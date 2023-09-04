@@ -1,12 +1,29 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-gesture-handler';
+
+import {createStackNavigator} from "@react-navigation/stack";
+import {NavigationContainer, lovigationContainer} from "@react-navigation/native";
+import Login from './Screens/Login';
+import Home from './Screens/Home';
 
 export default function App() {
+
+  const Stack = createStackNavigator();
+
+function MyStack() {
   return (
-    <View style={styles.container}>
-      <Text>TeloCambio</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Home" component={Home} />
+    </Stack.Navigator>
+  );
+}
+
+  return (
+    <NavigationContainer>
+      <MyStack/>
+    </NavigationContainer>
   );
 }
 
