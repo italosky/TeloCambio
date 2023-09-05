@@ -14,8 +14,20 @@ export default function App() {
 function MyStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Login" component={Login}
+      options={{
+        title:"Login",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#525FE1"},
+      }} />
+      <Stack.Screen name="Home" component={Home}
+      options={{
+        title:"Home",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#525FE1"},
+      }} />
     </Stack.Navigator>
   );
 }
