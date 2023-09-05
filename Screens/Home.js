@@ -2,37 +2,37 @@ import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function Home({ navigation }) {
-  useEffect(() => {
+useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('Login');
+        navigation.navigate('Ingreso');
     }, 2000);
 
     return () => clearTimeout(timer); 
-  }, []);
+    }, []);
 
-  return (
+return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido/a</Text>
-      <Text style={styles.description}>TeloCambio</Text>
+        <Text style={styles.title}>Bienvenido/a</Text>
+        <Text style={styles.description}>TeloCambio</Text>
     </View>
-  );
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 40,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    description: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 40,
+    },
 });

@@ -1,17 +1,34 @@
 import React, {Component} from 'react'
 import { Text, StyleSheet, View, Image, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { useNavigation } from '@react-navigation/native';
 
 export default function Ingreso(){
+    const navigation = useNavigation();
+
+    React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null, // Esto oculta el botón para devolverse
+      gestureEnabled: false, // Esto deshabilita devolverse con el dedo
+    });
+    }, [navigation]);
+    
+    const goLogin=()=>{
+        navigation.navigate('Login')
+    }
+    const goRegistro=()=>{
+        navigation.navigate('Registro')
+    }
+    
     return (
         <View style={styles.padre}>
             <View style={styles.padreBoton}>
-                    <TouchableOpacity style={styles.cajaBotonL}>
+                    <TouchableOpacity style={styles.cajaBotonL} onPress={goLogin}>
                         <Text style={styles.textoBoton}>Iniciar Sesión</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.padreBoton}>
-                    <TouchableOpacity style={styles.cajaBotonR}>
+                    <TouchableOpacity style={styles.cajaBotonR} onPress={goRegistro}>
                         <Text style={styles.textoBoton}>Registrarse</Text>
                     </TouchableOpacity>
                 </View>
@@ -25,7 +42,7 @@ export default function Ingreso(){
             </View>
     )
 }
-
+//Estilos para los botones y texto
 const styles = StyleSheet.create({
     padre: {
         flex: 1,

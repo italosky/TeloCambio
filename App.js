@@ -7,6 +7,7 @@ import {NavigationContainer, lovigationContainer} from "@react-navigation/native
 import Login from './Screens/Login';
 import Home from './Screens/Home';
 import Ingreso from './Screens/Ingreso';
+import Registro from './Screens/Registro';
 
 export default function App() {
 
@@ -36,7 +37,14 @@ function MyStack() {
         title:"Login",
         headerTintColor:"white",
         headerTitleAlign:"center",
-        headerStyle:{backgroundColor:"#525FE1"},
+        headerStyle:{backgroundColor:"#63A355"},
+      }} />
+      <Stack.Screen name="Registro" component={Registro}
+      options={{
+        title:"Login",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#63A355"},
       }} />
       
     </Stack.Navigator>
