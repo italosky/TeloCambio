@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
         alignItems:'center',
     },
     cajaBoton:{
-        backgroundColor:'#525FE1',
+        backgroundColor:'#8AAD34',
         borderRadius:'30',
         paddingVertical:20,
         width:150,

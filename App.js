@@ -6,6 +6,7 @@ import {createStackNavigator} from "@react-navigation/stack";
 import {NavigationContainer, lovigationContainer} from "@react-navigation/native";
 import Login from './Screens/Login';
 import Home from './Screens/Home';
+import Ingreso from './Screens/Ingreso';
 
 export default function App() {
 
@@ -14,12 +15,12 @@ export default function App() {
 function MyStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Login" component={Login}
+      <Stack.Screen name="Ingreso" component={Ingreso}
       options={{
-        title:"Login",
+        title:"Ingresar",
         headerTintColor:"white",
         headerTitleAlign:"center",
-        headerStyle:{backgroundColor:"#525FE1"},
+        headerStyle:{backgroundColor:"#63A355"},
       }} />
 
       <Stack.Screen name="Home" component={Home}
@@ -27,10 +28,19 @@ function MyStack() {
         title:"Home",
         headerTintColor:"white",
         headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#63A355"},
+      }} />
+
+      <Stack.Screen name="Login" component={Login}
+      options={{
+        title:"Login",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#525FE1"},
       }} />
       
     </Stack.Navigator>
+    
   );
 }
 
