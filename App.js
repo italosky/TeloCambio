@@ -41,7 +41,7 @@ function MyStack() {
       }} />
       <Stack.Screen name="Registro" component={Registro}
       options={{
-        title:"Login",
+        title:"Registro",
         headerTintColor:"white",
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
