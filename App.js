@@ -21,6 +21,7 @@ function MyStack() {
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#525FE1"},
       }} />
+
       <Stack.Screen name="Home" component={Home}
       options={{
         title:"Home",
@@ -28,6 +29,7 @@ function MyStack() {
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#525FE1"},
       }} />
+      
     </Stack.Navigator>
   );
 }
@@ -37,13 +39,4 @@ function MyStack() {
       <MyStack/>
     </NavigationContainer>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+};
