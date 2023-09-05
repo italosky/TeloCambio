@@ -15,17 +15,17 @@ export default function App() {
 function MyStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Ingreso" component={Ingreso}
+      <Stack.Screen name="Home" component={Home}
       options={{
-        title:"Ingresar",
+        title:"Home",
         headerTintColor:"white",
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
       }} />
 
-      <Stack.Screen name="Home" component={Home}
+      <Stack.Screen name="Ingreso" component={Ingreso}
       options={{
-        title:"Home",
+        title:"Ingresar",
         headerTintColor:"white",
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
