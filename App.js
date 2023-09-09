@@ -8,6 +8,9 @@ import Login from './Screens/Login';
 import Home from './Screens/Home';
 import Ingreso from './Screens/Ingreso';
 import Registro from './Screens/Registro';
+import Menu from './Screens/Menu';
+import Galeria from './Screens/Galeria';
+import SubirArticulos from './Screens/SubirArticulos';
 
 export default function App() {
 
@@ -34,7 +37,7 @@ function MyStack() {
 
       <Stack.Screen name="Login" component={Login}
       options={{
-        title:"Login",
+        title:"Inicio de Sesión",
         headerTintColor:"white",
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
@@ -42,6 +45,27 @@ function MyStack() {
       <Stack.Screen name="Registro" component={Registro}
       options={{
         title:"Registro",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#63A355"},
+      }} />
+      <Stack.Screen name="Menu" component={Menu}
+      options={{
+        title:"Menú",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#63A355"},
+      }} />
+      <Stack.Screen name="Galeria" component={Galeria}
+      options={{
+        title:"Galería",
+        headerTintColor:"white",
+        headerTitleAlign:"center",
+        headerStyle:{backgroundColor:"#63A355"},
+      }} />
+      <Stack.Screen name="SubirArticulos" component={SubirArticulos}
+      options={{
+        title:"Subir Artículos",
         headerTintColor:"white",
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
