@@ -24,7 +24,9 @@ export default function Login(props) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Iniciando sesión...", "Accediendo...");
+
       props.navigation.navigate("Menu");
+
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "El Correo o la Contraseña son Incorrectos.");
