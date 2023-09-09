@@ -12,10 +12,12 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
+
 export default function Ingreso() {
   const navigation = useNavigation();
 
   React.useLayoutEffect(() => {
+
     navigation.setOptions({
       headerLeft: () => null, // Esto oculta el botón para devolverse
       gestureEnabled: false, // Esto deshabilita devolverse con el dedo
@@ -50,6 +52,7 @@ export default function Ingreso() {
       </View>
     </View>
   );
+
 }
 //Estilos para los botones y texto
 const styles = StyleSheet.create({
