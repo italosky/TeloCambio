@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   cajaBoton: {
     backgroundColor: "#8AAD34",
-    borderRadius: "30",
+    borderRadius: 30,
     paddingVertical: 20,
     width: 150,
     marginTop: 20,
