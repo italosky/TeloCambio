@@ -1,6 +1,10 @@
+// ios 844204413625-tt508oeepjcqtau5jafb2h0a7a3gvqfg.apps.googleusercontent.com
+// android  844204413625-mvr1qkgr2rptvdaamhgjm78g1mtu010m.apps.googleusercontent.com
+// web 844204413625-jtlo2re6ca7h1jss9fdek0bn2tom985r.apps.googleusercontent.com
+// SHA1 Fingerprint    1B:4C:C5:FF:EF:3C:5F:99:FB:3D:25:BB:7A:F2:DB:36:8F:B8:8F:3F
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider} from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -20,4 +24,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const appFirebase = initializeApp(firebaseConfig);
 const auth = getAuth(appFirebase);
-export {auth, appFirebase};
+const provider = new GoogleAuthProvider();
+export {auth, appFirebase, provider};
