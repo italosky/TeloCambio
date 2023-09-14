@@ -11,9 +11,9 @@ import {
   Platform,
 } from "react-native";
 
-import appFirebase from "../firebaseConfig";
+import {appFirebase, auth} from "../firebaseConfig";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-const auth = getAuth(appFirebase);
+
 
 export default function Login(props) {
   //Crear variable de estado
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   cajaBoton: {
     backgroundColor: "#8AAD34",
-    borderRadius: "30",
+    borderRadius: 30,
     paddingVertical: 20,
     width: 150,
     marginTop: 20,
