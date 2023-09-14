@@ -12,15 +12,16 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import {appFirebase, auth} from "../firebaseConfig";
 import googleIcon from '../assets/GoogleButton.png';
+
 
 export default function Ingreso() {
   const navigation = useNavigation();
 
   React.useLayoutEffect(() => {
-
     navigation.setOptions({
       headerLeft: () => null, // Esto oculta el botón para devolverse
       gestureEnabled: false, // Esto deshabilita devolverse con el dedo
@@ -67,7 +68,6 @@ export default function Ingreso() {
       </View>
     </View>
   );
-
 }
 //Estilos para los botones y texto
 const styles = StyleSheet.create({
