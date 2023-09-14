@@ -14,10 +14,10 @@ const firebaseConfig = {
   storageBucket: "telocambio-5abab.appspot.com",
   messagingSenderId: "231713560463",
   appId: "1:231713560463:web:b3a57843294d8a4baaddfa",
-  measurementId: "G-2R0FP4LD9D"
+  measurementId: "G-2R0FP4LD9D",
 };
 
 // Initialize Firebase
 const appFirebase = initializeApp(firebaseConfig);
 const auth = getAuth(appFirebase);
-export {auth, appFirebase};
+export { auth, appFirebase };
