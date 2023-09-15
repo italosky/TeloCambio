@@ -27,7 +27,7 @@ export default function App() {
 function MyStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={Home}
+      <Stack.Screen name="MiPerfil" component={MiPerfil}
       options={{
         title:"Home",
         headerTintColor:"white",
@@ -106,7 +106,7 @@ function MyStack() {
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
       }} />
-      <Stack.Screen name="MiPerfil" component={MiPerfil}
+      <Stack.Screen name="Home" component={Home}
       options={{
         title:"Mi perfil de usuario",
         headerTintColor:"white",
