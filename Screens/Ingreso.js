@@ -41,6 +41,7 @@ export default function Ingreso() {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         const user = result.user;
+        navigation.navigate("Menu");
       })
       .catch((error) => {
         console.error("Error al autenticar con Google:", error);
