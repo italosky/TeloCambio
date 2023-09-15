@@ -11,9 +11,8 @@ import {
   Platform,
 } from "react-native";
 
-import {appFirebase, auth} from "../firebaseConfig";
+import { appFirebase, auth } from "../firebaseConfig";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-
 
 export default function Login(props) {
   //Crear variable de estado

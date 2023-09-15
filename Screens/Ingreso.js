@@ -14,9 +14,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
-import {appFirebase, auth} from "../firebaseConfig";
-import googleIcon from '../assets/GoogleButton.png';
-
+import { appFirebase, auth } from "../firebaseConfig";
+import googleIcon from "../assets/GoogleButton.png";
 
 export default function Ingreso() {
   const navigation = useNavigation();
@@ -37,15 +36,16 @@ export default function Ingreso() {
   const provider = new GoogleAuthProvider();
   const handleGoogleSignIn = () => {
     signInWithPopup(auth, provider)
-    .then((result) => {
+      .then((result) => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         const user = result.user;
-    }).catch((error) => {
+      })
+      .catch((error) => {
         console.error("Error al autenticar con Google:", error);
-    });
-  }  
-  
+      });
+  };
+
   return (
     <View style={styles.padre}>
       <View style={styles.padreBoton}>
@@ -61,7 +61,10 @@ export default function Ingreso() {
       </View>
 
       <View style={styles.padreBoton}>
-        <TouchableOpacity style={styles.cajaBotonG} onPress={handleGoogleSignIn}>
+        <TouchableOpacity
+          style={styles.cajaBotonG}
+          onPress={handleGoogleSignIn}
+        >
           <Image source={googleIcon} style={{ width: 24, height: 24 }} />
           <Text style={styles.textoBotonG}>Iniciar sesión con Google</Text>
         </TouchableOpacity>
@@ -95,21 +98,21 @@ const styles = StyleSheet.create({
     marginTop: 35,
   },
   cajaBotonG: {
-    backgroundColor: "#FFFFFF",  
-    paddingVertical: 10,        
-    paddingHorizontal: 33,     
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 10,
+    paddingHorizontal: 33,
     width: 300,
     marginTop: 35,
-    flexDirection: 'row',      
-    alignItems: 'center',       
-    borderColor: "#dbdbdb",    
-    borderWidth: 1            
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#dbdbdb",
+    borderWidth: 1,
   },
   textoBotonG: {
-    color: "#555",              
-    marginLeft: 10,             
+    color: "#555",
+    marginLeft: 10,
     fontSize: 16,
-    textAlign: "center",                
+    textAlign: "center",
   },
   textoBoton: {
     textAlign: "center",
