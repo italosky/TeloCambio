@@ -22,33 +22,15 @@ export default function Registro() {
         <View style={styles.tarjeta}>
           <View style={styles.cajaTexto}>
             <TextInput
-              placeholder="Nombre"
+              placeholder="Nombre y Apellido"
               style={{ paddingHorizontal: 15 }}
-              secureTextEntry={true}
             />
           </View>
 
           <View style={styles.cajaTexto}>
             <TextInput
-              placeholder="Apellido"
+              placeholder="Dirección"
               style={{ paddingHorizontal: 15 }}
-              secureTextEntry={true}
-            />
-          </View>
-
-          <View style={styles.cajaTexto}>
-            <TextInput
-              placeholder="Comuna"
-              style={{ paddingHorizontal: 15 }}
-              secureTextEntry={true}
-            />
-          </View>
-
-          <View style={styles.cajaTexto}>
-            <TextInput
-              placeholder="Región"
-              style={{ paddingHorizontal: 15 }}
-              secureTextEntry={true}
             />
           </View>
 
@@ -56,7 +38,6 @@ export default function Registro() {
             <TextInput
               placeholder="Numero de Telefono"
               style={{ paddingHorizontal: 15 }}
-              secureTextEntry={true}
             />
           </View>
 
@@ -64,14 +45,6 @@ export default function Registro() {
             <TextInput
               placeholder="Correo Electronico"
               style={{ paddingHorizontal: 15 }}
-            />
-          </View>
-
-          <View style={styles.cajaTexto}>
-            <TextInput
-              placeholder="Genero"
-              style={{ paddingHorizontal: 15 }}
-              secureTextEntry={true}
             />
           </View>
 
