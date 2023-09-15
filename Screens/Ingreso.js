@@ -14,14 +14,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
-<<<<<<< HEAD
-import { appFirebase, auth } from "../firebaseConfig";
-import googleIcon from "../assets/GoogleButton.png";
-=======
 import {appFirebase, auth} from "../firebaseConfig";
 import googleIcon from '../assets/GoogleButton.png';
 
->>>>>>> 4be38f280604c2f290ddafe5d3e47cdb1ac4ecfd
 
 export default function Ingreso() {
   const navigation = useNavigation();
