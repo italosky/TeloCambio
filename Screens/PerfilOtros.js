@@ -12,7 +12,11 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
+
 export default function Registro() {
+  const goReporteUser = () => {
+    navigation.navigate("ReporteUsuario");
+  };
   return (
     <View style={styles.container}>
       <Image style={styles.tinyLogo} source={require('../assets/yo.png')} />
@@ -23,7 +27,7 @@ export default function Registro() {
         <Text style={styles.text}>Nivel de Telocambista: 
         <Text style={styles.text}> Principiante</Text></Text>
       </View>
-      <TouchableOpacity style={styles.buttonReportar}>
+      <TouchableOpacity style={styles.buttonReportar} onPress={goReporteUser}>
         <Text style={styles.buttonText}>Reportar</Text>
       </TouchableOpacity>
     </View>
@@ -36,6 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: "white"
   },
   tinyLogo: {
     width: 150,

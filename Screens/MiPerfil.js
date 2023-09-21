@@ -13,6 +13,12 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 export default function Registro() {
+  const goPublicaciones = () => {
+    navigation.navigate("MisPublicados");
+  };
+  const goOfertas = () => {
+    navigation.navigate("MisOfertas");
+  };
   return (
     <View style={styles.container}>
       <Image style={styles.tinyLogo} source={require('../assets/yo.png')} />
@@ -23,10 +29,10 @@ export default function Registro() {
         <Text style={styles.text}>Nivel de Telocambista: 
         <Text style={styles.text}> Principiante</Text></Text>
       </View>
-      <TouchableOpacity style={styles.buttonPublicadas}>
+      <TouchableOpacity style={styles.buttonPublicadas} onPress={goPublicaciones}>
         <Text style={styles.buttonText}>Cosas Publicadas</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.buttonReportar, styles.buttonPublicadas]}>
+      <TouchableOpacity style={[styles.buttonReportar, styles.buttonPublicadas]} onPress={goOfertas}>
         <Text style={styles.buttonText}>Ofertas recibidas</Text>
       </TouchableOpacity>
     </View>
@@ -39,6 +45,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: "white"
   },
   tinyLogo: {
     width: 150,
