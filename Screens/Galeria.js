@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: '#000',
     fontSize: 18,
-    fontWeight: '650',
+    fontWeight: '600',
   },
   textButton: {
     color: "#ffffff",
