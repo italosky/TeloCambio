@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     padding: 5,
-    backgroundColor: "#8AAD34",
+    backgroundColor: "#63A355",
   },
   textButton: {
     color: "#ffffff",

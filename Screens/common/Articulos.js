@@ -64,9 +64,19 @@ export const products = {
       category: 'Ferretería',
       data: [
         {
-          nombre: 'Frague',
+          nombre: 'Destornilladores',
           estado: 'Nuevo',
-          imagen: require('/assets/Casco.png'),
+          imagen: require('/assets/Destornilladores.png'),
+        },
+        {
+          nombre: 'Escobilla Copa',
+          estado: 'Nuevo',
+          imagen: require('/assets/EscobillaCopa.png'),
+        },
+        {
+          nombre: 'Herramientas Varias',
+          estado: 'Nuevo',
+          imagen: require('/assets/HerramientasVarias.png'),
         },
       ],
     },

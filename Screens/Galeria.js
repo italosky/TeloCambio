@@ -46,9 +46,10 @@ export default function Home() {
           showsHorizontalScrollIndicator={false}
           renderItem={({item, index}) => {
             return (
-              <TouchableOpacity style={styles.HorizontalScroll}>
-                <Text style={{color: '#000'}}>{item.category}</Text>
+              <TouchableOpacity style={styles.HorizontalScroll} mode="elevated">
+                <Text style={styles.textButton}>{item.category}</Text>
               </TouchableOpacity>
+
             );
           }} 
         />
@@ -90,6 +91,18 @@ export default function Home() {
         />
       </View>
 
+      <Text style={styles.titleCategory}>Ferretería</Text>          
+      <View style={{marginTop: 15}}>
+        <FlatList 
+          data={FerreteríaList} 
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({item, index}) => {
+            return <MyProductItem item={item}/>;
+          }} 
+        />
+      </View>
+
     </View>
 
   );
@@ -102,9 +115,10 @@ const styles = StyleSheet.create({
   },
   HorizontalScroll: {
     padding: 10,
-    borderWidth: 1,
     marginLeft: 20,
     borderRadius: 20,
+    backgroundColor: "#8AAD34",
+    opacity: 30,
   },
   titleCategory: {
     marginTop: 20,
@@ -112,5 +126,8 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 18,
     fontWeight: '650',
+  },
+  textButton: {
+    color: "#ffffff",
   },
 });
