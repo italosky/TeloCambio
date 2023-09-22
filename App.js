@@ -8,7 +8,6 @@ import Login from './Screens/Login';
 import Home from './Screens/Home';
 import Ingreso from './Screens/Ingreso';
 import Registro from './Screens/Registro';
-import Menu from './Screens/Menu';
 import Galeria from './Screens/Galeria';
 import SubirArticulos from './Screens/SubirArticulos';
 import Concretar from './Screens/Concretar';
@@ -20,6 +19,7 @@ import MisOfertas from './Screens/MisOfertas';
 import MisPublicados from './Screens/MisPublicados';
 import PerfilOtros from './Screens/PerfilOtros';
 import ReporteUsuario from './Screens/ReporteUsuario';
+
 export default function App() {
 
   const Stack = createStackNavigator();
@@ -53,13 +53,6 @@ function MyStack() {
       <Stack.Screen name="Registro" component={Registro}
       options={{
         title:"Registro",
-        headerTintColor:"white",
-        headerTitleAlign:"center",
-        headerStyle:{backgroundColor:"#63A355"},
-      }} />
-      <Stack.Screen name="Menu" component={Menu}
-      options={{
-        title:"Menú",
         headerTintColor:"white",
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
