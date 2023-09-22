@@ -16,7 +16,14 @@ import { Drawer } from "react-native-paper";
 
 export default function Home() {
   const navigation = useNavigation();
-  
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null, // Esto oculta el botón para devolverse
+      gestureEnabled: false, // Esto deshabilita devolverse con el dedo
+    });
+  }, [navigation]);
+
   const goMiPerfil = () => {
     navigation.navigate("MiPerfil");
   };
@@ -42,16 +49,32 @@ export default function Home() {
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       <Drawer.Section>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goMiPerfil}>
+        <TouchableOpacity
+          style={styles.drawerItem}
+          active={active === "first"}
+          onPress={goMiPerfil}
+        >
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goGaleria}>
+        <TouchableOpacity
+          style={styles.drawerItem}
+          active={active === "first"}
+          onPress={goGaleria}
+        >
           <Text style={styles.drawerText}>Galeria de ArtÍculos</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goMisPublicados}>
+        <TouchableOpacity
+          style={styles.drawerItem}
+          active={active === "first"}
+          onPress={goMisPublicados}
+        >
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goMisOfertas}>
+        <TouchableOpacity
+          style={styles.drawerItem}
+          active={active === "first"}
+          onPress={goMisOfertas}
+        >
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
@@ -95,7 +118,6 @@ export default function Home() {
       renderNavigationView={navigationView}
     >
       <ScrollView>
-
         <View style={{ marginTop: 15 }}>
           <FlatList
             data={categoryList}
@@ -183,7 +205,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: "#000",
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   textButton: {
     color: "#ffffff",
@@ -207,8 +229,8 @@ const styles = StyleSheet.create({
   },
   drawerText: {
     fontSize: 18,
-    fontWeight: '500',
-    color: '#ffffff',
+    fontWeight: "500",
+    color: "#ffffff",
     padding: 12,
   },
 });
