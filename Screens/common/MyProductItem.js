@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   textCard: {
     fontSize: 14,
-    fontWeight: 500,
+    fontWeight: '500',
   },
   buttonCard: {
     borderRadius: 10,
