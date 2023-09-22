@@ -27,15 +27,16 @@ export default function Registro(props) {
     });
 
     const validateEmailDetails = (email) => {
-      if (!email.includes('@')) {
+      const [localPart, domainPart] = email.split('@');
+      if (!domainPart || !localPart) {
         return "El correo electrónico debe contener un '@'.";
-      }
-      if (!domainPart.includes('.')) {
-        return "La parte de dominio debe contener un punto ('.').";
       }
       const domainParts = domainPart.split('.');
       if (domainParts.some(part => part.length === 0)) {
         return "La parte de dominio no debe tener puntos consecutivos o empezar/terminar con un punto.";
+      }
+      if (!domainPart.includes('.')) {
+        return "La parte de dominio debe contener un punto ('.').";
       }
       const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
       if (!regex.test(email)) {
@@ -45,7 +46,7 @@ export default function Registro(props) {
     };
 
     const isValidPhoneNumber = (telefono) => {
-      const regex = /^[0-9]{0,8}$/;
+      const regex = /^[0-9]{0,12}$/;
       return regex.test(telefono);
     };
 
@@ -154,7 +155,7 @@ export default function Registro(props) {
         </View>
         <View style={styles.cajaTexto}>
           <TextInput
-            placeholder="Número de Teléfono"
+            placeholder="Número de Teléfono (+569-XXXXXXX)"
             keyboardType="numeric"
             style={{ paddingHorizontal: 15 }}
             onChangeText={(text) => setData({ ...data, telefono: text })}
