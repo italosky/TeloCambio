@@ -50,6 +50,12 @@ export default function Ingreso() {
 
   return (
     <View style={styles.padre}>
+      <View>
+          <Image
+            source={require("../assets/LogoTeLoCambio.png")}
+            style={styles.logo}
+          />
+        </View>
       <View style={styles.padreBoton}>
         <TouchableOpacity style={styles.cajaBotonL} onPress={goLogin}>
           <Text style={styles.textoBoton}>Iniciar Sesión</Text>
@@ -104,7 +110,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 33,
     width: 300,
-    marginTop: 35,
+    marginTop: 55,
     flexDirection: "row",
     alignItems: "center",
     borderColor: "#dbdbdb",
@@ -120,4 +126,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
   },
+  logo: {
+    width: 250,
+    height: 120,
+    marginBottom : 50,
+  }
 });

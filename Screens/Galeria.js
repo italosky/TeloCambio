@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   DrawerLayoutAndroid,
+  DrawerLayoutIOS,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { products } from "./common/Articulos";
@@ -51,28 +53,24 @@ export default function Home() {
       <Drawer.Section>
         <TouchableOpacity
           style={styles.drawerItem}
-          active={active === "first"}
           onPress={goMiPerfil}
         >
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.drawerItem}
-          active={active === "first"}
           onPress={goGaleria}
         >
-          <Text style={styles.drawerText}>Galeria de ArtÍculos</Text>
+          <Text style={styles.drawerText}>Galeria de Artículos</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.drawerItem}
-          active={active === "first"}
           onPress={goMisPublicados}
         >
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.drawerItem}
-          active={active === "first"}
           onPress={goMisOfertas}
         >
           <Text style={styles.drawerText}>Mis Ofertas</Text>
@@ -110,7 +108,7 @@ export default function Home() {
     setLibrosList(products.category[7].data);
   }, []);
 
-  return (
+  const renderDrawerAndroid = () => (
     <DrawerLayoutAndroid
       ref={drawer}
       drawerWidth={300}
@@ -186,6 +184,85 @@ export default function Home() {
       </ScrollView>
     </DrawerLayoutAndroid>
   );
+
+  const renderDrawerIOS = () => (
+    <DrawerLayoutIOS
+      ref={drawer}
+      drawerWidth={300}
+      drawerPosition={drawerPosition}
+      renderNavigationView={navigationView}
+    >
+      <ScrollView>
+        <View style={{ marginTop: 15 }}>
+          <FlatList
+            data={categoryList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => {
+              return (
+                <TouchableOpacity
+                  style={styles.HorizontalScroll}
+                  mode="elevated"
+                >
+                  <Text style={styles.textButton}>{item.category}</Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
+
+        <Text style={styles.titleCategory}>Accesorios</Text>
+        <View style={{ marginTop: 15 }}>
+          <FlatList
+            data={AccesoriosList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => {
+              return <MyProductItem item={item} />;
+            }}
+          />
+        </View>
+
+        <Text style={styles.titleCategory}>Comida</Text>
+        <View style={{ marginTop: 15 }}>
+          <FlatList
+            data={ComidatList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => {
+              return <MyProductItem item={item} />;
+            }}
+          />
+        </View>
+
+        <Text style={styles.titleCategory}>Deportes</Text>
+        <View style={{ marginTop: 15 }}>
+          <FlatList
+            data={DeportesList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => {
+              return <MyProductItem item={item} />;
+            }}
+          />
+        </View>
+
+        <Text style={styles.titleCategory}>Ferretería</Text>
+        <View style={{ marginTop: 15 }}>
+          <FlatList
+            data={FerreteríaList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => {
+              return <MyProductItem item={item} />;
+            }}
+          />
+        </View>
+      </ScrollView>
+    </DrawerLayoutIOS>
+  );
+
+  return Platform.OS === "ios" ? renderDrawerIOS() : renderDrawerAndroid();
 }
 
 const styles = StyleSheet.create({
@@ -234,3 +311,4 @@ const styles = StyleSheet.create({
     padding: 12,
   },
 });
+
