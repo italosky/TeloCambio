@@ -15,7 +15,9 @@ import { Picker } from "@react-native-picker/picker"; // Importa el Picker de @r
 export default function Registro() {
   const [selectedMotivo, setSelectedMotivo] = useState(""); // esto mantiene la opcion seleccionada en el menu desplegable
   const navigation = useNavigation();
-
+  const goPerfilOtros = () => {
+    navigation.navigate("PerfilOtros");
+  };
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -51,7 +53,7 @@ export default function Registro() {
               style={styles.cajaBotonCancelar}
               onPress={() => navigation.navigate("PáginaAnterior")} // NO OLVIDAR Reemplaza "PáginaAnterior" con el nombre de la página a la que deseas navegar
             >
-              <Text style={styles.textoBoton}>Cancelar</Text>
+              <Text style={styles.textoBoton} onPress={goPerfilOtros}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cajaBoton}>
               <Text style={styles.textoBoton}>Enviar Reporte</Text>
