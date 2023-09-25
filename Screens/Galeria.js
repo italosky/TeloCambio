@@ -66,6 +66,7 @@ export default function Home() {
       <View style={styles.separatorLine} />
 
       <Drawer.Section>
+
         <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
@@ -76,6 +77,7 @@ export default function Home() {
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
+
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
@@ -229,7 +231,9 @@ export default function Home() {
         <Text style={styles.titleCategory}>Comida</Text>
         <View style={{ marginTop: 15 }}>
           <FlatList
+
             data={ComidaList}
+
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => {
@@ -250,10 +254,12 @@ export default function Home() {
           />
         </View>
 
+
         <Text style={styles.titleCategory}>Ferreteria</Text>
         <View style={{ marginTop: 15 }}>
           <FlatList
             data={FerreteriaList}
+
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => {
@@ -313,6 +319,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     padding: 12,
   },
+
   separatorLine: {
     borderBottomWidth: 1,
     borderBottomColor: "gray",
@@ -323,3 +330,4 @@ const styles = StyleSheet.create({
     height: 47,
   },
 });
+
