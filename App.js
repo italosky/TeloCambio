@@ -27,7 +27,7 @@ export default function App() {
 function MyStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={Home}
+      <Stack.Screen name="ReporteUsuario" component={ReporteUsuario}
       options={{
         title:"Home",
         headerTintColor:"white",
@@ -127,7 +127,7 @@ function MyStack() {
         headerTitleAlign:"center",
         headerStyle:{backgroundColor:"#63A355"},
       }} />
-      <Stack.Screen name="ReporteUsuario" component={ReporteUsuario}
+      <Stack.Screen name="Home" component={Home}
       options={{
         title:"Reporte Usuario",
         headerTintColor:"white",

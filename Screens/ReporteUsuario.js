@@ -1,23 +1,38 @@
-import React, { useState } from "react";
+import React, { Component, useState } from "react";
 import {
   Text,
   StyleSheet,
   View,
   Image,
+  TextInput,
   TouchableOpacity,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Picker } from "@react-native-picker/picker"; // Importa el Picker de @react-native-picker/picker
+import { auth, db } from "../firebaseConfig";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Picker } from "@react-native-picker/picker";
 
-export default function Registro() {
-  const [selectedMotivo, setSelectedMotivo] = useState(""); // esto mantiene la opcion seleccionada en el menu desplegable
-  const navigation = useNavigation();
-  const goPerfilOtros = () => {
-    navigation.navigate("PerfilOtros");
+export default function Registro(props) {
+    const [data, setData] = useState({
+      causa_reporte: "",
+      reporte: "",
+    });
+    const navigation = useNavigation();
+    const goPerfilOtros = () => {
+      navigation.navigate("PerfilOtros");
+    };
+    const handleRegister = async () => {
+      let errorMessage = null;
+      if (data.causa_reporte === "") {
+        Alert.alert("Error", "Selecciona una causa del reporte.");
+        return;
+      }
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -25,43 +40,40 @@ export default function Registro() {
     >
       <View style={styles.padre}>
         <View style={styles.tarjeta}>
-          {/* el picker es el menu desplegable */}
+        <View style={styles.cajaPicker}>
           <Picker
-            selectedValue={selectedMotivo}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedMotivo(itemValue)
-            }
+            selectedValue={data.causa_reporte}
+            onValueChange={(itemValue) => setData({ ...data, causa_reporte: itemValue })}
           >
-            <Picker.Item label="Selecciona un motivo" value="" />
-            <Picker.Item label="Fraude" value="Fraude" />
-            <Picker.Item label="Engañoso" value="Engañoso" />
-            <Picker.Item label="Otros" value="Otros" />
+            <Picker.Item label="Causa del reporte"       value="" />
+            <Picker.Item label="No responde al intercambio"     value="No responde al intercambio" />
+            <Picker.Item label="Las fotos son falsas o robadas"  value="Las fotos son falsas o robadas" />
+            <Picker.Item label="Estafa"      value="Estafa" />
+            <Picker.Item label="Otros"      value="Otros" />
           </Picker>
-
-          {/* Campo de texto para el detalle del reporte */}
+        </View>
+        <View style={styles.cajaTexto}>
           <TextInput
-            placeholder="Detalle del Reporte (máximo 280 caracteres)"
-            style={styles.cajaTexto}
-            
-            multiline
-            maxLength={280}
+            placeholder="Escriba su reporte"
+            style={{ paddingHorizontal: 15 }}
+            onChangeText={(text) => setData({ ...data, reporte: text })}
+            value={data.reporte}
+            multiline={true} // Habilitar múltiples líneas
+            numberOfLines={5}
+            maxLength={140}
           />
-
-          {/* Contenedor de botones */}
-          <View style={styles.contenedorBotones}>
-            <TouchableOpacity
-              style={styles.cajaBotonCancelar}
-              onPress={() => navigation.navigate("PáginaAnterior")} // NO OLVIDAR Reemplaza "PáginaAnterior" con el nombre de la página a la que deseas navegar
-            >
-              <Text style={styles.textoBoton} onPress={goPerfilOtros}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cajaBoton}>
-              <Text style={styles.textoBoton}>Enviar Reporte</Text>
-            </TouchableOpacity>
-          </View>
+        </View>
+        <View style={styles.padreBoton}>
+          <TouchableOpacity style={styles.cajaBotonReportar} onPress={handleRegister}>
+            <Text style={styles.textoBoton}>Reportar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cajaBotonCancelar} onPress={goPerfilOtros}>
+            <Text style={styles.textoBoton}>Cancelar</Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
+  </KeyboardAvoidingView>
   );
 }
 
@@ -73,48 +85,60 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   tarjeta: {
-    margin: 40,
+    margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
     width: 340,
-    padding: 25,
-    paddingVertical: 110,
+    padding: 20,
     shadowColor: "#000",
     shadowOffset: {
-      width: 0,
+      with: 0,
       height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
   },
-  cajaTexto: {
+  cajaPicker: {
+    paddingVertical: 0,
     backgroundColor: "#cccccc50",
-    borderRadius: 10,
-    marginVertical: 10,
-    paddingHorizontal: 10,
-    marginTop: 80,
-  },
-  contenedorBotones: {
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    marginTop: 80,
-  },
-  cajaBoton: {
-    backgroundColor: "#FF0000",
     borderRadius: 30,
-    paddingVertical: 20,
-    width: 130,
+    marginVertical: 10,
+      
+  },
+  cajaTexto: {
+    paddingVertical: 18,
+    backgroundColor: "#cccccc50",
+    borderRadius: 30,
+    marginVertical: 10,  
+    width:300,
+    height: 180,
+  },
+  padreBoton: {
+    alignItems: "center",
   },
   cajaBotonCancelar: {
     backgroundColor: "#8AAD34",
     borderRadius: 30,
     paddingVertical: 20,
-    width: 130,
+    width: 150,
+    marginTop: 20,
+    width:200,
+  },
+  cajaBotonReportar: {
+    backgroundColor: "#cc0000",
+    borderRadius: 30,
+    paddingVertical: 20,
+    width: 150,
+    marginTop: 20,
+    width:250,
+    height: 70,
   },
   textoBoton: {
     textAlign: "center",
     color: "white",
+    fontSize: 18,
+    fontWeight: "500",
   },
 });
 

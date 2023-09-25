@@ -1,13 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  DrawerLayoutAndroid,
-} from "react-native";
+import React, { useRef, useState } from "react";
+import { StyleSheet, Text, View, Image, DrawerLayoutAndroid, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 
@@ -36,29 +28,34 @@ export default function MisPublicados() {
       setDrawerPosition("left");
     }
   };
+
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
+      <View>
+        <Image
+          source={require("../assets/LogoTeLoCambio.png")}
+          style={styles.logo}
+        />
+      </View>
+      <View style={styles.separatorLine} />
       <Drawer.Section>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goMiPerfil}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goGaleria}>
-          <Text style={styles.drawerText}>Galeria de ArtÍculos</Text>
+        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria}>
+          <Text style={styles.drawerText}>Galeria de Artículos</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goMisPublicados}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem}  active={active === "first"} onPress={goMisOfertas}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
     </View>
   );
 
-  const [active, setActive] = React.useState("");
-
   return (
-
     <DrawerLayoutAndroid
       ref={drawer}
       drawerWidth={300}
@@ -69,7 +66,6 @@ export default function MisPublicados() {
         <Text>Hola Mundo Guapo</Text>
       </View>
     </DrawerLayoutAndroid>
-
   );
 }
 
@@ -81,11 +77,6 @@ const styles = StyleSheet.create({
   navigationContainer: {
     backgroundColor: "#ecf0f1",
   },
-  paragraph: {
-    padding: 16,
-    fontSize: 15,
-    textAlign: "center",
-  },
   drawerItem: {
     backgroundColor: "#8AAD34",
     margin: 10,
@@ -93,8 +84,19 @@ const styles = StyleSheet.create({
   },
   drawerText: {
     fontSize: 18,
-    fontWeight: '500',
-    color: '#ffffff',
+    fontWeight: "500",
+    color: "#ffffff",
     padding: 12,
   },
+  separatorLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
+    marginVertical: 10, 
+  },
+  logo: {
+    width: 260,
+    height: 47,
+  },
 });
+
+
