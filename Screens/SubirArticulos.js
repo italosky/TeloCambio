@@ -15,7 +15,6 @@ export default function SubirArticulos(){
   const [itemTrade, setItemTrade] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-
   const UploadProgressModal = ({ uploading, progress }) => {
     return (
       <Modal visible={uploading} transparent={true}>
@@ -27,7 +26,6 @@ export default function SubirArticulos(){
       </Modal>
     );
   };
-
   useEffect(() => {
     (async () => {
       if (Platform.OS !== 'web') {
