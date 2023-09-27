@@ -14,7 +14,8 @@ import { useNavigation } from "@react-navigation/native";
 
 
 export default function Registro() {
-  const goReporteUser = () => {
+  const navigation = useNavigation();
+  const goReporteUsuario = () => {
     navigation.navigate("ReporteUsuario");
   };
   return (
@@ -27,7 +28,7 @@ export default function Registro() {
         <Text style={styles.text}>Nivel de Telocambista: 
         <Text style={styles.text}> Principiante</Text></Text>
       </View>
-      <TouchableOpacity style={styles.buttonReportar} onPress={goReporteUser}>
+      <TouchableOpacity style={styles.buttonReportar} onPress={goReporteUsuario}>
         <Text style={styles.buttonText}>Reportar</Text>
       </TouchableOpacity>
     </View>
