@@ -9,12 +9,13 @@ import {
   DrawerLayoutAndroid,
   DrawerLayoutIOS,
   Platform,
+  Animated
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MyProductItem from "./common/MyProductItem";
-import { Drawer} from "react-native-paper";
+import { Drawer, AnimatedFAB } from "react-native-paper";
 
 export default function Home() {
   const navigation = useNavigation();
@@ -42,6 +43,10 @@ export default function Home() {
     navigation.navigate("MisOfertas");
   };
 
+  const goSubirArticulos = () => {
+    navigation.navigate("SubirArticulos");
+  };
+
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
   const changeDrawerPosition = () => {
@@ -66,21 +71,23 @@ export default function Home() {
       <View style={styles.separatorLine} />
 
       <Drawer.Section>
-
         <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.drawerItem} onPress={goGaleria}>
           <Text style={styles.drawerText}>Galeria de Artículos</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
 
+        <TouchableOpacity style={styles.drawerItemEnd} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
+
     </View>
   );
 
@@ -112,6 +119,17 @@ export default function Home() {
     setJuguetesList(products.category[6].data);
     setLibrosList(products.category[7].data);
   }, []);
+
+  const [isExtended, setIsExtended] = React.useState(true);
+
+  const onScroll = ({ nativeEvent }) => {
+    const currentScrollPosition =
+      Math.floor(nativeEvent?.contentOffset?.y) ?? 0;
+
+    setIsExtended(currentScrollPosition <= 0);
+  };
+
+  
 
   const renderDrawerAndroid = () => (
     <DrawerLayoutAndroid
@@ -187,6 +205,8 @@ export default function Home() {
           />
         </View>
       </ScrollView>
+      <AnimatedFAB icon={'plus'} label={'Subir Artículo     '} extended={isExtended} onPress={goSubirArticulos} visible={true} 
+      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}/>
     </DrawerLayoutAndroid>
   );
 
@@ -254,7 +274,6 @@ export default function Home() {
           />
         </View>
 
-
         <Text style={styles.titleCategory}>Ferreteria</Text>
         <View style={{ marginTop: 15 }}>
           <FlatList
@@ -281,9 +300,9 @@ const styles = StyleSheet.create({
   },
   HorizontalScroll: {
     padding: 10,
-    marginLeft: 20,
+    marginLeft: 15,
     borderRadius: 20,
-    backgroundColor: "#8AAD34",
+    backgroundColor: "#A5CB48",
     opacity: 30,
   },
   titleCategory: {
@@ -295,6 +314,7 @@ const styles = StyleSheet.create({
   },
   textButton: {
     color: "#ffffff",
+    fontWeight: '500',
   },
   containerDrawer: {
     flex: 1,
@@ -313,21 +333,32 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 30,
   },
+  drawerItemEnd: {
+    backgroundColor: "#8AAD34",
+    margin: 10,
+    borderRadius: 30,
+    marginVertical: 10,
+  },
   drawerText: {
     fontSize: 18,
     fontWeight: "500",
     color: "#ffffff",
     padding: 12,
   },
-
   separatorLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: "gray",
-    marginVertical: 10, 
+    borderBottomWidth: 0.5,
+    color: "gray",
+    marginVertical: 15,
+    marginHorizontal: 15,
   },
   logo: {
     width:260,
     height: 47,
   },
+  fabStyle: {
+    bottom: 16,
+    right: 16,
+    position: 'absolute',
+    backgroundColor: '#A5CB48',
+  },
 });
-
