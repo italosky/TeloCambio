@@ -142,11 +142,11 @@ export default function SubirArticulos(){
         <Card>
           {image && <Image source={{ uri: image }} style={styles.image} />}
         </Card>
+
         <TouchableOpacity style={styles.cajaBoton} onPress={pickImage}>
           <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
         </TouchableOpacity>
       </View>
-      
       <View style={styles.containerTextInput}>
         <Text style={styles.title}>Nombre del Artículo</Text>
         <View style={styles.cajaTexto}>
@@ -194,15 +194,6 @@ const styles = StyleSheet.create({
       backgroundColor: "white",
       paddingHorizontal: 15,
     },
-    containerImage: {
-      flex: 0.5,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "white",
-      paddingVertical: 15,
-      paddingHorizontal: 15,
-      margin: 10,
-    },
     containerTextInput: {
       marginTop: 15,
       alignItems: "center",
@@ -238,6 +229,14 @@ const styles = StyleSheet.create({
       paddingVertical: 15,
       alignItems: "center",
       textAlign: "center",
+    },
+    title1: {
+      fontSize: 18,
+      fontWeight: '500',
+      paddingVertical: 15,
+      alignItems: "center",
+      textAlign: "center",
+      marginTop: 10,
     },
     cajaBotonP: {
       backgroundColor: "#8AAD34",
