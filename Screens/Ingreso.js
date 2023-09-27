@@ -23,8 +23,8 @@ export default function Ingreso() {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => null, // Esto oculta el botón para devolverse
-      gestureEnabled: false, // Esto deshabilita devolverse con el dedo
+      headerLeft: () => null, 
+      gestureEnabled: false,
     });
   }, [navigation]);
 
