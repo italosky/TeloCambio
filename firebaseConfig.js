@@ -26,12 +26,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const appFirebase = initializeApp(firebaseConfig);
 const auth = getAuth(appFirebase);
-<<<<<<< HEAD
-const provider = new GoogleAuthProvider();
-export {auth, appFirebase, provider};
-=======
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 
 export { auth, appFirebase, db, storage };
->>>>>>> 9c17d90c32fd83cd9d23bcb36f02d85eeebf01bd

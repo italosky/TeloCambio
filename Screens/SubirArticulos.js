@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Platform, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, Alert } from 'react-native';
+import { Button, Platform, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, Alert, Modal } from 'react-native';
 import { Card } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -13,13 +13,27 @@ export default function SubirArticulos(){
   const [itemName, setItemName] = useState('');
   const [itemCondition, setItemCondition] = useState('');
   const [itemTrade, setItemTrade] = useState('');
-  
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const UploadProgressModal = ({ uploading, progress }) => {
+    return (
+      <Modal visible={uploading} transparent={true}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderRadius: 10 }}>
+            <Text>Subiendo... {progress}</Text>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   useEffect(() => {
     (async () => {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          alert('Sorry, we need camera roll permissions to make this work!');
+          alert('Se necesitan permisos para el uso de la camara');
         }
       }
       const user = auth.currentUser;
@@ -59,6 +73,7 @@ export default function SubirArticulos(){
           alert('Por favor, inicia sesión para subir un artículo');
           return; 
         }
+        
         const uploadUri = image;
         let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
         const extension = filename.split('.').pop();
@@ -66,67 +81,63 @@ export default function SubirArticulos(){
         filename = name + Date.now() + '.' + extension;
         const response = await fetch(uploadUri);
         const blob = await response.blob();    
-        const storage = getStorage();
         const storageRef = ref(storage, `Imagenes de Articulos/${filename}`);
-        const uploadTask = uploadBytesResumable(storageRef, blob);   
-        uploadTask.on('state_changed', (snapshot) => {      
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Carga al ' + progress.toFixed(2) + '% completada');
-          if (!firstAlertShown) {
-            alert('Subiendo...');
-            firstAlertShown = true;
+        const uploadTask = uploadBytesResumable(storageRef, blob); 
+  
+        setUploading(true);  
+        
+        uploadTask.on('state_changed', 
+          (snapshot) => {      
+            const progress = ((snapshot.bytesTransferred / snapshot.totalBytes) * 100).toFixed(1);
+            setProgress(progress); 
+          },
+          (error) => {
+            setUploading(false);  
+         
+            console.error('Error al subir archivo:', error);
+            alert('Error al subir archivo: ' + error.message);
+          },
+          async () => {
+            setUploading(false);  
+            try {
+              const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
+              await setDoc(doc(db, 'Publicaciones', uid), {
+                nombreArticulo: itemName,
+                estadoArticulo: itemCondition,
+                tipo: itemTrade,
+                imagenURL: imageURL,
+              });
+              Alert.alert(
+                '¡Felicitaciones Telocambista!',
+                'Publicación subida con éxito.', 
+                [{text: 'OK', onPress: () => navigation.navigate('Galeria')}],
+                { cancelable: false } 
+              );
+            } catch (error) {
+              console.error('Error al obtener la URL de descarga:', error);
+              alert('Error: ' + error.message);
+            }
           }
-        },
-        (error) => {
-          switch (error.code) {
-            case 'storage/unauthorized':
-              console.error('El usuario no tiene permiso para acceder al objeto.');
-              alert('El usuario no tiene permiso para acceder al objeto.');
-              break;
-            case 'storage/canceled':
-              console.error('El usuario canceló la carga.');
-              alert('El usuario canceló la carga.');
-              break;
-            case 'storage/unknown':
-              console.error('Ocurrió un error desconocido, inspecciona la carga de errores para obtener detalles.');
-              alert('Ocurrió un error desconocido, inspecciona la carga de errores para obtener detalles.');
-              break;
-            default:
-              console.error('Error al subir archivo:', error);
-              alert('Error al subir archivo: ' + error.message);
-              break;
-          }
-        },
-        async () => {
-          try {
-            const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            await setDoc(doc(db, 'Publicaciones', uid), {
-              nombreArticulo: itemName,
-              estadoArticulo: itemCondition,
-              tipo: itemTrade,
-              imagenURL: imageURL,
-            });
-            Alert.alert(
-              '¡Felicitaciones Telocambista!',
-              'Publicacion subida con éxito.', 
-              [{text: 'OK', onPress: () => navigation.navigate('Galeria')}],
-              { cancelable: false } 
-            );
-          } catch (error) {
-            console.error('Error al obtener la URL de descarga:', error);
-            alert('Error: ' + error.message);
-          }
-        });
+        );
       } 
-    } 
-    catch (error) {
+    } catch (error) {
       console.error("Error al subir el artículo:", error);
       alert('Error al subir el artículo. Por favor intenta de nuevo.');
     }
   };
   
+  
   return (
     <View style={styles.container}>
+      {uploading && (
+        <Modal visible={uploading} transparent={true} animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalInnerContainer}>
+              <Text style={{fontSize: 18}}>Subiendo... {progress}%</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
       <View style={styles.containerImage}>
         <Card>
           {image && <Image source={{ uri: image }} style={styles.image} />}
@@ -135,6 +146,7 @@ export default function SubirArticulos(){
           <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
         </TouchableOpacity>
       </View>
+      
       <View style={styles.containerTextInput}>
         <Text style={styles.title}>Nombre del Artículo</Text>
         <View style={styles.cajaTexto}>
@@ -145,6 +157,7 @@ export default function SubirArticulos(){
             value={itemName}
           />
         </View>
+  
         <Text style={styles.title}>Estado del Artículo</Text>
         <View style={styles.cajaTexto}>
           <TextInput
@@ -154,6 +167,7 @@ export default function SubirArticulos(){
             value={itemCondition}
           />
         </View>
+  
         <Text style={styles.title}>Intercambio o Gratis</Text>
         <View style={styles.cajaTexto}>
           <TextInput
@@ -163,12 +177,13 @@ export default function SubirArticulos(){
             value={itemTrade}
           />
         </View>
+  
         <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
           <Text style={styles.textoBotonP}>Publicar</Text>
         </TouchableOpacity>
       </View>
     </View>
-  );
+  );  
 }
 
 const styles = StyleSheet.create({
@@ -248,6 +263,27 @@ const styles = StyleSheet.create({
       paddingHorizontal: 15,
       margin: 15,
     },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      marginHorizontal: 20
+    },
+    modalInnerContainer: {
+      padding: 20, 
+      backgroundColor: 'white', 
+      borderRadius: 10, 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      width: '80%', // O el porcentaje o ancho fijo que desees.
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
   }
 );
-
