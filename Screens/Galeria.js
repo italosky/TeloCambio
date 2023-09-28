@@ -82,8 +82,8 @@ export default function Home() {
         <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
 
-        <TouchableOpacity style={styles.drawerItemEnd} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
@@ -354,10 +354,5 @@ const styles = StyleSheet.create({
     width:260,
     height: 47,
   },
-  fabStyle: {
-    bottom: 16,
-    right: 16,
-    position: 'absolute',
-    backgroundColor: '#A5CB48',
-  },
 });
+
