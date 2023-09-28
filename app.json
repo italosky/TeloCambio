@@ -15,16 +15,24 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.TeloCambio",
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.TeloCambio"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "52759473-b2d9-4999-b5d5-3dd7b71234f2"
+      }
+    },
+    "scheme": ["telocambio"]
   }
 }
