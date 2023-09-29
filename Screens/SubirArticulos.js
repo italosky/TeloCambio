@@ -149,6 +149,7 @@ export default function SubirArticulos(){
         <Text style={styles.title}>Nombre del Artículo</Text>
         <View style={styles.cajaTexto}>
           <TextInput
+            maxLength={30}
             placeholder="Ej. Bicicleta"
             style={styles.textInput}
             onChangeText={setItemName}
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
       paddingHorizontal: 15,
-      color: "#a9a9a9",
+      color: "#000000",
     },
     title: {
       fontSize: 18,

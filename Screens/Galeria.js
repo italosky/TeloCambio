@@ -82,8 +82,8 @@ export default function Home() {
         <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
 
-        <TouchableOpacity style={styles.drawerItemEnd} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
@@ -205,8 +205,8 @@ export default function Home() {
           />
         </View>
       </ScrollView>
-      <AnimatedFAB icon={'plus'} label={'Subir Artículo     '} extended={isExtended} onPress={goSubirArticulos} visible={true} 
-      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}/>
+      <AnimatedFAB icon={'plus'} label={'Subir Artículo'} extended={isExtended} onPress={goSubirArticulos} visible={true} 
+      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}color="white"/>
     </DrawerLayoutAndroid>
   );
 
@@ -278,7 +278,6 @@ export default function Home() {
         <View style={{ marginTop: 15 }}>
           <FlatList
             data={FerreteriaList}
-
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => {
@@ -302,7 +301,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginLeft: 15,
     borderRadius: 20,
-    backgroundColor: "#A5CB48",
+    backgroundColor: "#8AAD34",
     opacity: 30,
   },
   titleCategory: {
@@ -356,9 +355,10 @@ const styles = StyleSheet.create({
     height: 47,
   },
   fabStyle: {
-    bottom: 16,
+    bottom: 56,
     right: 16,
     position: 'absolute',
-    backgroundColor: '#A5CB48',
+    backgroundColor: '#8AAD34',
   },
 });
+
