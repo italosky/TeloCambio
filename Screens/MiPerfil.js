@@ -1,21 +1,22 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Text,
   StyleSheet,
   View,
   Image,
-  TextInput,
   TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  DrawerLayoutAndroid
+  DrawerLayoutAndroid,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 
 export default function Registro() {
   const navigation = useNavigation();
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: false,
+    });
+  }, [navigation]);
 
   const goPublicaciones = () => {
     navigation.navigate("MisPublicados");
@@ -46,7 +47,7 @@ export default function Registro() {
       setDrawerPosition("left");
     }
   };
-  
+
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       <View>
@@ -83,19 +84,26 @@ export default function Registro() {
       renderNavigationView={navigationView}
     >
       <View style={styles.container}>
-        <Image style={styles.tinyLogo} source={require('../assets/yo.png')} />
+        <Image style={styles.tinyLogo} source={require("../assets/yo.png")} />
         <View>
           <Text style={styles.bigText}>Juan Pérez</Text>
         </View>
         <View style={[styles.textContainer, styles.espacioContainer]}>
-          <Text style={styles.text}>Nivel de Telocambista:
+          <Text style={styles.text}>
+            Nivel de Telocambista:
             <Text style={styles.text}> Principiante</Text>
           </Text>
         </View>
-        <TouchableOpacity style={styles.buttonPublicadas} onPress={goPublicaciones}>
+        <TouchableOpacity
+          style={styles.buttonPublicadas}
+          onPress={goPublicaciones}
+        >
           <Text style={styles.buttonText}>Cosas Publicadas</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonReportar, styles.buttonPublicadas]} onPress={goOfertas}>
+        <TouchableOpacity
+          style={[styles.buttonReportar, styles.buttonPublicadas]}
+          onPress={goOfertas}
+        >
           <Text style={styles.buttonText}>Ofertas recibidas</Text>
         </TouchableOpacity>
       </View>
@@ -106,9 +114,9 @@ export default function Registro() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: "white"
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
   },
   tinyLogo: {
     width: 150,
@@ -118,17 +126,17 @@ const styles = StyleSheet.create({
   textContainer: {
     backgroundColor: "#8AAD34",
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: "gray",
     borderRadius: 7,
     width: 330,
     padding: 15,
     margin: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   text: {
     fontSize: 18,
-    color: 'white'
+    color: "white",
   },
   bigText: {
     fontSize: 24,
@@ -142,11 +150,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: 200,
     padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   containerDrawer: {
@@ -168,8 +176,8 @@ const styles = StyleSheet.create({
   },
   drawerText: {
     fontSize: 18,
-    fontWeight: '500',
-    color: '#ffffff',
+    fontWeight: "500",
+    color: "#ffffff",
     padding: 12,
   },
   separatorLine: {

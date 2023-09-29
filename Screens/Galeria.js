@@ -6,11 +6,9 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  DrawerLayoutAndroid,
-  DrawerLayoutIOS,
   Platform,
-  Animated
 } from "react-native";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
@@ -22,8 +20,8 @@ export default function Home() {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => null, 
-      gestureEnabled: false, 
+      headerLeft: () => null,
+      gestureEnabled: false,
     });
   }, [navigation]);
 
@@ -61,11 +59,11 @@ export default function Home() {
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       {/* Título "TeloCambio" encima de la línea superior, mi opcion B era dejarlo como texto */}
       <View>
-          <Image
-            source={require("../assets/LogoTeLoCambio.png")}
-            style={styles.logo}
-          />
-        </View>
+        <Image
+          source={require("../assets/LogoTeLoCambio.png")}
+          style={styles.logo}
+        />
+      </View>
 
       {/* Línea de separación */}
       <View style={styles.separatorLine} />
@@ -83,11 +81,9 @@ export default function Home() {
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
-
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
-
     </View>
   );
 
@@ -129,10 +125,8 @@ export default function Home() {
     setIsExtended(currentScrollPosition <= 0);
   };
 
-  
-
   const renderDrawerAndroid = () => (
-    <DrawerLayoutAndroid
+    <DrawerLayout
       ref={drawer}
       drawerWidth={300}
       drawerPosition={drawerPosition}
@@ -146,10 +140,7 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => {
               return (
-                <TouchableOpacity
-                  style={styles.HorizontalScroll}
-                  mode="elevated"
-                >
+                <TouchableOpacity style={styles.HorizontalScroll}>
                   <Text style={styles.textButton}>{item.category}</Text>
                 </TouchableOpacity>
               );
@@ -157,139 +148,35 @@ export default function Home() {
           />
         </View>
 
-        <Text style={styles.titleCategory}>Accesorios</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={AccesoriosList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Comida</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={ComidaList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Deportes</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={DeportesList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Ferreteria</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={FerreteriaList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
+        {categoryList.map((category) => (
+          <View key={category.category}>
+            <Text style={styles.titleCategory}>{category.category}</Text>
+            <View style={{ marginTop: 15 }}>
+              <FlatList
+                data={category.data}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item, index }) => {
+                  return <MyProductItem item={item} />;
+                }}
+              />
+            </View>
+          </View>
+        ))}
       </ScrollView>
-      <AnimatedFAB icon={'plus'} label={'Subir Artículo'} extended={isExtended} onPress={goSubirArticulos} visible={true} 
-      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}color="white"/>
-    </DrawerLayoutAndroid>
+      <TouchableOpacity
+        onPress={goSubirArticulos}
+        style={[
+          styles.fabStyle,
+          isExtended ? { bottom: 16 } : { bottom: -100 },
+        ]}
+      >
+        <Text style={{ color: "#fff" }}>Subir Artículo</Text>
+      </TouchableOpacity>
+    </DrawerLayout>
   );
 
-  const renderDrawerIOS = () => (
-    <DrawerLayoutIOS
-      ref={drawer}
-      drawerWidth={300}
-      drawerPosition={drawerPosition}
-      renderNavigationView={navigationView}
-    >
-      <ScrollView>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={categoryList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return (
-                <TouchableOpacity
-                  style={styles.HorizontalScroll}
-                  mode="elevated"
-                >
-                  <Text style={styles.textButton}>{item.category}</Text>
-                </TouchableOpacity>
-              );
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Accesorios</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={AccesoriosList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Comida</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-
-            data={ComidaList}
-
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Deportes</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={DeportesList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Ferreteria</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={FerreteriaList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-      </ScrollView>
-    </DrawerLayoutIOS>
-  );
-
-  return Platform.OS === "ios" ? renderDrawerIOS() : renderDrawerAndroid();
+  return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
 }
 
 const styles = StyleSheet.create({
@@ -313,7 +200,7 @@ const styles = StyleSheet.create({
   },
   textButton: {
     color: "#ffffff",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   containerDrawer: {
     flex: 1,
@@ -351,14 +238,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   logo: {
-    width:260,
+    width: 260,
     height: 47,
   },
   fabStyle: {
     bottom: 56,
     right: 16,
-    position: 'absolute',
-    backgroundColor: '#8AAD34',
+    position: "absolute",
+    backgroundColor: "#8AAD34",
   },
 });
-
