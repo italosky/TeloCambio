@@ -60,6 +60,7 @@ export default function Login(props) {
               secureTextEntry={true}
             />
           </View>
+          <Text style={styles.olvideContraseña}>Olvidé mi contraseña</Text>
 
           <View style={styles.padreBoton}>
             <TouchableOpacity style={styles.cajaBoton} onPress={logeo}>
@@ -119,5 +120,10 @@ const styles = StyleSheet.create({
   textoBoton: {
     textAlign: "center",
     color: "white",
+  },
+  olvideContraseña: {
+    color: "#8AAD34",
+    textAlign: "center",
+    marginTop: 10,
   },
 });

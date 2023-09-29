@@ -205,8 +205,8 @@ export default function Home() {
           />
         </View>
       </ScrollView>
-      <AnimatedFAB icon={'plus'} label={'Subir Artículo     '} extended={isExtended} onPress={goSubirArticulos} visible={true} 
-      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}/>
+      <AnimatedFAB icon={'plus'} label={'Subir Artículo'} extended={isExtended} onPress={goSubirArticulos} visible={true} 
+      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}color="white"/>
     </DrawerLayoutAndroid>
   );
 
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginLeft: 15,
     borderRadius: 20,
-    backgroundColor: "#A5CB48",
+    backgroundColor: "#8AAD34",
     opacity: 30,
   },
   titleCategory: {
@@ -353,6 +353,12 @@ const styles = StyleSheet.create({
   logo: {
     width:260,
     height: 47,
+  },
+  fabStyle: {
+    bottom: 56,
+    right: 16,
+    position: 'absolute',
+    backgroundColor: '#8AAD34',
   },
 });
 

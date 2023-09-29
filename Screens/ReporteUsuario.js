@@ -54,11 +54,11 @@ export default function Registro(props) {
         </View>
         <View style={styles.cajaTexto}>
           <TextInput
-            placeholder="Escriba su reporte"
+            placeholder="Escriba aquí si desea añadir mas detalles"
             style={{ paddingHorizontal: 15 }}
             onChangeText={(text) => setData({ ...data, reporte: text })}
             value={data.reporte}
-            multiline={true} // Habilitar múltiples líneas
+            multiline={true}
             numberOfLines={5}
             maxLength={140}
           />
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
       
   },
   cajaTexto: {
-    paddingVertical: 18,
     backgroundColor: "#cccccc50",
     borderRadius: 30,
     marginVertical: 10,  
@@ -121,7 +120,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#8AAD34",
     borderRadius: 30,
     paddingVertical: 20,
-    width: 150,
     marginTop: 20,
     width:200,
   },
@@ -129,10 +127,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#cc0000",
     borderRadius: 30,
     paddingVertical: 20,
-    width: 150,
     marginTop: 20,
     width:250,
-    height: 70,
   },
   textoBoton: {
     textAlign: "center",
