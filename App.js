@@ -22,6 +22,7 @@ import MisOfertas from "./Screens/MisOfertas";
 import MisPublicados from "./Screens/MisPublicados";
 import PerfilOtros from "./Screens/PerfilOtros";
 import ReporteUsuario from "./Screens/ReporteUsuario";
+import RecuperarContraseña from "./Screens/RecuperarContraseña";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -33,7 +34,7 @@ export default function App() {
           name="Home"
           component={Home}
           options={{
-            title: "Home",
+            title: "Bienvenido/a!",
             headerTintColor: "white",
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
@@ -181,6 +182,16 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
+        <Stack.Screen
+          name="RecuperarContraseña"
+          component={RecuperarContraseña}
+          options={{
+            title: "Recuperar Contraseña",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />       
       </Stack.Navigator>
     );
   }

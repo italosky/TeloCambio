@@ -14,9 +14,20 @@ import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MyProductItem from "./common/MyProductItem";
 import { Drawer, AnimatedFAB } from "react-native-paper";
+import { auth} from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home() {
   const navigation = useNavigation();
+  const cerrarSesion = async () => {
+    try {
+      await auth.signOut(); 
+      await AsyncStorage.removeItem("isLoggedIn");
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -84,6 +95,12 @@ export default function Home() {
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
+      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
+  <Image
+    source={require('../assets/Salir.png')}
+    style={styles.logoutImage}
+  />
+</TouchableOpacity>
     </View>
   );
 
@@ -248,5 +265,14 @@ const styles = StyleSheet.create({
     right: 16,
     position: "absolute",
     backgroundColor: "#8AAD34",
+  },
+  logoutButton: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  
+  logoutImage: {
+    width: 100,
+    height: 100,
   },
 });

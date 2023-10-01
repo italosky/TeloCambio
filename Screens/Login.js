@@ -10,20 +10,24 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-
+import { useNavigation } from "@react-navigation/native";
 import { appFirebase, auth } from "../firebaseConfig";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login(props) {
-  //Crear variable de estado
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const navigation = useNavigation();
+  const goRecuperarContraseña = () => {
+    navigation.navigate("RecuperarContraseña");
+  };
 
   const logeo = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert("Iniciando sesión...", "Accediendo...");
 
+      await AsyncStorage.setItem("isLoggedIn", "true");
       props.navigation.navigate("Galeria");
     } catch (error) {
       console.log(error);
@@ -60,7 +64,9 @@ export default function Login(props) {
               secureTextEntry={true}
             />
           </View>
+          <TouchableOpacity style={styles.drawerItem} onPress={goRecuperarContraseña}>
           <Text style={styles.olvideContraseña}>Olvidé mi contraseña</Text>
+        </TouchableOpacity>
 
           <View style={styles.padreBoton}>
             <TouchableOpacity style={styles.cajaBoton} onPress={logeo}>
