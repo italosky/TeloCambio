@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   DrawerLayoutAndroid,
 } from "react-native";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 
@@ -77,7 +78,7 @@ export default function Registro() {
   const [active, setActive] = React.useState("");
 
   return (
-    <DrawerLayoutAndroid
+    <DrawerLayout
       ref={drawer}
       drawerWidth={300}
       drawerPosition={drawerPosition}
@@ -107,7 +108,7 @@ export default function Registro() {
           <Text style={styles.buttonText}>Ofertas recibidas</Text>
         </TouchableOpacity>
       </View>
-    </DrawerLayoutAndroid>
+    </DrawerLayout>
   );
 }
 
