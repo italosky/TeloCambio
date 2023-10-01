@@ -164,15 +164,17 @@ export default function Home() {
           </View>
         ))}
       </ScrollView>
-      <TouchableOpacity
+      <AnimatedFAB
+        icon={"plus"}
+        label={"Subir Artículo"}
+        extended={isExtended}
         onPress={goSubirArticulos}
-        style={[
-          styles.fabStyle,
-          isExtended ? { bottom: 16 } : { bottom: -100 },
-        ]}
-      >
-        <Text style={{ color: "#fff" }}>Subir Artículo</Text>
-      </TouchableOpacity>
+        visible={true}
+        animateFrom={"right"}
+        iconMode={"static"}
+        style={[styles.fabStyle]}
+        color="white"
+      />
     </DrawerLayout>
   );
 
