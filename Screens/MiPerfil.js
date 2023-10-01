@@ -1,12 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import {
-  Text,
-  StyleSheet,
-  View,
-  Image,
-  TouchableOpacity,
-  DrawerLayoutAndroid,
-} from "react-native";
+import { Text, StyleSheet, View, Image, TouchableOpacity } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
@@ -92,7 +85,7 @@ export default function Registro() {
         <View style={[styles.textContainer, styles.espacioContainer]}>
           <Text style={styles.text}>
             Nivel de Telocambista:
-            <Text style={styles.text}> Principiante</Text>
+            <Text style={styles.text}> Experto</Text>
           </Text>
         </View>
         <TouchableOpacity

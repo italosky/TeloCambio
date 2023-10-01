@@ -28,7 +28,10 @@ export default function ForgotPassword({ navigation }) {
       navigation.navigate("Login");
     } catch (error) {
       console.error("Error al enviar el correo de recuperación:", error);
-      Alert.alert("Error", "No se pudo enviar el correo de recuperación. Verifique la dirección de correo electrónico.");
+      Alert.alert(
+        "Error",
+        "No se pudo enviar el correo de recuperación. Verifique la dirección de correo electrónico."
+      );
     }
   };
 
@@ -53,7 +56,10 @@ export default function ForgotPassword({ navigation }) {
             />
           </View>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={handleForgotPassword}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleForgotPassword}
+            >
               <Text style={styles.buttonText}>Restablecer Contraseña</Text>
             </TouchableOpacity>
           </View>
@@ -104,7 +110,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#8AAD34",
     borderRadius: 30,
-    paddingVertical: 20,
+    paddingVertical: 12,
     width: 150,
     marginTop: 20,
     alignItems: "center",
@@ -114,5 +120,3 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
-
-
