@@ -22,6 +22,12 @@ export default function Login(props) {
   const goRecuperarContraseña = () => {
     navigation.navigate("RecuperarContraseña");
   };
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null,
+      gestureEnabled: false,
+    });
+  }, [navigation]);
 
   const logeo = async () => {
     try {
@@ -64,9 +70,12 @@ export default function Login(props) {
               secureTextEntry={true}
             />
           </View>
-          <TouchableOpacity style={styles.drawerItem} onPress={goRecuperarContraseña}>
-          <Text style={styles.olvideContraseña}>Olvidé mi contraseña</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={goRecuperarContraseña}
+          >
+            <Text style={styles.olvideContraseña}>Olvidé mi contraseña</Text>
+          </TouchableOpacity>
 
           <View style={styles.padreBoton}>
             <TouchableOpacity style={styles.cajaBoton} onPress={logeo}>
