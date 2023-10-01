@@ -1,5 +1,13 @@
 import React, { useRef, useState } from "react";
-import { StyleSheet, Text, View, Image, DrawerLayoutAndroid, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  DrawerLayoutAndroid,
+  TouchableOpacity,
+} from "react-native";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 
@@ -56,7 +64,7 @@ export default function MisPublicados() {
   );
 
   return (
-    <DrawerLayoutAndroid
+    <DrawerLayout
       ref={drawer}
       drawerWidth={300}
       drawerPosition={drawerPosition}
@@ -65,7 +73,7 @@ export default function MisPublicados() {
       <View>
         <Text>Hola Mundo Guapo</Text>
       </View>
-    </DrawerLayoutAndroid>
+    </DrawerLayout>
   );
 }
 
@@ -91,12 +99,10 @@ const styles = StyleSheet.create({
   separatorLine: {
     borderBottomWidth: 1,
     borderBottomColor: "gray",
-    marginVertical: 10, 
+    marginVertical: 10,
   },
   logo: {
     width: 260,
     height: 47,
   },
 });
-
-
