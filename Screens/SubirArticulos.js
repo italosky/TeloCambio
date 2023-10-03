@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { auth, db , storage } from "../firebaseConfig";
 import { doc, setDoc, addDoc, collection } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { Picker } from "@react-native-picker/picker";
 
 export default function SubirArticulos(){
   const navigation = useNavigation();
@@ -114,6 +115,7 @@ export default function SubirArticulos(){
         <Card>
           {image && <Image source={{ uri: image }} style={styles.image} />}
         </Card>
+
         <TouchableOpacity style={styles.cajaBoton} onPress={pickImage}>
           <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
         </TouchableOpacity>
@@ -139,22 +141,26 @@ export default function SubirArticulos(){
           />
         </View>
         <Text style={styles.title}>Estado del Artículo</Text>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Nuevo/Usado"
-            style={styles.textInput}
-            onChangeText={setItemCondition}
-            value={itemCondition}
-          />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={itemCondition}
+            onValueChange={(itemValue, itemIndex) => setItemCondition(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Nuevo" value="Nuevo" />
+            <Picker.Item label="Usado" value="Usado" />
+          </Picker>
         </View>
         <Text style={styles.title}>Intercambio o Gratis</Text>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Intercambio o Gratis"
-            style={styles.textInput}
-            onChangeText={setItemTrade}
-            value={itemTrade}
-          />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={itemTrade}
+            onValueChange={(itemValue, itemIndex) => setItemTrade(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Intercambio" value="Intercambio" />
+            <Picker.Item label="Gratis" value="Gratis" />
+          </Picker>
         </View>
         <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
           <Text style={styles.textoBotonP}>Publicar</Text>

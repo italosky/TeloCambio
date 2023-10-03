@@ -1,17 +1,25 @@
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import { Card } from 'react-native-paper';
 import React from 'react';
+import { useNavigation } from "@react-navigation/native";
 
 const MyProductItem = ({item}) => {
+  const navigation = useNavigation();
+
+  const goDetalleArticulo = () => {
+    // Navega a la pantalla 'DetalleArticulo'
+    navigation.navigate('DetalleArticulo', { itemId: item.id });
+  };
+
   return (
-    <Card style={styles.containerCard}>
+    <Card style={styles.containerCard} onPress={goDetalleArticulo}>
       <Card.Cover source={item.imagen} style={styles.imagen}/>
       <Text style={styles.titleCard}>{item.nombre}</Text>
       <View style={styles.viewCard}>
-        <Text style={styles.textCard}>{item.estado}</Text>
-        <TouchableOpacity style={styles.buttonCard}>
-          <Text style={styles.textButton}>Solicitar</Text>
-        </TouchableOpacity> 
+        <Text style={styles.textCard}>{item.comuna}</Text>
+        <View style={styles.buttonCard}>
+          <Text style={styles.textButton}>TeLoCambio</Text>
+        </View> 
       </View>
     </Card>
   );
@@ -37,7 +45,7 @@ const styles = StyleSheet.create({
   },
   titleCard: {
     marginLeft: 10,
-    marginTop: 5,
+    marginTop: 7,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -46,7 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingLeft: 10,
     paddingRight: 10,
-    paddingTop: 4,
+    paddingTop: 7,
     alignItems: 'center',
   },
   textCard: {

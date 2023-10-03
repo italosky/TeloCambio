@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import {
   Text,
   StyleSheet,
@@ -11,26 +11,57 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { auth, db } from "../firebaseConfig";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Picker } from "@react-native-picker/picker";
+import { db } from '../firebaseConfig';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection, doc, serverTimestamp } from 'firebase/firestore';
 
 export default function Registro(props) {
-    const [data, setData] = useState({
-      causa_reporte: "",
-      reporte: "",
-    });
-    const navigation = useNavigation();
-    const goPerfilOtros = () => {
-      navigation.navigate("PerfilOtros");
-    };
-    const handleRegister = async () => {
-      let errorMessage = null;
-      if (data.causa_reporte === "") {
-        Alert.alert("Error", "Selecciona una causa del reporte.");
-        return;
+  const [userId, setUserId] = useState(null);
+  const [data, setData] = useState({ 
+    causa_reporte: "", 
+    reporte: "" 
+  });
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        console.log("El usuario no esta autenticado"); 
       }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const navigation = useNavigation();
+  const handleRegister = async () => {
+    if (data.causa_reporte && data.reporte) {
+      try {
+        const reportesRef = collection(db, 'Reportes');
+        const reportesVigentesDocRef = doc(reportesRef, 'ReportesVigentes');
+        const userReportsCollectionRef = collection(reportesVigentesDocRef, userId); 
+        await addDoc(userReportsCollectionRef, {
+          causa_reporte: data.causa_reporte,
+          reporte: data.reporte,
+          timestamp: serverTimestamp(),
+        });
+        Alert.alert('¡Reporte enviado!', 'Un administrador revisara su solicitud');
+        setData({
+          causa_reporte: "",
+          reporte: ""
+        });
+      } catch (error) {
+        console.error(error);
+        Alert.alert("Error enviando el reporte.");
+      }
+    } else {
+      Alert.alert("Por favor, completa todos los campos");
+    }
+  }
+  const goPerfilOtros = () => {
+    navigation.navigate("PerfilOtros");
   };
 
   return (
@@ -92,7 +123,7 @@ const styles = StyleSheet.create({
     padding: 20,
     shadowColor: "#000",
     shadowOffset: {
-      with: 0,
+      width: 0,
       height: 2,
     },
     shadowOpacity: 0.25,
@@ -137,7 +168,3 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 });
-
-
-
-
