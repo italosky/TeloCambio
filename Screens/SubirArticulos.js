@@ -115,6 +115,7 @@ export default function SubirArticulos(){
         <Card>
           {image && <Image source={{ uri: image }} style={styles.image} />}
         </Card>
+
         <TouchableOpacity style={styles.cajaBoton} onPress={pickImage}>
           <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
         </TouchableOpacity>
