@@ -1,13 +1,25 @@
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home({ navigation }) {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate("Ingreso");
-    }, 2000);
+    const checkLoggedInStatus = async () => {
+      const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
+      if (isLoggedIn === "true") {
+        
+        navigation.navigate("Galeria"); 
+      } else {
+        
+        const timer = setTimeout(() => {
+          navigation.navigate("Ingreso"); 
+        }, 2000);
 
-    return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkLoggedInStatus();
   }, []);
 
   return (

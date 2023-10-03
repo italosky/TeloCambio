@@ -23,8 +23,8 @@ export default function Ingreso() {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => null, // Esto oculta el botón para devolverse
-      gestureEnabled: false, // Esto deshabilita devolverse con el dedo
+      headerLeft: () => null, 
+      gestureEnabled: false,
     });
   }, [navigation]);
 
@@ -65,16 +65,6 @@ export default function Ingreso() {
       <View style={styles.padreBoton}>
         <TouchableOpacity style={styles.cajaBotonR} onPress={goRegistro}>
           <Text style={styles.textoBoton}>Registrarse</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.padreBoton}>
-        <TouchableOpacity
-          style={styles.cajaBotonG}
-          onPress={handleGoogleSignIn}
-        >
-          <Image source={googleIcon} style={{ width: 24, height: 24 }} />
-          <Text style={styles.textoBotonG}>Iniciar sesión con Google</Text>
         </TouchableOpacity>
       </View>
     </View>

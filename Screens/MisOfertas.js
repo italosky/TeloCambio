@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
-import { StyleSheet, Text, View, Image, DrawerLayoutAndroid, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 
@@ -56,16 +57,16 @@ export default function MisOfertas() {
   );
 
   return (
-    <DrawerLayoutAndroid
+    <DrawerLayout
       ref={drawer}
       drawerWidth={300}
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
       <View>
-        <Text>Hola Mundo Guapo</Text>
+        <Text>ESTA ES LA SCREEN DE MIS OFERTAS</Text>
       </View>
-    </DrawerLayoutAndroid>
+    </DrawerLayout>
   );
 }
 
@@ -98,4 +99,3 @@ const styles = StyleSheet.create({
     height: 47,
   },
 });
-

@@ -17,103 +17,96 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Picker } from "@react-native-picker/picker";
 
 export default function Registro(props) {
-    const [data, setData] = useState({
-      nombre_apellido: "",
-      region: "",
-      telefono: "",
-      email: "",
-      username: "",
-      password: "",
-    });
+  const [data, setData] = useState({
+    nombre_apellido: "",
+    region: "",
+    telefono: "",
+    email: "",
+    password: "",
+  });
 
-    const validateEmailDetails = (email) => {
-      const [localPart, domainPart] = email.split('@');
-      if (!domainPart || !localPart) {
-        return "El correo electrónico debe contener un '@'.";
-      }
-      const domainParts = domainPart.split('.');
-      if (domainParts.some(part => part.length === 0)) {
-        return "La parte de dominio no debe tener puntos consecutivos o empezar/terminar con un punto.";
-      }
-      if (!domainPart.includes('.')) {
-        return "La parte de dominio debe contener un punto ('.').";
-      }
-      const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-      if (!regex.test(email)) {
-        return "El correo electrónico contiene caracteres no permitidos.";
-      }
-      return null;
-    };
+  const validateEmailDetails = (email) => {
+    const [localPart, domainPart] = email.split('@');
+    if (!domainPart || !localPart) {
+      return "El correo electrónico debe contener un '@'.";
+    }
+    const domainParts = domainPart.split('.');
+    if (domainParts.some(part => part.length === 0)) {
+      return "La parte de dominio no debe tener puntos consecutivos o empezar/terminar con un punto.";
+    }
+    if (!domainPart.includes('.')) {
+      return "La parte de dominio debe contener un punto ('.').";
+    }
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!regex.test(email)) {
+      return "El correo electrónico contiene caracteres no permitidos.";
+    }
+    return null;
+  };
 
-    const isValidPhoneNumber = (telefono) => {
-      const regex = /^[0-9]{0,12}$/;
-      return regex.test(telefono);
-    };
-
-    const handleRegister = async () => {
-      let errorMessage = null;
-      if (!data.password || !data.username || !data.email || !data.nombre_apellido || !data.telefono) {
-        Alert.alert("Error", "Todos los campos son obligatorios.");
-        return;
+  const isValidPhoneNumber = (telefono) => {
+    const regex = /^[0-9]{0,12}$/;
+    return regex.test(telefono);
+  };
+  
+  const handleRegister = async () => {
+    let errorMessage = null;
+    if (!data.password || !data.email || !data.nombre_apellido || !data.telefono) {
+      Alert.alert("Error", "Todos los campos son obligatorios.");
+      return;
+    }
+    if (data.region === "") {
+      Alert.alert("Error", "Selecciona una región.");
+      return;
+    }
+    const trimmedEmail = data.email.trim();
+    const emailValidationMessage = validateEmailDetails(trimmedEmail);
+    if (emailValidationMessage !== null) {
+      errorMessage = emailValidationMessage;
+    }
+    if (!isValidPhoneNumber(data.telefono)) {
+      errorMessage = "El número de teléfono no es válido.";
+    }
+    if (errorMessage) {
+      Alert.alert("Error", errorMessage);
+      return;
+    }
+    try {
+      const response = await createUserWithEmailAndPassword(auth, trimmedEmail, data.password);
+      if (response.user) {
+        const userUID = response.user.uid;
+        const normalizedNombre = '('+ data.nombre_apellido + ')'.toLowerCase().replace(/\s+/g, '');
+        const readableID = `${normalizedNombre}-${userUID}`;
+        const userDoc = doc(db, "Usuarios", readableID);
+        await setDoc(userDoc, {
+          uid: userUID,
+          nombre_apellido: data.nombre_apellido,
+          region: data.region,
+          telefono: data.telefono,
+          email: data.email,
+        });      
+        Alert.alert('Registro exitoso!');
+        props.navigation.navigate("Login");
       }
-      if (data.region === "") {
-        Alert.alert("Error", "Selecciona una región.");
-        return;
+    } catch (error) {
+      errorMessage = "Error al registrar.";
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = "Email ya en uso.";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Email inválido.";
+          break;
+        case 'auth/weak-password':
+          errorMessage = "Contraseña muy corta.";
+          break;
+        default:
+          break;
       }
-      const trimmedEmail = data.email.trim();
-      const emailValidationMessage = validateEmailDetails(trimmedEmail);
-      if (emailValidationMessage !== null) {
-        errorMessage = emailValidationMessage;
-      }
-      if (!isValidPhoneNumber(data.telefono)) {
-        errorMessage = "El número de teléfono no es válido.";
-      }
-      if (errorMessage) {
-        Alert.alert("Error", errorMessage);
-        return;
-      }
-      try {
-        const response = await createUserWithEmailAndPassword(auth, trimmedEmail, data.password);
-        if (response.user) {
-          const userDoc = doc(db, "Usuarios", data.username);
-          const userDocSnapshot = await getDoc(userDoc);
-          if (userDocSnapshot.exists()) {
-            Alert.alert('Error', 'El nombre de usuario ya existe. Por favor, elige otro.');
-            return;
-          }
-          await setDoc(userDoc, {
-            uid: response.user.uid,
-            nombre_apellido: data.nombre_apellido,
-            region: data.region,
-            telefono: data.telefono,
-            email: data.email,
-            username: data.username,
-            password: data.password
-          });
-          Alert.alert('Registro exitoso!');
-          props.navigation.navigate("Login");
-        }
-      } 
-      catch (error) {
-        console.error("Error al registrar el usuario:", error);
-        errorMessage = "Ocurrió un error al registrar el usuario. Por favor, inténtalo de nuevo.";
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = "Este email ya está siendo usado por otra cuenta.";
-            break;
-          case 'auth/invalid-email':
-            errorMessage = "Por favor, introduce un email válido.";
-            break;
-          case 'auth/weak-password':
-            errorMessage = "La contraseña es demasiado corta. Debe tener al menos 6 caracteres.";
-            break;
-          default:
-            break;
-        }
       Alert.alert("Error", errorMessage);
     }
   };
-
+    
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -168,14 +161,6 @@ export default function Registro(props) {
             style={{ paddingHorizontal: 15 }}
             onChangeText={(text) => setData({ ...data, email: text })}
             value={data.email}
-          />
-        </View>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Nombre de Usuario"
-            style={{ paddingHorizontal: 15 }}
-            onChangeText={(text) => setData({ ...data, username: text })}
-            value={data.username}
           />
         </View>
         <View style={styles.cajaTexto}>

@@ -6,24 +6,34 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  DrawerLayoutAndroid,
-  DrawerLayoutIOS,
   Platform,
   Animated
 } from "react-native";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MyProductItem from "./common/MyProductItem";
 import { Drawer, AnimatedFAB } from "react-native-paper";
+import { auth} from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home() {
   const navigation = useNavigation();
+  const cerrarSesion = async () => {
+    try {
+      await auth.signOut(); 
+      await AsyncStorage.removeItem("isLoggedIn");
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => null, 
-      gestureEnabled: false, 
+      headerLeft: () => null,
+      gestureEnabled: false,
     });
   }, [navigation]);
 
@@ -61,11 +71,11 @@ export default function Home() {
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       {/* Título "TeloCambio" encima de la línea superior, mi opcion B era dejarlo como texto */}
       <View>
-          <Image
-            source={require("../assets/LogoTeLoCambio.png")}
-            style={styles.logo}
-          />
-        </View>
+        <Image
+          source={require("../assets/LogoTeLoCambio.png")}
+          style={styles.logo}
+        />
+      </View>
 
       {/* Línea de separación */}
       <View style={styles.separatorLine} />
@@ -82,12 +92,16 @@ export default function Home() {
         <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.drawerItemEnd} onPress={goMisOfertas}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
-
+      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
+  <Image
+    source={require('../assets/Salir.png')}
+    style={styles.logoutImage}
+  />
+</TouchableOpacity>
     </View>
   );
 
@@ -129,10 +143,8 @@ export default function Home() {
     setIsExtended(currentScrollPosition <= 0);
   };
 
-  
-
   const renderDrawerAndroid = () => (
-    <DrawerLayoutAndroid
+    <DrawerLayout
       ref={drawer}
       drawerWidth={300}
       drawerPosition={drawerPosition}
@@ -146,10 +158,7 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => {
               return (
-                <TouchableOpacity
-                  style={styles.HorizontalScroll}
-                  mode="elevated"
-                >
+                <TouchableOpacity style={styles.HorizontalScroll}>
                   <Text style={styles.textButton}>{item.category}</Text>
                 </TouchableOpacity>
               );
@@ -157,140 +166,37 @@ export default function Home() {
           />
         </View>
 
-        <Text style={styles.titleCategory}>Accesorios</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={AccesoriosList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Comida</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={ComidaList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Deportes</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={DeportesList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Ferreteria</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={FerreteriaList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
+        {categoryList.map((category) => (
+          <View key={category.category}>
+            <Text style={styles.titleCategory}>{category.category}</Text>
+            <View style={{ marginTop: 15 }}>
+              <FlatList
+                data={category.data}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item, index }) => {
+                  return <MyProductItem item={item} />;
+                }}
+              />
+            </View>
+          </View>
+        ))}
       </ScrollView>
-      <AnimatedFAB icon={'plus'} label={'Subir Artículo     '} extended={isExtended} onPress={goSubirArticulos} visible={true} 
-      animateFrom={'right'} iconMode={'static'} style={[styles.fabStyle]}/>
-    </DrawerLayoutAndroid>
+      <AnimatedFAB
+        icon={"plus"}
+        label={"Subir Artículo     "}
+        extended={isExtended}
+        onPress={goSubirArticulos}
+        visible={true}
+        animateFrom={"right"}
+        iconMode={"static"}
+        style={[styles.fabStyle]}
+        color="white"
+      />
+    </DrawerLayout>
   );
 
-  const renderDrawerIOS = () => (
-    <DrawerLayoutIOS
-      ref={drawer}
-      drawerWidth={300}
-      drawerPosition={drawerPosition}
-      renderNavigationView={navigationView}
-    >
-      <ScrollView>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={categoryList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return (
-                <TouchableOpacity
-                  style={styles.HorizontalScroll}
-                  mode="elevated"
-                >
-                  <Text style={styles.textButton}>{item.category}</Text>
-                </TouchableOpacity>
-              );
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Accesorios</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={AccesoriosList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Comida</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-
-            data={ComidaList}
-
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Deportes</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={DeportesList}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-
-        <Text style={styles.titleCategory}>Ferreteria</Text>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={FerreteriaList}
-
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return <MyProductItem item={item} />;
-            }}
-          />
-        </View>
-      </ScrollView>
-    </DrawerLayoutIOS>
-  );
-
-  return Platform.OS === "ios" ? renderDrawerIOS() : renderDrawerAndroid();
+  return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
 }
 
 const styles = StyleSheet.create({
@@ -314,7 +220,7 @@ const styles = StyleSheet.create({
   },
   textButton: {
     color: "#ffffff",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   containerDrawer: {
     flex: 1,
@@ -352,13 +258,22 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   logo: {
-    width:260,
+    width: 260,
     height: 47,
   },
   fabStyle: {
-    bottom: 16,
-    right: 16,
-    position: 'absolute',
-    backgroundColor: '#A5CB48',
+    bottom: 20,
+    right: 20,
+    position: "absolute",
+    backgroundColor: "#A5CB48",
+  },
+  logoutButton: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  
+  logoutImage: {
+    width: 100,
+    height: 100,
   },
 });

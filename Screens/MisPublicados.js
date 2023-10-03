@@ -4,18 +4,16 @@ import {
   Text,
   View,
   Image,
-  TouchableOpacity,
-  DrawerLayoutAndroid,
-  DrawerLayoutIOS,
   Platform,
-  Animated
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MisPublicadosItem from "./common/MisPublicadosItem";
 import { Drawer } from "react-native-paper";
-import { KeyboardAwareScrollView } from '@codler/react-native-keyboard-aware-scroll-view';
 
 export default function MisPublicados() {
   const navigation = useNavigation();
@@ -117,7 +115,7 @@ export default function MisPublicados() {
   }, []);
 
   const renderDrawerAndroid = () => (
-    <DrawerLayoutAndroid
+    <DrawerLayout
       ref={drawer}
       drawerWidth={300}
       drawerPosition={drawerPosition}
@@ -131,7 +129,7 @@ export default function MisPublicados() {
             }}
           />
         </View>
-    </DrawerLayoutAndroid>
+    </DrawerLayout>
   );
 
   return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
@@ -184,16 +182,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   drawerText: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "500",
     color: "#ffffff",
     padding: 12,
+    paddingHorizontal: 20,
   },
   separatorLine: {
-    borderBottomWidth: 0.5,
-    color: "gray",
-    marginVertical: 15,
-    marginHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
+    marginVertical: 10,
   },
   logo: {
     width:260,
