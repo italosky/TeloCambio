@@ -56,7 +56,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 15,
-    color: 'gray',
   },
   viewCard: {
     flexDirection: 'row-reverse',

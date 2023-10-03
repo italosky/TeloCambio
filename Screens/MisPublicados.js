@@ -5,7 +5,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  ScrollView,
   DrawerLayoutAndroid,
   DrawerLayoutIOS,
   Platform,
@@ -16,6 +15,7 @@ import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MisPublicadosItem from "./common/MisPublicadosItem";
 import { Drawer } from "react-native-paper";
+import { KeyboardAwareScrollView } from '@codler/react-native-keyboard-aware-scroll-view';
 
 export default function MisPublicados() {
   const navigation = useNavigation();
@@ -123,7 +123,6 @@ export default function MisPublicados() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-      <ScrollView>
         <View style={{ marginTop: 15 }}>
           <FlatList
             data={AccesoriosList}
@@ -132,7 +131,6 @@ export default function MisPublicados() {
             }}
           />
         </View>
-      </ScrollView>
     </DrawerLayoutAndroid>
   );
 
