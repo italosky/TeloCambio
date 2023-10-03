@@ -17,9 +17,9 @@ const MyProductItem = ({item}) => {
       <Text style={styles.titleCard}>{item.nombre}</Text>
       <View style={styles.viewCard}>
         <Text style={styles.textCard}>{item.comuna}</Text>
-        <TouchableOpacity style={styles.buttonCard}>
+        <View style={styles.buttonCard}>
           <Text style={styles.textButton}>TeLoCambio</Text>
-        </TouchableOpacity> 
+        </View> 
       </View>
     </Card>
   );
