@@ -10,7 +10,7 @@ import {
   Animated
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, createAppContainer } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MyProductItem from "./common/MyProductItem";
@@ -58,14 +58,6 @@ export default function Home() {
   };
 
   const drawer = useRef(null);
-  const [drawerPosition, setDrawerPosition] = useState("left");
-  const changeDrawerPosition = () => {
-    if (drawerPosition === "left") {
-      setDrawerPosition("right");
-    } else {
-      setDrawerPosition("left");
-    }
-  };
 
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
@@ -147,7 +139,7 @@ export default function Home() {
     <DrawerLayout
       ref={drawer}
       drawerWidth={300}
-      drawerPosition={drawerPosition}
+      drawerPosition='left'
       renderNavigationView={navigationView}
     >
       <ScrollView>

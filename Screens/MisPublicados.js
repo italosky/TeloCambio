@@ -12,7 +12,7 @@ import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
-import MisPublicadosItem from "./common/MisPublicadosItem";
+import MisListItem from "./common/MisListItem";
 import { Drawer } from "react-native-paper";
 
 export default function MisPublicados() {
@@ -125,7 +125,7 @@ export default function MisPublicados() {
           <FlatList
             data={AccesoriosList}
             renderItem={({ item, index }) => {
-              return <MisPublicadosItem item={item} />;
+              return <MisListItem item={item} />;
             }}
           />
         </View>

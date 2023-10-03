@@ -3,7 +3,7 @@ import { Card } from 'react-native-paper';
 import React from 'react';
 import { useNavigation } from "@react-navigation/native";
 
-const MisPublicadosItem = ({item}) => {
+const MisListItem = ({item}) => {
   const navigation = useNavigation();
 
   const goDetalleArticulo = () => {
@@ -30,7 +30,7 @@ const MisPublicadosItem = ({item}) => {
   );
 };
 
-export default MisPublicadosItem;
+export default MisListItem;
 
 const styles = StyleSheet.create({
   containerCard: {
