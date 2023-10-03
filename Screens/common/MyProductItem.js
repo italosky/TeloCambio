@@ -11,11 +11,6 @@ const MyProductItem = ({item}) => {
     navigation.navigate('DetalleArticulo', { itemId: item.id });
   };
 
-  const goCategoria = () => {
-    // Navega a la pantalla 'DetalleArticulo'
-    navigation.navigate('Categoria', { itemId: item.id });
-  };
-
   return (
     <Card style={styles.containerCard} onPress={goDetalleArticulo}>
       <Card.Cover source={item.imagen} style={styles.imagen}/>
