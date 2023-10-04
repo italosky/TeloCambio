@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { auth, db , storage } from "../firebaseConfig";
 import { doc, setDoc, addDoc, collection } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { Picker } from "@react-native-picker/picker";
 
 export default function SubirArticulos(){
   const navigation = useNavigation();
@@ -137,9 +138,9 @@ export default function SubirArticulos(){
             style={styles.textInput}
             onChangeText={setItemComuna}
             value={itemComuna}
-          />
+        />
         </View>
-        <Text style={styles.title}>Estado del Artículo</Text>
+        <Text style={styles.title}>Estado del articulo</Text>
         <View style={styles.cajaTexto}>
           <TextInput
             placeholder="Nuevo/Usado"
@@ -148,10 +149,10 @@ export default function SubirArticulos(){
             value={itemCondition}
           />
         </View>
-        <Text style={styles.title}>Intercambio o Gratis</Text>
+        <Text style={styles.title}>Tipo de cambio</Text>
         <View style={styles.cajaTexto}>
           <TextInput
-            placeholder="Intercambio o Gratis"
+            placeholder="Intercambio/Gratis"
             style={styles.textInput}
             onChangeText={setItemTrade}
             value={itemTrade}
