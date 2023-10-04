@@ -75,7 +75,7 @@ export default function Registro(props) {
       const response = await createUserWithEmailAndPassword(auth, trimmedEmail, data.password);
       if (response.user) {
         const userUID = response.user.uid;
-        const normalizedNombre = '('+ data.nombre_apellido + ')'.toLowerCase().replace(/\s+/g, '');
+        const normalizedNombre = data.nombre_apellido.toLowerCase().replace(/\s+/g, '');
         const readableID = `${normalizedNombre}-${userUID}`;
         const userDoc = doc(db, "Usuarios", readableID);
         await setDoc(userDoc, {

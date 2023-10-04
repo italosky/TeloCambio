@@ -76,16 +76,17 @@ export default function SubirArticulos(){
         async () => {
           setUploading(false);  
           try {
+            const normalizedNombre = itemName.toLowerCase().replace(/\s+/g, '');
+            const readableID = `${normalizedNombre}-${userId}`;
             const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const publicacionesRef = collection(db, 'Publicaciones');
-            const articulosPublicadosDocRef = doc(publicacionesRef, 'ArticulosPublicados');
-            const userCollectionRef = collection(articulosPublicadosDocRef, userId);
-            await addDoc(userCollectionRef, {
+            const itemDoc = doc(db, 'Publicaciones', readableID);
+            await setDoc(itemDoc, {
               nombreArticulo: itemName,
               estadoArticulo: itemCondition,
               comuna: itemComuna,
               tipo: itemTrade,
               imagenURL: imageURL,
+              userId: userId,
             });
             Alert.alert('¡Felicitaciones!', 'Publicación subida con éxito.', [{text: 'OK', onPress: () => navigation.navigate('Galeria')}], { cancelable: false });
           } catch (error) {
@@ -99,6 +100,7 @@ export default function SubirArticulos(){
       alert('Error al subir el artículo. Por favor intenta de nuevo.');
     }
   };
+
   
   return (
     <View style={styles.container}>
