@@ -137,29 +137,25 @@ export default function SubirArticulos(){
             style={styles.textInput}
             onChangeText={setItemComuna}
             value={itemComuna}
+        />
+        </View>
+        <Text style={styles.title}>Estado del articulo</Text>
+        <View style={styles.cajaTexto}>
+          <TextInput
+            placeholder="Nuevo/Usado"
+            style={styles.textInput}
+            onChangeText={setItemCondition}
+            value={itemCondition}
           />
         </View>
-        <Text style={styles.title}>Estado del Artículo</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={itemCondition}
-            onValueChange={(itemValue, itemIndex) => setItemCondition(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Nuevo" value="Nuevo" />
-            <Picker.Item label="Usado" value="Usado" />
-          </Picker>
-        </View>
-        <Text style={styles.title}>Intercambio o Gratis</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={itemTrade}
-            onValueChange={(itemValue, itemIndex) => setItemTrade(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Intercambio" value="Intercambio" />
-            <Picker.Item label="Gratis" value="Gratis" />
-          </Picker>
+        <Text style={styles.title}>Tipo de cambio</Text>
+        <View style={styles.cajaTexto}>
+          <TextInput
+            placeholder="Intercambio/Gratis"
+            style={styles.textInput}
+            onChangeText={setItemTrade}
+            value={itemTrade}
+          />
         </View>
         <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
           <Text style={styles.textoBotonP}>Publicar</Text>
