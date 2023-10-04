@@ -12,11 +12,25 @@ import {
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
-import { Drawer, FAB } from "react-native-paper";
+import { Drawer, AnimatedFAB } from "react-native-paper";
 import { auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home() {
+    const [isExtended, setIsExtended] = React.useState(true);
+
+    const onScroll = ({ nativeEvent }) => {
+      const currentScrollPosition =
+        Math.floor(nativeEvent?.contentOffset?.y) ?? 0;
+  
+      setIsExtended(currentScrollPosition <= 0);
+    };
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+          headerLeft: () => null,
+          gestureEnabled: false,
+        });
+      }, [navigation]);   
   const navigation = useNavigation();
 
   const cerrarSesion = async () => {
@@ -86,11 +100,16 @@ export default function Home() {
           contentContainerStyle={styles.gridContainer}
         />
       </View>
-      <FAB
+      <AnimatedFAB
         icon="plus"
         label="Subir Artículo"
         onPress={goSubirArticulos}
         style={styles.fabStyle}
+        extended={isExtended}
+        visible={true}
+        animateFrom={"right"}
+        iconMode={"static"}
+        color="white"
       />
     </DrawerLayout>
   );
