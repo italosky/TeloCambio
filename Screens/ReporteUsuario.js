@@ -29,7 +29,7 @@ export default function Registro(props) {
       if (user) {
         setUserId(user.uid);
       } else {
-        console.log("El usuario no esta autenticado"); 
+        console.log("El usuario no esta autenticado, porfavor dirijase a login"); 
       }
     });
     return () => unsubscribe();
@@ -39,7 +39,8 @@ export default function Registro(props) {
   const handleRegister = async () => {
     if (data.causa_reporte && data.reporte) {
       try {
-        const reportesRef = collection(db, 'Reportes');
+        // Asegurate de que tienes una colección 'Reportes' en tu Firestore
+        const reportesRef = collection(db, 'Reportes'); // <- Aqui
         const reportesVigentesDocRef = doc(reportesRef, 'ReportesVigentes');
         const userReportsCollectionRef = collection(reportesVigentesDocRef, userId); 
         await addDoc(userReportsCollectionRef, {

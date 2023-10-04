@@ -1,40 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Platform, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, Alert, Modal } from 'react-native';
-import { Card } from 'react-native-paper';
-import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
-import { auth, db , storage } from "../firebaseConfig";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Image,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  ScrollView,
+} from "react-native";
+import { Card } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
+import { auth, db, storage } from "../firebaseConfig";
 import { doc, setDoc, addDoc, collection } from "firebase/firestore";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
 
-export default function SubirArticulos(){
+export default function SubirArticulos() {
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
-  const [itemName, setItemName] = useState('');
-  const [itemCondition, setItemCondition] = useState('');
-  const [itemTrade, setItemTrade] = useState('');
-  const [itemComuna, setItemComuna] = useState('');
+  const [itemName, setItemName] = useState("");
+  const [itemCondition, setItemCondition] = useState("Nuevo");
+  const [itemTrade, setItemTrade] = useState("Intercambio");
+  const [itemComuna, setItemComuna] = useState("");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [userId, setUserId] = useState('');
-  
+  const [userId, setUserId] = useState("");
+
   useEffect(() => {
     (async () => {
-      if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          alert('Se necesitan permisos para el uso de la camara');
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          alert("Se necesitan permisos para el uso de la cámara");
         }
       }
       const user = auth.currentUser;
       if (user) {
         const uid = user.uid;
-        setUserId(uid); // Establecer el uid del usuario
+        setUserId(uid);
       }
     })();
   }, []);
-  
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -47,39 +65,56 @@ export default function SubirArticulos(){
       setImage(result.assets[0].uri);
     }
   };
-  
+
   const SubirArticulo = async () => {
     try {
-      if (!image || !itemName || !itemCondition || !itemComuna || !itemTrade || !userId) {
-        alert('Todos los campos son obligatorios y debes estar autenticado');
+      if (
+        !image ||
+        !itemName ||
+        !itemCondition ||
+        !itemComuna ||
+        !itemTrade ||
+        !userId
+      ) {
+        alert("Todos los campos son obligatorios y debes estar autenticado");
         return;
       }
       const uploadUri = image;
-      let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
-      const extension = filename.split('.').pop();
-      const name = filename.split('.').slice(0, -1).join('.');
-      filename = name + Date.now() + '.' + extension;
+      let filename = uploadUri.substring(uploadUri.lastIndexOf("/") + 1);
+      const extension = filename.split(".").pop();
+      const name = filename.split(".").slice(0, -1).join(".");
+      filename = name + Date.now() + "." + extension;
       const response = await fetch(uploadUri);
-      const blob = await response.blob();    
+      const blob = await response.blob();
       const storageRef = ref(storage, `Imagenes de Articulos/${filename}`);
-      const uploadTask = uploadBytesResumable(storageRef, blob); 
+      const uploadTask = uploadBytesResumable(storageRef, blob);
       setUploading(true);
-      uploadTask.on('state_changed', 
+      uploadTask.on(
+        "state_changed",
         (snapshot) => {
-          const progress = ((snapshot.bytesTransferred / snapshot.totalBytes) * 100).toFixed(1);
-          setProgress(progress); 
+          const progress = (
+            (snapshot.bytesTransferred / snapshot.totalBytes) *
+            100
+          ).toFixed(1);
+          setProgress(progress);
         },
         (error) => {
-          setUploading(false);   
-          alert('Error al subir archivo: ' + error.message);
+          setUploading(false);
+          alert("Error al subir archivo: " + error.message);
         },
         async () => {
-          setUploading(false);  
+          setUploading(false);
           try {
             const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const publicacionesRef = collection(db, 'Publicaciones');
-            const articulosPublicadosDocRef = doc(publicacionesRef, 'ArticulosPublicados');
-            const userCollectionRef = collection(articulosPublicadosDocRef, userId);
+            const publicacionesRef = collection(db, "Publicaciones");
+            const articulosPublicadosDocRef = doc(
+              publicacionesRef,
+              "ArticulosPublicados"
+            );
+            const userCollectionRef = collection(
+              articulosPublicadosDocRef,
+              userId
+            );
             await addDoc(userCollectionRef, {
               nombreArticulo: itemName,
               estadoArticulo: itemCondition,
@@ -87,26 +122,30 @@ export default function SubirArticulos(){
               tipo: itemTrade,
               imagenURL: imageURL,
             });
-            Alert.alert('¡Felicitaciones!', 'Publicación subida con éxito.', [{text: 'OK', onPress: () => navigation.navigate('Galeria')}], { cancelable: false });
+            Alert.alert(
+              "¡Felicitaciones!",
+              "Publicación subida con éxito.",
+              [{ text: "OK", onPress: () => navigation.navigate("Galeria2") }],
+              { cancelable: false }
+            );
           } catch (error) {
-            alert('Error: ' + error.message);
+            alert("Error: " + error.message);
           }
         }
       );
-    } 
-    catch (error) {
+    } catch (error) {
       console.error(error);
-      alert('Error al subir el artículo. Por favor intenta de nuevo.');
+      alert("Error al subir el artículo. Por favor intenta de nuevo.");
     }
   };
-  
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {uploading && (
         <Modal visible={uploading} transparent={true} animationType="slide">
           <View style={styles.modalContainer}>
             <View style={styles.modalInnerContainer}>
-              <Text style={{fontSize: 18}}>Subiendo... {progress}%</Text>
+              <Text style={{ fontSize: 18 }}>Subiendo... {progress}%</Text>
             </View>
           </View>
         </Modal>
@@ -140,24 +179,26 @@ export default function SubirArticulos(){
             value={itemComuna}
           />
         </View>
-        <Text style={styles.title}>Estado del Artículo</Text>
-        <View style={styles.pickerContainer}>
+
+        <View style={styles.cajaPicker}>
           <Picker
             selectedValue={itemCondition}
-            onValueChange={(itemValue, itemIndex) => setItemCondition(itemValue)}
-            style={styles.picker}
+            onValueChange={(itemValue) => setItemCondition(itemValue)}
           >
+            <Picker.Item label="Estado del artículo" value="a" />
             <Picker.Item label="Nuevo" value="Nuevo" />
             <Picker.Item label="Usado" value="Usado" />
           </Picker>
         </View>
-        <Text style={styles.title}>Intercambio o Gratis</Text>
-        <View style={styles.pickerContainer}>
+        <View style={styles.cajaPicker}>
           <Picker
             selectedValue={itemTrade}
-            onValueChange={(itemValue, itemIndex) => setItemTrade(itemValue)}
-            style={styles.picker}
+            onValueChange={(itemValue) => setItemTrade(itemValue)}
           >
+            <Picker.Item
+              label="Intercambio o Gratis"
+              value="Articulo para intercambio o Gratis"
+            />
             <Picker.Item label="Intercambio" value="Intercambio" />
             <Picker.Item label="Gratis" value="Gratis" />
           </Picker>
@@ -166,107 +207,107 @@ export default function SubirArticulos(){
           <Text style={styles.textoBotonP}>Publicar</Text>
         </TouchableOpacity>
       </View>
-    </View>
-  );  
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "white",
-      paddingHorizontal: 15,
+  container: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+    paddingHorizontal: 15,
+  },
+  containerImage: {
+    alignItems: "center",
+  },
+  containerTextInput: {
+    marginTop: 15,
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  cajaBoton: {
+    backgroundColor: "#ffffff",
+    borderRadius: 30,
+    paddingVertical: 15,
+    width: 250,
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: "#8AAD34",
+  },
+  textoBoton: {
+    textAlign: "center",
+    color: "#8AAD34",
+  },
+  cajaTexto: {
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    backgroundColor: "#cccccc50",
+    borderRadius: 30,
+    marginVertical: 7,
+    width: 250,
+  },
+  cajaPicker: {
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    backgroundColor: "#cccccc50",
+    borderRadius: 30,
+    marginVertical: 7,
+    width: 295,
+  },
+  textInput: {
+    paddingHorizontal: 15,
+    color: "#000000",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "500",
+    paddingVertical: 15,
+    alignItems: "center",
+    textAlign: "center",
+  },
+  cajaBotonP: {
+    backgroundColor: "#8AAD34",
+    borderRadius: 30,
+    paddingVertical: 15,
+    width: 150,
+    marginTop: 30,
+    alignItems: "center",
+  },
+  textoBotonP: {
+    textAlign: "center",
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "500",
+  },
+  image: {
+    width: 150,
+    height: 150,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    margin: 15,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 20,
+  },
+  modalInnerContainer: {
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "80%", // O el porcentaje o ancho fijo que desees.
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    containerTextInput: {
-      marginTop: 15,
-      alignItems: "center",
-      paddingVertical: 20,
-    },
-    cajaBoton: {
-      backgroundColor: "#ffffff",
-      borderRadius: 30,
-      paddingVertical: 15,
-      width: 250,
-      marginTop: 15,
-      borderWidth: 1,
-      borderColor: "#8AAD34",
-    },
-    textoBoton:{
-      textAlign: "center",
-      color: "#8AAD34",
-    },
-    cajaTexto: {
-      paddingVertical: 15,
-      paddingHorizontal: 25,
-      backgroundColor: "#cccccc50",
-      borderRadius: 30,
-      marginVertical: 7,
-    },
-    textInput: {
-      paddingHorizontal: 15,
-      color: "#000000",
-    },
-    title: {
-      fontSize: 18,
-      fontWeight: '500',
-      paddingVertical: 15,
-      alignItems: "center",
-      textAlign: "center",
-    },
-    title1: {
-      fontSize: 18,
-      fontWeight: '500',
-      paddingVertical: 15,
-      alignItems: "center",
-      textAlign: "center",
-      marginTop: 10,
-    },
-    cajaBotonP: {
-      backgroundColor: "#8AAD34",
-      borderRadius: 30,
-      paddingVertical: 15,
-      width: 150,
-      marginTop: 30,
-      alignItems: "center",
-    },
-    textoBotonP:{
-      textAlign: "center",
-      color: "#ffffff",
-      fontSize: 18,
-      fontWeight: '500',
-    },
-    card: {
-      margin: 10,
-    },
-    image: {
-      width: 150, 
-      height: 150,
-      paddingVertical: 15,
-      paddingHorizontal: 15,
-      margin: 15,
-    },
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      marginHorizontal: 20
-    },
-    modalInnerContainer: {
-      padding: 20, 
-      backgroundColor: 'white', 
-      borderRadius: 10, 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      width: '80%', // O el porcentaje o ancho fijo que desees.
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-  }
-);
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+});
