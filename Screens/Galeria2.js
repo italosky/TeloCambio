@@ -43,8 +43,8 @@ export default function Home() {
     navigation.navigate("MiPerfil");
   };
 
-  const goGaleria = () => {
-    navigation.navigate("Galeria");
+  const goGaleria2 = () => {
+    navigation.navigate("Galeria2");
   };
 
   const goMisPublicados = () => {
@@ -111,7 +111,7 @@ export default function Home() {
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
           <Text style={styles.drawerText}>Galería de Artículos</Text>
         </TouchableOpacity>
 
