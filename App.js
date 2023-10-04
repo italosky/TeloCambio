@@ -12,6 +12,7 @@ import Home from "./Screens/Home";
 import Ingreso from "./Screens/Ingreso";
 import Registro from "./Screens/Registro";
 import Galeria from "./Screens/Galeria";
+import Galeria2 from "./Screens/Galeria2";
 import SubirArticulos from "./Screens/SubirArticulos";
 import Concretar from "./Screens/Concretar";
 import DatosCambio from "./Screens/DatosCambio";
@@ -23,6 +24,8 @@ import MisPublicados from "./Screens/MisPublicados";
 import PerfilOtros from "./Screens/PerfilOtros";
 import ReporteUsuario from "./Screens/ReporteUsuario";
 import RecuperarContraseña from "./Screens/RecuperarContraseña";
+import Categoria from "./Screens/Categoria";
+import DetalleArticulo from "./Screens/DetalleArticulo";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -40,7 +43,6 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
-
         <Stack.Screen
           name="Ingreso"
           component={Ingreso}
@@ -51,7 +53,6 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
-
         <Stack.Screen
           name="Login"
           component={Login}
@@ -82,6 +83,16 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
+        <Stack.Screen
+          name="Galeria2"
+          component={Galeria2}
+          options={{
+            title: "Galería",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />     
         <Stack.Screen
           name="SubirArticulos"
           component={SubirArticulos}
@@ -191,7 +202,27 @@ export default function App() {
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
           }}
-        />       
+        />
+        <Stack.Screen
+          name="Categoria"
+          component={Categoria}
+          options={{
+            title: "Categoría",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
+        <Stack.Screen
+          name="DetalleArticulo"
+          component={DetalleArticulo}
+          options={{
+            title: "Detalle Artículo",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
       </Stack.Navigator>
     );
   }
