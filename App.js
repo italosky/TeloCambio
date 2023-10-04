@@ -34,8 +34,8 @@ export default function App() {
     return (
       <Stack.Navigator>
         <Stack.Screen
-          name="Galeria2"
-          component={Galeria2}
+          name="Home"
+          component={Home}
           options={{
             title: "Bienvenido/a!",
             headerTintColor: "white",
@@ -83,6 +83,16 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
+        <Stack.Screen
+          name="Galeria2"
+          component={Galeria2}
+          options={{
+            title: "Galería",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />     
         <Stack.Screen
           name="SubirArticulos"
           component={SubirArticulos}
