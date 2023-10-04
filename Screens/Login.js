@@ -34,7 +34,7 @@ export default function Login(props) {
       await signInWithEmailAndPassword(auth, email, password);
 
       await AsyncStorage.setItem("isLoggedIn", "true");
-      props.navigation.navigate("Galeria");
+      props.navigation.navigate("Galeria2");
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "El Correo o la Contraseña son Incorrectos.");

@@ -12,6 +12,7 @@ import Home from "./Screens/Home";
 import Ingreso from "./Screens/Ingreso";
 import Registro from "./Screens/Registro";
 import Galeria from "./Screens/Galeria";
+import Galeria2 from "./Screens/Galeria2";
 import SubirArticulos from "./Screens/SubirArticulos";
 import Concretar from "./Screens/Concretar";
 import DatosCambio from "./Screens/DatosCambio";
@@ -82,6 +83,16 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
+        <Stack.Screen
+          name="Galeria2"
+          component={Galeria2}
+          options={{
+            title: "Galería",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />     
         <Stack.Screen
           name="SubirArticulos"
           component={SubirArticulos}
