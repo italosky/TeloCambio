@@ -29,8 +29,8 @@ export default function SubirArticulos() {
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
   const [itemName, setItemName] = useState("");
-  const [itemCondition, setItemCondition] = useState("Nuevo");
-  const [itemTrade, setItemTrade] = useState("Intercambio");
+  const [itemCondition, setItemCondition] = useState("");
+  const [itemTrade, setItemTrade] = useState("");
   const [itemComuna, setItemComuna] = useState("");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -105,22 +105,17 @@ export default function SubirArticulos() {
         async () => {
           setUploading(false);
           try {
+            const normalizedNombre ='('+itemName+')'.toLowerCase().replace(/\s+/g, '');
+            const readableID = `${normalizedNombre}-${userId}`;
             const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const publicacionesRef = collection(db, "Publicaciones");
-            const articulosPublicadosDocRef = doc(
-              publicacionesRef,
-              "ArticulosPublicados"
-            );
-            const userCollectionRef = collection(
-              articulosPublicadosDocRef,
-              userId
-            );
-            await addDoc(userCollectionRef, {
+            const itemDoc = doc(db, 'Publicaciones', readableID);
+            await setDoc(itemDoc, {
               nombreArticulo: itemName,
               estadoArticulo: itemCondition,
               comuna: itemComuna,
               tipo: itemTrade,
               imagenURL: imageURL,
+              userId: userId,
             });
             Alert.alert(
               "¡Felicitaciones!",
@@ -160,20 +155,19 @@ export default function SubirArticulos() {
         </TouchableOpacity>
       </View>
       <View style={styles.containerTextInput}>
-        <Text style={styles.title}>Nombre del Artículo</Text>
         <View style={styles.cajaTexto}>
           <TextInput
             maxLength={30}
-            placeholder="Ej. Bicicleta"
+            placeholder="Escriba el nombre del articulo"
             style={styles.textInput}
             onChangeText={setItemName}
             value={itemName}
           />
         </View>
-        <Text style={styles.title}>Comuna</Text>
+
         <View style={styles.cajaTexto}>
           <TextInput
-            placeholder="Ej: Las Condes"
+            placeholder="Escriba la comuna de publicacion"
             style={styles.textInput}
             onChangeText={setItemComuna}
             value={itemComuna}
@@ -185,7 +179,7 @@ export default function SubirArticulos() {
             selectedValue={itemCondition}
             onValueChange={(itemValue) => setItemCondition(itemValue)}
           >
-            <Picker.Item label="Estado del artículo" value="a" />
+            <Picker.Item label="Estado del artículo" value="" />
             <Picker.Item label="Nuevo" value="Nuevo" />
             <Picker.Item label="Usado" value="Usado" />
           </Picker>
@@ -195,12 +189,9 @@ export default function SubirArticulos() {
             selectedValue={itemTrade}
             onValueChange={(itemValue) => setItemTrade(itemValue)}
           >
-            <Picker.Item
-              label="Intercambio o Gratis"
-              value="Articulo para intercambio o Gratis"
-            />
-            <Picker.Item label="Intercambio" value="Intercambio" />
-            <Picker.Item label="Gratis" value="Gratis" />
+            <Picker.Item label="Motivo de publicación" value=""/>
+            <Picker.Item label="Intercambiar artículo" value="Intercambiar artículo" />
+            <Picker.Item label="Regalar artículo" value="Regalar artículo" />
           </Picker>
         </View>
         <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
@@ -244,17 +235,17 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 25,
     backgroundColor: "#cccccc50",
+    marginVertical: 10,
     borderRadius: 30,
-    marginVertical: 7,
-    width: 250,
+    width: 300,
   },
   cajaPicker: {
-    paddingVertical: 15,
     paddingHorizontal: 25,
     backgroundColor: "#cccccc50",
     borderRadius: 30,
-    marginVertical: 7,
-    width: 295,
+    marginVertical: 10,
+    width: 300,
+    height: 60,
   },
   textInput: {
     paddingHorizontal: 15,
@@ -300,7 +291,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    width: "80%", // O el porcentaje o ancho fijo que desees.
+    width: "80%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
