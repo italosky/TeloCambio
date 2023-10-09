@@ -105,19 +105,11 @@ export default function SubirArticulos() {
         async () => {
           setUploading(false);
           try {
-            const normalizedNombre = itemName.toLowerCase().replace(/\s+/g, '');
+            const normalizedNombre ='('+itemName+')'.toLowerCase().replace(/\s+/g, '');
             const readableID = `${normalizedNombre}-${userId}`;
             const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const publicacionesRef = collection(db, "Publicaciones");
-            const articulosPublicadosDocRef = doc(
-              publicacionesRef,
-              "ArticulosPublicados"
-            );
-            const userCollectionRef = collection(
-              articulosPublicadosDocRef,
-              userId
-            );
-            await addDoc(userCollectionRef, {
+            const itemDoc = doc(db, 'Publicaciones', readableID);
+            await setDoc(itemDoc, {
               nombreArticulo: itemName,
               estadoArticulo: itemCondition,
               comuna: itemComuna,
@@ -197,9 +189,9 @@ export default function SubirArticulos() {
             selectedValue={itemTrade}
             onValueChange={(itemValue) => setItemTrade(itemValue)}
           >
-            <Picker.Item label="Intercambio o Gratis" value=""/>
-            <Picker.Item label="Intercambio" value="Intercambio" />
-            <Picker.Item label="Gratis" value="Gratis" />
+            <Picker.Item label="Motivo de publicación" value=""/>
+            <Picker.Item label="Intercambiar artículo" value="Intercambiar artículo" />
+            <Picker.Item label="Regalar artículo" value="Regalar artículo" />
           </Picker>
         </View>
         <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
