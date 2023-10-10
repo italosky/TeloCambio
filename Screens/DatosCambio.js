@@ -1,4 +1,4 @@
-import React, { Component, useState  } from "react";
+import React, { Component, useState } from "react";
 import {
   Text,
   StyleSheet,
@@ -11,35 +11,31 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import * as Clipboard from 'expo-clipboard';
-
-function copyToClipboard(text, type) {
-  Clipboard.setString(text);
-  let message = "";
-  if (type === "correo") {
-    message = "Correo copiado al portapapeles.";
-  } else if (type === "telefono") {
-    message = "Teléfono copiado al portapapeles.";
-  }
-  Alert.alert(message);
-}
 
 export default function Registro() {
+  const navigation = useNavigation();
+  const backGaleria = () => {
+    navigation.navigate("Galeria2");
+  };
+
   return (
     <View style={styles.container}>
-      <Image style={styles.tinyLogo} source={require('../assets/yo.png')} />
+      <Image
+        style={styles.tinyLogo}
+        source={require("../assets/FotoPerfil.com.png")}
+      />
       <View style={styles.textContainer}>
-        <Text style={styles.text}>Juan Pérez</Text>
+        <Text style={styles.text}>Nombre del pj</Text>
       </View>
-      <TouchableOpacity onPress={() => copyToClipboard("juan.perez@example.com", "correo")}>
-        <View style={styles.textContainer}>
-          <Text style={styles.text}>juan.perez@example.com</Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => copyToClipboard("+52 123 456 7890", "telefono")}>
-        <View style={styles.textContainer}>
-          <Text style={styles.text}>+52 123 456 7890</Text>
-        </View>
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>Correodelpj@gmail.com</Text>
+      </View>
+
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>Numero del pj</Text>
+      </View>
+      <TouchableOpacity style={styles.cajaBotonP} onPress={backGaleria}>
+        <Text style={styles.textoBotonP}>Volver a Galeria</Text>
       </TouchableOpacity>
     </View>
   );
@@ -47,8 +43,8 @@ export default function Registro() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   tinyLogo: {
     width: 150,
@@ -57,17 +53,32 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     backgroundColor: "#8AAD34",
-    borderWidth: 1,  
-    borderColor: 'gray',  
+    borderWidth: 1,
+    borderColor: "gray",
     borderRadius: 5,
-    width: 280,
-    padding: 20,
+    width: 250,
+    padding: 9,
     margin: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   text: {
     fontSize: 18,
-    color: 'white'
-  }
+    color: "white",
+    fontWeight: "400",
+  },
+  cajaBotonP: {
+    backgroundColor: "#63A355",
+    borderRadius: 30,
+    paddingVertical: 15,
+    width: 150,
+    marginTop: 30,
+    alignItems: "center",
+  },
+  textoBotonP: {
+    textAlign: "center",
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "500",
+  },
 });

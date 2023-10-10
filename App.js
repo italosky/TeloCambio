@@ -92,7 +92,7 @@ export default function App() {
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
           }}
-        />     
+        />
         <Stack.Screen
           name="SubirArticulos"
           component={SubirArticulos}
