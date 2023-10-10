@@ -3,11 +3,9 @@ import {
   StyleSheet,
   Text,
   View,
-  Image, 
+  Image,
   TouchableOpacity,
-  ScrollView,
   Platform,
-  SafeAreaView,
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
@@ -15,8 +13,8 @@ import { FlatList } from "react-native-gesture-handler";
 import { Drawer, AnimatedFAB } from "react-native-paper";
 import { auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 export default function Galeria2() {
   const [dataSource, setDataSource] = useState([]);
@@ -32,15 +30,15 @@ export default function Galeria2() {
     try {
       setLoading(true);
       const allItemsArray = [];
-      const articulosPublicadosRef = collection(db, 'Publicaciones');
+      const articulosPublicadosRef = collection(db, "Publicaciones");
       const usersSnapshot = await getDocs(articulosPublicadosRef);
       usersSnapshot.forEach((postDoc) => {
         const postData = postDoc.data();
         allItemsArray.push({
           id: postDoc.id,
-          imagenURL: postData.imagenURL, 
-          imagenURL2: postData.imagenURL2, 
-          imagenURL3: postData.imagenURL3, 
+          imagenURL: postData.imagenURL,
+          imagenURL2: postData.imagenURL2,
+          imagenURL3: postData.imagenURL3,
           nombreArticulo: postData.nombreArticulo,
           tipo: postData.tipo,
           estadoArticulo: postData.estadoArticulo,
@@ -53,15 +51,16 @@ export default function Galeria2() {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
-  useEffect(() => {   //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
-    const unsubscribe = navigation.addListener('focus', () => {
+  useEffect(() => {
+    //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
+    const unsubscribe = navigation.addListener("focus", () => {
       fetchPosts();
     });
     fetchPosts();
     return unsubscribe;
-  }, [navigation]); 
+  }, [navigation]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -127,19 +126,19 @@ export default function Galeria2() {
       renderNavigationView={navigationView}
     >
       <View style={styles.container}>
-      {loading ? (
-        <Text>Cargando...</Text>
-      ) : (
-        <FlatList
-          data={dataSource}  
-          renderItem={renderItem}
-          numColumns={numColumns}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.gridContainer}
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-        />
-      )}
+        {loading ? (
+          <Text>Cargando...</Text>
+        ) : (
+          <FlatList
+            data={dataSource}
+            renderItem={renderItem}
+            numColumns={numColumns}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.gridContainer}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+          />
+        )}
       </View>
       <AnimatedFAB
         icon="plus"
@@ -154,7 +153,7 @@ export default function Galeria2() {
       />
     </DrawerLayout>
   );
-   
+
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       <View>
@@ -193,20 +192,16 @@ export default function Galeria2() {
     <View style={styles.itemContainer}>
       <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
       <View style={styles.itemOverlay}>
-        <Text style={styles.itemName}>{item.nombreArticulo || ''}</Text>
-        <Text style={styles.itemInfo}>{item.estadoArticulo || ''}</Text>
-        <Text style={styles.itemInfo}>{item.comuna || ''}</Text>
-        {item.tipo === 'Intercambiar artículo' && (
-          <TouchableOpacity
-            style={[styles.teLoCambioButton]}
-          >
+        <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
+        <Text style={styles.itemInfo}>{item.estadoArticulo || ""}</Text>
+        <Text style={styles.itemInfo}>{item.comuna || ""}</Text>
+        {item.tipo === "Intercambiar artículo" && (
+          <TouchableOpacity style={[styles.teLoCambioButton]}>
             <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
           </TouchableOpacity>
         )}
-        {item.tipo === 'Regalar artículo' && (
-          <TouchableOpacity
-            style={[styles.teLoRegaloButton]}
-          >
+        {item.tipo === "Regalar artículo" && (
+          <TouchableOpacity style={[styles.teLoRegaloButton]}>
             <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
           </TouchableOpacity>
         )}
@@ -234,7 +229,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
     borderRadius: 2,
-    alignItems: 'center',
+    alignItems: "center",
   },
   drawerText: {
     fontSize: 18,
@@ -258,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#8AAD34",
   },
   logoutButton: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
   },
   logoutImage: {
@@ -270,57 +265,57 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: "column",
     margin: 2,
-    position: 'relative', 
+    position: "relative",
   },
   imageThumbnail: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     height: 200,
-    width: '100%', 
-    resizeMode: 'cover',
+    width: "100%",
+    resizeMode: "cover",
   },
   itemOverlay: {
-    position: 'absolute', 
-    bottom: 0, 
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    width: '100%', 
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    width: "100%",
     padding: 10,
   },
   itemName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFF', 
+    fontWeight: "bold",
+    color: "#FFF",
   },
   itemInfo: {
     fontSize: 14,
-    color: '#FFF', 
+    color: "#FFF",
   },
   teLoCambioButton: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginTop: 5,
-    backgroundColor: '#63A355',
+    backgroundColor: "#63A355",
   },
   teLoCambioButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   teLoRegaloButton: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginTop: 5,
-    backgroundColor: '#efb810',
+    backgroundColor: "#efb810",
   },
   teLoRegaloButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });

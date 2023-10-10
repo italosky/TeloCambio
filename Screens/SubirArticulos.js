@@ -149,7 +149,7 @@ export default function SubirArticulos() {
     }
   }, [itemRegion]);
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
         <View style={styles.containerImage}>
           <View style={styles.imagesContainer}>
@@ -280,15 +280,7 @@ export default function SubirArticulos() {
               value=""
               enabled={isEnabled}
             />
-            <Picker.Item label="Usado - Aceptable" value="Usado - Aceptable" />
-            <Picker.Item
-              label="Usado - Buen Estado"
-              value="Usado - Buen Estado"
-            />
-            <Picker.Item
-              label="Usado - Como Nuevo"
-              value="Usado - Como Nuevo"
-            />
+            <Picker.Item label="Usado" value="Usado" />
             <Picker.Item label="Nuevo" value="Nuevo" />
           </Picker>
         </View>
@@ -302,8 +294,6 @@ export default function SubirArticulos() {
               value=""
               enabled={isEnabled}
             />
-            <Picker.Item label="Intercambio" value="Intercambio" />
-            <Picker.Item label="Gratis" value="Gratis" />
             <Picker.Item
               label="Intercambiar artículo"
               value="Intercambiar artículo"
@@ -331,7 +321,7 @@ export default function SubirArticulos() {
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
@@ -451,7 +441,7 @@ const styles = StyleSheet.create({
   cajaPicker: {
     backgroundColor: "#cccccc50",
     borderRadius: 30,
-    marginVertical: 7,
+    marginVertical: 9,
     width: 295,
   },
 });
