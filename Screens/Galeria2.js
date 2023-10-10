@@ -38,7 +38,9 @@ export default function Home() {
         const postData = postDoc.data();
         allItemsArray.push({
           id: postDoc.id,
-          src: postData.imagenURL,
+          imagenURL: postData.imagenURL, 
+          imagenURL2: postData.imagenURL2, 
+          imagenURL3: postData.imagenURL3, 
           nombreArticulo: postData.nombreArticulo,
           tipo: postData.tipo,
           estadoArticulo: postData.estadoArticulo,
@@ -51,11 +53,15 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
-  useEffect(() => {
+  useEffect(() => {   //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchPosts();
+    });
     fetchPosts();
-  }, []);
+    return unsubscribe;
+  }, [navigation]); 
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -185,7 +191,7 @@ export default function Home() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Image style={styles.imageThumbnail} source={{ uri: item.src }} />
+      <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
       <View style={styles.itemOverlay}>
         <Text style={styles.itemName}>{item.nombreArticulo || ''}</Text>
         <Text style={styles.itemInfo}>{item.tipo || ''}</Text> 
@@ -193,10 +199,6 @@ export default function Home() {
       </View>
     </View>
   );
-  
-  
-
-  // Resto de tus componentes y funciones
 
   return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
 }
