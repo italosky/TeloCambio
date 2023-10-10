@@ -21,7 +21,6 @@ import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
 import Icon from 'react-native-vector-icons/FontAwesome';
-
 export default function SubirArticulos() {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([]);
@@ -33,14 +32,10 @@ export default function SubirArticulos() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState("");
   const [progress, setProgress] = useState(0);
-
   const removeImage = (indexToRemove) => {
     setSelectedImages(selectedImages.filter((_, index) => index !== indexToRemove));
   };
-
   const [isEnabled, setIsEnabled] = useState(false);
-
-
   useEffect(() => {
     (async () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -51,7 +46,6 @@ export default function SubirArticulos() {
       if (user) setUserId(user.uid);
     })();
   }, []);
-
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -61,9 +55,7 @@ export default function SubirArticulos() {
       selectedImages.length < 3 ? setSelectedImages([...selectedImages, result.assets[0].uri]) : alert('Debes seleccionar 3 imagenes');
     }
   };
-
   
-
   const SubirArticulo = async () => {
     try {
       if (selectedImages.length < 3) {
@@ -116,7 +108,6 @@ export default function SubirArticulos() {
       alert("Error al subir el artículo. Por favor intenta de nuevo.");
     }
   };
-
   useEffect(() => {
     if (itemRegion) {
       fetch(`http://70.37.82.88:8020/api/communes?region=${itemRegion}`)
@@ -129,9 +120,8 @@ export default function SubirArticulos() {
         });
     }
   }, [itemRegion]);
-
   return (
-    <ScrollView>
+    
     <View style={styles.container}>
       <View style={styles.containerImage}>
         <View style={styles.imagesContainer}>
@@ -164,7 +154,6 @@ export default function SubirArticulos() {
           value={itemName}
         />
       </View>
-
       <View style={styles.cajaTexto}>
         <Picker
           selectedValue={itemRegion}
@@ -189,7 +178,6 @@ export default function SubirArticulos() {
           <Picker.Item label="Región de Magallanes y de la Antártica Chilena" value="Región de Magallanes y de la Antártica Chilena" />
         </Picker>
       </View>
-
       <View style={styles.cajaTexto}>
         <Picker
           selectedValue={itemComuna.id}
@@ -218,13 +206,14 @@ export default function SubirArticulos() {
           <Picker.Item label="Nuevo" value="Nuevo" />
         </Picker>
       </View>
-
       <View style={styles.cajaTexto}>
         <Picker
           selectedValue={itemTrade}
           onValueChange={(itemValue) => setItemTrade(itemValue)}
         >
           <Picker.Item label="Motivo de Publicación" value="" enabled={isEnabled}/>
+          <Picker.Item label="Intercambio" value="Intercambio" />
+          <Picker.Item label="Gratis" value="Gratis" />
           <Picker.Item label="Intercambiar artículo" value="Intercambiar artículo" />
           <Picker.Item label="Regalar artículo" value="Regalar artículo" />
         </Picker>
@@ -243,67 +232,9 @@ export default function SubirArticulos() {
           </View>
         </Modal>
       )}
-      <View style={styles.containerImage}>
-        <Card>
-          {image && <Image source={{ uri: image }} style={styles.image} />}
-        </Card>
-
-        <TouchableOpacity style={styles.cajaBoton} onPress={pickImage}>
-          <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.containerTextInput}>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            maxLength={30}
-            placeholder="Escriba el nombre del articulo"
-            style={styles.textInput}
-            onChangeText={setItemName}
-            value={itemName}
-          />
-        </View>
-
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Escriba la comuna de publicacion"
-            style={styles.textInput}
-            onChangeText={setItemComuna}
-            value={itemComuna}
-          />
-        </View>
-
-        <View style={styles.cajaPicker}>
-          <Picker
-            selectedValue={itemCondition}
-            onValueChange={(itemValue) => setItemCondition(itemValue)}
-          >
-            <Picker.Item label="Estado del artículo" value="" />
-            <Picker.Item label="Nuevo" value="Nuevo" />
-            <Picker.Item label="Usado" value="Usado" />
-          </Picker>
-        </View>
-        <View style={styles.cajaPicker}>
-          <Picker
-            selectedValue={itemTrade}
-            onValueChange={(itemValue) => setItemTrade(itemValue)}
-          >
-            <Picker.Item label="Motivo de publicación" value="" />
-            <Picker.Item
-              label="Intercambiar artículo"
-              value="Intercambiar artículo"
-            />
-            <Picker.Item label="Regalar artículo" value="Regalar artículo" />
-          </Picker>
-        </View>
-        <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
-          <Text style={styles.textoBotonP}>Publicar</Text>
-        </TouchableOpacity>
-      </View>
     </View>
-    </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
