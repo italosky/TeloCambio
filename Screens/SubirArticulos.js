@@ -225,8 +225,8 @@ export default function SubirArticulos() {
           onValueChange={(itemValue) => setItemTrade(itemValue)}
         >
           <Picker.Item label="Motivo de Publicación" value="" enabled={isEnabled}/>
-          <Picker.Item label="Intercambio" value="Intercambio" />
-          <Picker.Item label="Gratis" value="Gratis" />
+          <Picker.Item label="Intercambiar artículo" value="Intercambiar artículo" />
+          <Picker.Item label="Regalar artículo" value="Regalar artículo" />
         </Picker>
       </View>
 
