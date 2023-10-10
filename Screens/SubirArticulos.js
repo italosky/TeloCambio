@@ -17,14 +17,10 @@ import { Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { auth, db, storage } from "../firebaseConfig";
-import { doc, setDoc, addDoc, collection } from "firebase/firestore";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
+import { doc, setDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function SubirArticulos() {
   const navigation = useNavigation();
@@ -35,8 +31,12 @@ export default function SubirArticulos() {
   const [itemRegion, setItemRegion] = useState([]);
   const [itemComuna, setItemComuna] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [userId, setUserId] = useState("");
+  const [progress, setProgress] = useState(0);
+
+  const removeImage = (indexToRemove) => {
+    setSelectedImages(selectedImages.filter((_, index) => index !== indexToRemove));
+  };
 
   const [isEnabled, setIsEnabled] = useState(false);
 
@@ -48,27 +48,17 @@ export default function SubirArticulos() {
         alert('Permiso necesario para acceder a la cámara y a la galería.');
       }
       const user = auth.currentUser;
-      if (user) {
-        const uid = user.uid;
-        setUserId(uid);
-      }
+      if (user) setUserId(user.uid);
     })();
   }, []);
 
   const pickImage = async () => {
-    if (selectedImages.length < 3) {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 4],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        setSelectedImages([...selectedImages, result.uri]);
-      }
-    } else {
-      alert('Ya has seleccionado el número máximo de imágenes (3).');
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, aspect: [4, 4], quality: 1,
+    });
+    if (!result.canceled) {
+      selectedImages.length < 3 ? setSelectedImages([...selectedImages, result.assets[0].uri]) : alert('Debes seleccionar 3 imagenes');
     }
   };
 
@@ -76,69 +66,52 @@ export default function SubirArticulos() {
 
   const SubirArticulo = async () => {
     try {
-      if (
-        !selectedImages ||
-        !itemName ||
-        !itemCondition ||
-        !itemRegion ||
-        !itemComuna ||
-        !itemTrade ||
-        !userId
-      ) {
-        alert("Todos los campos son obligatorios y debes estar autenticado");
+      if (selectedImages.length < 3) {
+        Alert.alert("Atención!","Debes seleccionar 3 imágenes minimo");
         return;
       }
-      const uploadUri = selectedImages;
-      let filename = uploadUri.substring(uploadUri.lastIndexOf("/") + 1);
-      const extension = filename.split(".").pop();
-      const name = filename.split(".").slice(0, -1).join(".");
-      filename = name + Date.now() + "." + extension;
-      const response = await fetch(uploadUri);
-      const blob = await response.blob();
-      const storageRef = ref(storage, `Imagenes de Articulos/${filename}`);
-      const uploadTask = uploadBytesResumable(storageRef, blob);
+      if (!itemName || !itemCondition || !itemComuna || !itemTrade || !userId || selectedImages.length < 3) {
+        Alert.alert("Todos los campos son obligatorios");
+        return;
+      }
       setUploading(true);
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = (
-            (snapshot.bytesTransferred / snapshot.totalBytes) *
-            100
-          ).toFixed(1);
-          setProgress(progress);
-        },
-        (error) => {
-          setUploading(false);
-          alert("Error al subir archivo: " + error.message);
-        },
-        async () => {
-          setUploading(false);
-          try {
-            const normalizedNombre ='('+itemName+')'.toLowerCase().replace(/\s+/g, '');
-            const readableID = `${normalizedNombre}-${userId}`;
-            const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const itemDoc = doc(db, 'Publicaciones', readableID);
-            await setDoc(itemDoc, {
-              nombreArticulo: itemName,
-              estadoArticulo: itemCondition,
-              region: itemRegion,
-              comuna: itemComuna,
-              tipo: itemTrade,
-              imagenURL: imageURL,
-              userId: userId,
-            });
-            Alert.alert(
-              "¡Felicitaciones!",
-              "Publicación subida con éxito.",
-              [{ text: "OK", onPress: () => navigation.navigate("Galeria2") }],
-              { cancelable: false }
-            );
-          } catch (error) {
-            alert("Error: " + error.message);
-          }
-        }
-      );
+      const urls = await Promise.all(selectedImages.map(async (imageUri, index) => {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        const filename = `imagen${index + 1}-${Date.now()}`;
+        const storageRef = ref(storage, `Imagenes de Articulos/${filename}`);
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+        return new Promise((resolve, reject) => {
+          uploadTask.on("state_changed", 
+            snapshot => {
+              setProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            }, 
+            error => reject(error), 
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL);
+            }
+          );
+        });
+      }));
+      const [url1, url2, url3] = urls;
+      const normalizedNombre ='('+itemName+')'.toLowerCase().replace(/\s+/g, '');
+      const readableID = `${normalizedNombre}-${userId}`;
+      const itemDoc = doc(db, 'Publicaciones', readableID);
+      await setDoc(itemDoc, {
+        nombreArticulo: itemName,
+        estadoArticulo: itemCondition,
+        comuna: itemComuna,
+        tipo: itemTrade,
+        imagenURL: url1,
+        imagenURL2: url2,
+        imagenURL3: url3,
+        userId: userId,
+      });
+      setUploading(false);
+      Alert.alert("¡Felicitaciones Telocambista!", "Publicación subida con éxito.", [{ text: "OK", onPress: () => navigation.navigate("Galeria2") }], { cancelable: false });
     } catch (error) {
+      setUploading(false);
       console.error(error);
       alert("Error al subir el artículo. Por favor intenta de nuevo.");
     }
@@ -161,10 +134,22 @@ export default function SubirArticulos() {
     
     <View style={styles.container}>
       <View style={styles.containerImage}>
-        <Card>
-          {selectedImages && selectedImages.length > 3 && <Image source={{ uri: selectedImages[0] }} style={styles.image} />}
-        </Card>
-          
+        <View style={styles.imagesContainer}>
+          {selectedImages.map((selectedImages, index) => (
+            <View style={styles.imageWrapper} key={index}>
+              <Card style={styles.imageCard}>
+                <Image source={{ uri: selectedImages }} style={styles.image} />
+              </Card>
+              <TouchableOpacity 
+                style={styles.deleteIconContainer}
+                onPress={() => removeImage(index)}>
+                <View style={styles.circle}>
+                  <Icon name="trash" size={20} color="white" />
+                </View>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>  
         <TouchableOpacity style={styles.cajaBoton} onPress={pickImage}>
           <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
         </TouchableOpacity>
@@ -350,5 +335,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  imagesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: 15, 
+  },
+  image: {
+    width: 100,
+    height: 100,
+    margin: 1,
+  },  
+  imageWrapper: {
+    position: 'relative',
+    margin: 3,
+  },
+  deleteIconContainer: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+  },
+  circle: {
+    backgroundColor: 'rgba(255, 100, 100, 0.8)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
   },
 });
