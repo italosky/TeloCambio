@@ -279,15 +279,7 @@ export default function SubirArticulos() {
               value=""
               enabled={isEnabled}
             />
-            <Picker.Item label="Usado - Aceptable" value="Usado - Aceptable" />
-            <Picker.Item
-              label="Usado - Buen Estado"
-              value="Usado - Buen Estado"
-            />
-            <Picker.Item
-              label="Usado - Como Nuevo"
-              value="Usado - Como Nuevo"
-            />
+            <Picker.Item label="Usado " value="Usado " />
             <Picker.Item label="Nuevo" value="Nuevo" />
           </Picker>
         </View>
@@ -301,8 +293,6 @@ export default function SubirArticulos() {
               value=""
               enabled={isEnabled}
             />
-            <Picker.Item label="Intercambio" value="Intercambio" />
-            <Picker.Item label="Gratis" value="Gratis" />
             <Picker.Item
               label="Intercambiar artículo"
               value="Intercambiar artículo"
@@ -330,21 +320,22 @@ export default function SubirArticulos() {
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
+    paddingHorizontal: 15,
   },
   containerImage: {
     alignItems: "center",
-    paddingVertical: 1,
   },
+
   cajaBoton: {
     backgroundColor: "#ffffff",
     borderRadius: 30,
-    paddingVertical: 13,
-    width: 270,
-    marginTop: 20,
+    paddingVertical: 15,
+    width: 250,
+    marginTop: 15,
     borderWidth: 1,
     borderColor: "#8AAD34",
   },
@@ -353,14 +344,12 @@ const styles = StyleSheet.create({
     color: "#8AAD34",
   },
   cajaTexto: {
-    paddingVertical: 5,
+    paddingVertical: 15,
     paddingHorizontal: 25,
     backgroundColor: "#cccccc50",
+    marginVertical: 10,
     borderRadius: 30,
-    height: 45,
-    width: 270,
-    justifyContent: "center",
-    marginTop: 30,
+    width: 300,
   },
   textInput: {
     paddingHorizontal: 15,
@@ -372,14 +361,13 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
     textAlign: "center",
-    marginTop: 7,
   },
   cajaBotonP: {
     backgroundColor: "#8AAD34",
     borderRadius: 30,
     paddingVertical: 15,
     width: 150,
-    marginTop: 35,
+    marginTop: 30,
     alignItems: "center",
   },
   textoBotonP: {
@@ -389,8 +377,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   image: {
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
     paddingVertical: 15,
     paddingHorizontal: 15,
     margin: 15,
