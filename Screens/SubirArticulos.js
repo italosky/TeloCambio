@@ -131,7 +131,7 @@ export default function SubirArticulos() {
   }, [itemRegion]);
 
   return (
-    
+    <ScrollView>
     <View style={styles.container}>
       <View style={styles.containerImage}>
         <View style={styles.imagesContainer}>
@@ -243,7 +243,64 @@ export default function SubirArticulos() {
           </View>
         </Modal>
       )}
+      <View style={styles.containerImage}>
+        <Card>
+          {image && <Image source={{ uri: image }} style={styles.image} />}
+        </Card>
+
+        <TouchableOpacity style={styles.cajaBoton} onPress={pickImage}>
+          <Text style={styles.textoBoton}>Seleccionar Imagen</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.containerTextInput}>
+        <View style={styles.cajaTexto}>
+          <TextInput
+            maxLength={30}
+            placeholder="Escriba el nombre del articulo"
+            style={styles.textInput}
+            onChangeText={setItemName}
+            value={itemName}
+          />
+        </View>
+
+        <View style={styles.cajaTexto}>
+          <TextInput
+            placeholder="Escriba la comuna de publicacion"
+            style={styles.textInput}
+            onChangeText={setItemComuna}
+            value={itemComuna}
+          />
+        </View>
+
+        <View style={styles.cajaPicker}>
+          <Picker
+            selectedValue={itemCondition}
+            onValueChange={(itemValue) => setItemCondition(itemValue)}
+          >
+            <Picker.Item label="Estado del artículo" value="" />
+            <Picker.Item label="Nuevo" value="Nuevo" />
+            <Picker.Item label="Usado" value="Usado" />
+          </Picker>
+        </View>
+        <View style={styles.cajaPicker}>
+          <Picker
+            selectedValue={itemTrade}
+            onValueChange={(itemValue) => setItemTrade(itemValue)}
+          >
+            <Picker.Item label="Motivo de publicación" value="" />
+            <Picker.Item
+              label="Intercambiar artículo"
+              value="Intercambiar artículo"
+            />
+            <Picker.Item label="Regalar artículo" value="Regalar artículo" />
+          </Picker>
+        </View>
+        <TouchableOpacity style={styles.cajaBotonP} onPress={SubirArticulo}>
+          <Text style={styles.textoBotonP}>Publicar</Text>
+        </TouchableOpacity>
+      </View>
     </View>
+    </ScrollView>
   );
 }
 
