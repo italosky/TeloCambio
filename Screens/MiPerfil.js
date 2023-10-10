@@ -23,7 +23,7 @@ export default function Registro() {
     navigation.navigate("MiPerfil");
   };
   const goGaleria = () => {
-    navigation.navigate("Galeria");
+    navigation.navigate("Galeria2");
   };
   const goMisPublicados = () => {
     navigation.navigate("MisPublicados");
