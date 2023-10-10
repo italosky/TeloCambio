@@ -148,7 +148,7 @@ export default function SubirArticulos() {
     }
   }, [itemRegion]);
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
         <View style={styles.containerImage}>
           <View style={styles.imagesContainer}>
@@ -279,7 +279,7 @@ export default function SubirArticulos() {
               value=""
               enabled={isEnabled}
             />
-            <Picker.Item label="Usado " value="Usado " />
+            <Picker.Item label="Usado" value="Usado" />
             <Picker.Item label="Nuevo" value="Nuevo" />
           </Picker>
         </View>
@@ -324,18 +324,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
-    paddingHorizontal: 15,
   },
   containerImage: {
     alignItems: "center",
+    paddingVertical: 1,
   },
-
   cajaBoton: {
     backgroundColor: "#ffffff",
     borderRadius: 30,
-    paddingVertical: 15,
-    width: 250,
-    marginTop: 15,
+    paddingVertical: 13,
+    width: 270,
+    marginTop: 20,
     borderWidth: 1,
     borderColor: "#8AAD34",
   },
@@ -344,12 +343,14 @@ const styles = StyleSheet.create({
     color: "#8AAD34",
   },
   cajaTexto: {
-    paddingVertical: 15,
+    paddingVertical: 5,
     paddingHorizontal: 25,
     backgroundColor: "#cccccc50",
-    marginVertical: 10,
     borderRadius: 30,
-    width: 300,
+    height: 45,
+    width: 270,
+    justifyContent: "center",
+    marginTop: 30,
   },
   textInput: {
     paddingHorizontal: 15,
@@ -361,13 +362,14 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
     textAlign: "center",
+    marginTop: 7,
   },
   cajaBotonP: {
     backgroundColor: "#8AAD34",
     borderRadius: 30,
     paddingVertical: 15,
     width: 150,
-    marginTop: 30,
+    marginTop: 35,
     alignItems: "center",
   },
   textoBotonP: {
@@ -377,8 +379,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   image: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
     paddingVertical: 15,
     paddingHorizontal: 15,
     margin: 15,
@@ -438,7 +440,7 @@ const styles = StyleSheet.create({
   cajaPicker: {
     backgroundColor: "#cccccc50",
     borderRadius: 30,
-    marginVertical: 7,
+    marginVertical: 9,
     width: 295,
   },
 });
