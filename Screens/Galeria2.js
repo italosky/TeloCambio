@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
-export default function Home() {
+export default function Galeria2() {
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isExtended, setIsExtended] = useState(true);
@@ -122,7 +122,7 @@ export default function Home() {
   const renderDrawerAndroid = () => (
     <DrawerLayout
       ref={drawer}
-      drawerWidth={300}
+      drawerWidth={200}
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
@@ -194,8 +194,22 @@ export default function Home() {
       <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
       <View style={styles.itemOverlay}>
         <Text style={styles.itemName}>{item.nombreArticulo || ''}</Text>
-        <Text style={styles.itemInfo}>{item.tipo || ''}</Text> 
+        <Text style={styles.itemInfo}>{item.estadoArticulo || ''}</Text>
         <Text style={styles.itemInfo}>{item.comuna || ''}</Text>
+        {item.tipo === 'Intercambiar artículo' && (
+          <TouchableOpacity
+            style={[styles.teLoCambioButton]}
+          >
+            <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+          </TouchableOpacity>
+        )}
+        {item.tipo === 'Regalar artículo' && (
+          <TouchableOpacity
+            style={[styles.teLoRegaloButton]}
+          >
+            <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -210,19 +224,20 @@ const styles = StyleSheet.create({
   },
   containerDrawer: {
     flex: 1,
-    padding: 16,
+    padding: 5,
   },
   navigationContainer: {
     backgroundColor: "#ecf0f1",
   },
   drawerItem: {
     backgroundColor: "#8AAD34",
-    margin: 10,
-    borderRadius: 30,
+    marginTop: 5,
+    marginBottom: 5,
+    borderRadius: 2,
+    alignItems: 'center',
   },
   drawerText: {
     fontSize: 18,
-    fontWeight: "500",
     color: "#ffffff",
     padding: 12,
   },
@@ -233,8 +248,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   logo: {
-    width: 260,
-    height: 47,
+    width: 255,
+    height: 55,
   },
   fabStyle: {
     bottom: 40,
@@ -247,8 +262,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logoutImage: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
   },
   gridContainer: {
     padding: 0,
@@ -281,5 +296,31 @@ const styles = StyleSheet.create({
   itemInfo: {
     fontSize: 14,
     color: '#FFF', 
+  },
+  teLoCambioButton: {
+    alignSelf: 'flex-end',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    backgroundColor: '#63A355',
+  },
+  teLoCambioButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  teLoRegaloButton: {
+    alignSelf: 'flex-end',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    backgroundColor: '#efb810',
+  },
+  teLoRegaloButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
