@@ -28,14 +28,6 @@ export default function Galeria2() {
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
 
-  useEffect(() => {
-    if (drawer.current) {
-      drawer.current.openDrawer();
-    }
-    
-    fetchPosts();
-  }, []);
-
   const fetchPosts = async () => {
     try {
       setLoading(true);
@@ -46,7 +38,9 @@ export default function Galeria2() {
         const postData = postDoc.data();
         allItemsArray.push({
           id: postDoc.id,
-          src: postData.imagenURL,
+          imagenURL: postData.imagenURL, 
+          imagenURL2: postData.imagenURL2, 
+          imagenURL3: postData.imagenURL3, 
           nombreArticulo: postData.nombreArticulo,
           tipo: postData.tipo,
           estadoArticulo: postData.estadoArticulo,
@@ -59,7 +53,15 @@ export default function Galeria2() {
     } finally {
       setLoading(false);
     }
-  };
+  };  
+
+  useEffect(() => {   //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchPosts();
+    });
+    fetchPosts();
+    return unsubscribe;
+  }, [navigation]); 
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -72,7 +74,6 @@ export default function Galeria2() {
       Math.floor(nativeEvent?.contentOffset?.y) ?? 0;
     setIsExtended(currentScrollPosition <= 0);
   };
-
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => null,
@@ -190,7 +191,7 @@ export default function Galeria2() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Image style={styles.imageThumbnail} source={{ uri: item.src }} />
+      <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
       <View style={styles.itemOverlay}>
         <Text style={styles.itemName}>{item.nombreArticulo || ''}</Text>
         <Text style={styles.itemInfo}>{item.estadoArticulo || ''}</Text>
