@@ -105,10 +105,11 @@ export default function SubirArticulos() {
         async () => {
           setUploading(false);
           try {
-            const normalizedNombre ='('+itemName+')'.toLowerCase().replace(/\s+/g, '');
+            const normalizedNombre =
+              "(" + itemName + ")".toLowerCase().replace(/\s+/g, "");
             const readableID = `${normalizedNombre}-${userId}`;
             const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const itemDoc = doc(db, 'Publicaciones', readableID);
+            const itemDoc = doc(db, "Publicaciones", readableID);
             await setDoc(itemDoc, {
               nombreArticulo: itemName,
               estadoArticulo: itemCondition,
@@ -189,8 +190,11 @@ export default function SubirArticulos() {
             selectedValue={itemTrade}
             onValueChange={(itemValue) => setItemTrade(itemValue)}
           >
-            <Picker.Item label="Motivo de publicación" value=""/>
-            <Picker.Item label="Intercambiar artículo" value="Intercambiar artículo" />
+            <Picker.Item label="Motivo de publicación" value="" />
+            <Picker.Item
+              label="Intercambiar artículo"
+              value="Intercambiar artículo"
+            />
             <Picker.Item label="Regalar artículo" value="Regalar artículo" />
           </Picker>
         </View>
@@ -232,20 +236,19 @@ const styles = StyleSheet.create({
     color: "#8AAD34",
   },
   cajaTexto: {
-    paddingVertical: 15,
-    paddingHorizontal: 25,
+    paddingVertical: 18,
     backgroundColor: "#cccccc50",
-    marginVertical: 10,
+    marginVertical: 7,
     borderRadius: 30,
-    width: 300,
+    width: 250,
   },
   cajaPicker: {
     paddingHorizontal: 25,
+    paddingVertical: 15,
     backgroundColor: "#cccccc50",
     borderRadius: 30,
-    marginVertical: 10,
-    width: 300,
-    height: 60,
+    marginVertical: 7,
+    width: 295,
   },
   textInput: {
     paddingHorizontal: 15,
