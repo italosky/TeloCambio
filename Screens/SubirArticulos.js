@@ -71,7 +71,7 @@ export default function SubirArticulos() {
         : alert("Debes seleccionar 3 imagenes");
     }
   };
-  
+
   const SubirArticulo = async () => {
     try {
       if (selectedImages.length < 3) {
