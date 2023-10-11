@@ -17,7 +17,7 @@ import { Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { auth, db, storage } from "../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -26,19 +26,26 @@ export default function SubirArticulos() {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([]);
   const [itemName, setItemName] = useState("");
+  const [itemNameError, setItemNameError] = useState("");
   const [itemCondition, setItemCondition] = useState("");
   const [itemTrade, setItemTrade] = useState("");
   const [itemRegion, setItemRegion] = useState([]);
+  const [selectedRegionUrl, setSelectedRegionUrl] = useState("");
+  const [itemProvincia, setItemProvincia] = useState([]);
+  const [selectedComuna, setSelectedComuna] = useState(null);
   const [itemComuna, setItemComuna] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState("");
   const [progress, setProgress] = useState(0);
+  const [selectedRegion, setSelectedRegion] = useState("");
   const removeImage = (indexToRemove) => {
     setSelectedImages(
       selectedImages.filter((_, index) => index !== indexToRemove)
     );
   };
+
   const [isEnabled, setIsEnabled] = useState(false);
+
   useEffect(() => {
     (async () => {
       const { status } =
@@ -50,6 +57,7 @@ export default function SubirArticulos() {
       if (user) setUserId(user.uid);
     })();
   }, []);
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -71,16 +79,17 @@ export default function SubirArticulos() {
         return;
       }
       if (
+        !selectedComuna ||
+        selectedImages.length < 3 ||
+        !userId ||
         !itemName ||
         !itemCondition ||
-        !itemComuna ||
-        !itemTrade ||
-        !userId ||
-        selectedImages.length < 3
+        !itemTrade
       ) {
         Alert.alert("Todos los campos son obligatorios");
         return;
       }
+      const comunaId = selectedComuna.id;
       setUploading(true);
       const urls = await Promise.all(
         selectedImages.map(async (imageUri, index) => {
@@ -116,12 +125,15 @@ export default function SubirArticulos() {
       await setDoc(itemDoc, {
         nombreArticulo: itemName,
         estadoArticulo: itemCondition,
-        comuna: itemComuna,
+        comuna: selectedComuna.name,
+        region: selectedRegion.name,
         tipo: itemTrade,
         imagenURL: url1,
         imagenURL2: url2,
         imagenURL3: url3,
-        userId: userId,
+        uid: userId,
+        fecha: serverTimestamp(),
+        estadoPublicacion: "activa",
       });
       setUploading(false);
       Alert.alert(
@@ -136,18 +148,43 @@ export default function SubirArticulos() {
       alert("Error al subir el artículo. Por favor intenta de nuevo.");
     }
   };
+
   useEffect(() => {
-    if (itemRegion) {
-      fetch(`http://70.37.82.88:8020/api/communes?region=${itemRegion}`)
+    // Obtener todas las regiones al cargar el componente
+    fetch("http://70.37.82.88:8020/api/regions")
+      .then((response) => response.json())
+      .then((data) => {
+        setItemRegion(data.regions);
+      })
+      .catch((error) => {
+        console.error("Error al obtener las regiones:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (selectedRegionUrl) {
+      fetch(selectedRegionUrl)
         .then((response) => response.json())
         .then((data) => {
+          setItemProvincia(data.provinces);
           setItemComuna(data.communes);
         })
         .catch((error) => {
-          console.error("Error al obtener las comunas:", error);
+          console.error("Error al obtener provincias y comunas:", error);
         });
     }
-  }, [itemRegion]);
+  }, [selectedRegionUrl]);
+
+  const handleItemNameChange = (text) => {
+    // Limitar la longitud del itemName a 30 caracteres
+    if (text.length <= 17) {
+      setItemName(text);
+      setItemNameError("");
+    } else {
+      setItemNameError("El nombre del artículo no puede tener más de 20 caracteres");
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
@@ -182,78 +219,44 @@ export default function SubirArticulos() {
             maxLength={30}
             placeholder="Nombre del Artículo (Ej. Bicicleta)"
             style={styles.textInput}
-            onChangeText={setItemName}
+            onChangeText={handleItemNameChange}
             value={itemName}
           />
         </View>
+
         <View style={styles.cajaPicker}>
           <Picker
-            selectedValue={itemRegion}
-            onValueChange={(itemValue) => setItemRegion(itemValue)}
+            selectedValue={selectedRegionUrl}
+            onValueChange={(itemValue, itemIndex) => {
+              const selectedRegionData = itemRegion.find(
+                (region) => region.url === itemValue
+              );
+              setSelectedRegion(selectedRegionData);
+              setSelectedRegionUrl(itemValue);
+            }}
           >
             <Picker.Item
               label="Seleccionar Región"
               value=""
               enabled={isEnabled}
             />
-            <Picker.Item
-              label="Región de Arica y Parinacota"
-              value="Región de Arica y Parinacota"
-            />
-            <Picker.Item
-              label="Región de Tarapacá"
-              value="Región de Tarapacá"
-            />
-            <Picker.Item
-              label="Región de Antofagasta"
-              value="Región de Antofagasta"
-            />
-            <Picker.Item label="Región de Atacama" value="Región de Atacama" />
-            <Picker.Item
-              label="Región de Coquimbo"
-              value="Región de Coquimbo"
-            />
-            <Picker.Item
-              label="Región de Valparaíso"
-              value="Región de Valparaíso"
-            />
-            <Picker.Item
-              label="Región Metropolitana"
-              value="Región Metropolitana"
-            />
-            <Picker.Item
-              label="Región del Libertador General Bernardo O'Higgins"
-              value="Región del Libertador General Bernardo O'Higgins"
-            />
-            <Picker.Item label="Región del Maule" value="Región del Maule" />
-            <Picker.Item label="Región de Ñuble" value="Región de Ñuble" />
-            <Picker.Item label="Región del Biobío" value="Región del Biobío" />
-            <Picker.Item
-              label="Región de La Araucanía"
-              value="Región de La Araucanía"
-            />
-            <Picker.Item
-              label="Región de Los Ríos"
-              value="Región de Los Ríos"
-            />
-            <Picker.Item
-              label="Región de Los Lagos"
-              value="Región de Los Lagos"
-            />
-            <Picker.Item
-              label="Región de Aysén del General Carlos Ibáñez del Campo"
-              value="Región de Aysén del General Carlos Ibáñez del Campo"
-            />
-            <Picker.Item
-              label="Región de Magallanes y de la Antártica Chilena"
-              value="Región de Magallanes y de la Antártica Chilena"
-            />
+            {itemRegion.map((region) => (
+              <Picker.Item
+                key={region.id}
+                label={region.name}
+                value={region.url}
+              />
+            ))}
           </Picker>
         </View>
+
         <View style={styles.cajaPicker}>
           <Picker
-            selectedValue={itemComuna.id}
-            onValueChange={(itemValue) => setItemComuna(itemValue)}
+            selectedValue={selectedComuna}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedComuna(itemValue)
+            }
+            enabled={selectedRegionUrl !== ""}
           >
             <Picker.Item
               label="Seleccionar Comuna"
@@ -264,7 +267,7 @@ export default function SubirArticulos() {
               <Picker.Item
                 key={comuna.id}
                 label={comuna.name}
-                value={comuna.name}
+                value={comuna} // Aquí debes pasar el objeto de la comuna
               />
             ))}
           </Picker>
@@ -284,6 +287,7 @@ export default function SubirArticulos() {
             <Picker.Item label="Nuevo" value="Nuevo" />
           </Picker>
         </View>
+
         <View style={styles.cajaPicker}>
           <Picker
             selectedValue={itemTrade}
@@ -319,6 +323,7 @@ export default function SubirArticulos() {
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -334,7 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 30,
     paddingVertical: 13,
-    width: 270,
+    width: 200,
     marginTop: 20,
     borderWidth: 1,
     borderColor: "#8AAD34",
@@ -342,28 +347,26 @@ const styles = StyleSheet.create({
   textoBoton: {
     textAlign: "center",
     color: "#8AAD34",
+    fontSize: 15,
+    fontWeight: "500",
   },
   cajaTexto: {
-    paddingVertical: 5,
-    paddingHorizontal: 25,
+    paddingVertical: 12,
     backgroundColor: "#cccccc50",
     borderRadius: 30,
-    height: 55,
     width: 300,
-    justifyContent: "center",
     marginTop: 30,
+    marginVertical: 8,
+  },
+  cajaPicker: {
+    backgroundColor: "#cccccc50",
+    borderRadius: 30,
+    marginVertical: 8,
+    width: 300,
   },
   textInput: {
     paddingHorizontal: 15,
     color: "#000000",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "500",
-    paddingVertical: 15,
-    alignItems: "center",
-    textAlign: "center",
-    marginTop: 7,
   },
   cajaBotonP: {
     backgroundColor: "#8AAD34",
@@ -437,11 +440,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "white",
-  },
-  cajaPicker: {
-    backgroundColor: "#cccccc50",
-    borderRadius: 30,
-    marginVertical: 9,
-    width: 295,
   },
 });

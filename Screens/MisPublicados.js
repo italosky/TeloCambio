@@ -7,21 +7,61 @@ import {
   Platform,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator
 } from "react-native";
+import { Card, Drawer } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
-import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
-import MisListItem from "./common/MisListItem";
-import { Drawer } from "react-native-paper";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc
+} from "firebase/firestore";
+import { db, auth } from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisPublicados() {
+  const [userId, setUserId] = useState("");
   const navigation = useNavigation();
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await Promise.all([eliminarOfertasAsociadas(itemId), deleteDoc(doc(db, "Publicaciones", itemId))]);
+      setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
+    } catch (error) {
+      console.error("Error al eliminar el artículo:", error);
+    }
+  };
+
+  const eliminarOfertasAsociadas = async (itemId) => {
+    try {
+      const ofertasRef = query(collection(db, "Ofertas"), where("ArticuloGaleria", "==", itemId));
+      const ofertasSnap = await getDocs(ofertasRef);
+  
+      console.log("Ofertas a eliminar:", ofertasSnap.docs.map(doc => doc.id));
+  
+      for (const ofertaDoc of ofertasSnap.docs) {
+        const ofertaId = ofertaDoc.id;
+        console.log("Eliminando oferta:", ofertaId);
+        await deleteDoc(doc(db, "Ofertas", ofertaId));
+      }
+    } catch (error) {
+      console.error("Error al eliminar ofertas asociadas:", error);
+      throw error; // Propaga el error para que pueda ser capturado en la función que lo llama.
+    }
+  };
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => null, 
-      gestureEnabled: false, 
+      headerLeft: () => null,
+      gestureEnabled: false,
     });
   }, [navigation]);
 
@@ -29,8 +69,8 @@ export default function MisPublicados() {
     navigation.navigate("MiPerfil");
   };
 
-  const goGaleria = () => {
-    navigation.navigate("Galeria");
+  const goGaleria2 = () => {
+    navigation.navigate("Galeria2");
   };
 
   const goMisPublicados = () => {
@@ -41,8 +81,13 @@ export default function MisPublicados() {
     navigation.navigate("MisOfertas");
   };
 
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
+  
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
+
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
       setDrawerPosition("right");
@@ -51,84 +96,161 @@ export default function MisPublicados() {
     }
   };
 
+  const cerrarSesion = async () => {
+    try {
+      await auth.signOut();
+      await AsyncStorage.removeItem("isLoggedIn");
+      navigation.navigate("Ingreso");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
-      {/* Título "TeloCambio" encima de la línea superior, mi opcion B era dejarlo como texto */}
       <View>
-          <Image
-            source={require("../assets/LogoTeLoCambio.png")}
-            style={styles.logo}
-          />
-        </View>
-
-      {/* Línea de separación */}
+        <Image
+          source={require("../assets/LogoTeLoCambio.png")}
+          style={styles.logo}
+        />
+      </View>
       <View style={styles.separatorLine} />
 
       <Drawer.Section>
         <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria}>
-          <Text style={styles.drawerText}>Galeria de Artículos</Text>
+        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
+          <Text style={styles.drawerText}>Galería de Artículos</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.drawerItemEnd} onPress={goMisOfertas}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 
+      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
+        <Image
+          source={require("../assets/Salir.png")}
+          style={styles.logoutImage}
+        />
+      </TouchableOpacity>
     </View>
   );
 
-  const [active, setActive] = React.useState("");
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) setUserId(user.uid);
+  }, []);
 
-  const [categoryList, setcategoryList] = useState([]);
-  const [AccesoriosList, setAccesoriosList] = useState([]);
-  const [ComidaList, setComidaList] = useState([]);
-  const [DeportesList, setDeportesList] = useState([]);
-  const [FerreteriaList, setFerreteriaList] = useState([]);
-  const [HogarList, setHogarList] = useState([]);
-  const [InstrumentosList, setInstrumentosList] = useState([]);
-  const [JuguetesList, setJuguetesList] = useState([]);
-  const [LibrosList, setLibrosList] = useState([]);
+  const fetchPosts = async () => {
+    setLoading(true);
+    const allItemsArray = [];
+    const articulosPublicadosRef = await getDocs(query(
+      collection(db, "Publicaciones"), 
+      where("uid", "==", userId),
+      where("estadoPublicacion", "==", "activa")
+    ));
+    articulosPublicadosRef.forEach((postDoc) => {
+      const postData = postDoc.data();
+      allItemsArray.push({
+        uid: postDoc.id,
+        imagenURL: postData.imagenURL,
+        nombreArticulo: postData.nombreArticulo,
+        tipo: postData.tipo,
+        estadoArticulo: postData.estadoArticulo,
+        comuna: postData.comuna,
+        fecha: postData.fecha
+      });
+    });
+    setDataSource(allItemsArray);
+    setLoading(false);
+  };
+  
+  const EmptyListComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>¡Ups! No tienes publicaciones vigentes.</Text>
+    </View>
+  );
+
+  const formatDateFromDatabase = (timestamp) => {
+    const date = timestamp.toDate();
+    return getCurrentDateFormatted(date);
+  }
+  
+  const getCurrentDateFormatted = (date) => {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  };
+  
 
   useEffect(() => {
-    console.log(products);
-    let tempCategory = [];
-    products.category.map((item) => {
-      tempCategory.push(item);
+    //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchPosts();
     });
-    setcategoryList(tempCategory);
-    setAccesoriosList(products.category[0].data);
-    setComidaList(products.category[1].data);
-    setDeportesList(products.category[2].data);
-    setFerreteriaList(products.category[3].data);
-    setHogarList(products.category[4].data);
-    setInstrumentosList(products.category[5].data);
-    setJuguetesList(products.category[6].data);
-    setLibrosList(products.category[7].data);
-  }, []);
+    if (userId){
+      fetchPosts();
+    }
+    return unsubscribe;
+  }, [navigation, userId]);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
+  
+  const renderItem = ({item}) => {
+    return (
+      <Card style={styles.containerCard}> 
+        <Card.Title
+        style={styles.containerCardContent} 
+        title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
+        subtitle={<Text style={styles.textCardDate} >Publicado el {formatDateFromDatabase(item.fecha)}</Text>}
+        left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
+        right={(props) => (
+          <TouchableOpacity
+            onPress={() => handleDeleteItem(item.uid)}
+          >
+            <Image source={require("../assets/Eliminar.png")} style={styles.iconList} />
+          </TouchableOpacity>
+        )}
+        />
+      </Card>
+    );
+  };
+
 
   const renderDrawerAndroid = () => (
     <DrawerLayout
       ref={drawer}
-      drawerWidth={300}
+      drawerWidth={200}
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-        <View style={{ marginTop: 15 }}>
+      <View style={{ flex: 1 }}>
+        {loading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>        
+        ) : (
           <FlatList
-            data={AccesoriosList}
-            renderItem={({ item, index }) => {
-              return <MisListItem item={item} />;
-            }}
+            data={dataSource}
+            renderItem={renderItem}
+            keyExtractor={(item) => (item && item.uid ? item.uid.toString() : 'defaultKey')}
+            contentContainerStyle={{ ...styles.gridContainer, flexGrow: 1 }}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+            ListEmptyComponent={EmptyListComponent}
+            style={styles.containerFlatList}
           />
-        </View>
+        )}
+      </View>
     </DrawerLayout>
   );
 
@@ -140,61 +262,104 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  HorizontalScroll: {
-    padding: 10,
-    marginLeft: 15,
-    borderRadius: 20,
-    backgroundColor: "#A5CB48",
-    opacity: 30,
-  },
-  titleCategory: {
-    marginTop: 20,
-    marginLeft: 20,
-    color: "#000",
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  textButton: {
-    color: "#ffffff",
-    fontWeight: '500',
-  },
   containerDrawer: {
     flex: 1,
-    padding: 16,
+    padding: 5,
   },
   navigationContainer: {
     backgroundColor: "#ecf0f1",
   },
-  paragraph: {
-    padding: 16,
-    fontSize: 15,
-    textAlign: "center",
-  },
   drawerItem: {
     backgroundColor: "#8AAD34",
-    margin: 10,
-    borderRadius: 30,
-  },
-  drawerItemEnd: {
-    backgroundColor: "#8AAD34",
-    margin: 10,
-    borderRadius: 30,
-    marginVertical: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+    alignItems: "center",
   },
   drawerText: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "500",
     color: "#ffffff",
-    padding: 12,
-    paddingHorizontal: 20,
+    padding: 10,
   },
   separatorLine: {
     borderBottomWidth: 1,
-    borderBottomColor: "gray",
-    marginVertical: 10,
+    borderBottomColor: "#7A7A7A",
+    margin: 15,
   },
   logo: {
-    width:260,
-    height: 47,
+    width: 255,
+    height: 55,
+  },
+  logoutButton: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  logoutImage: {
+    width: 80,
+    height: 80,
+  },
+  containerFlatList: {
+    marginVertical: 15,
+  },
+  containerCard: {
+    width: 'auto',
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginHorizontal: 15,
+    marginBottom: 10,
+  },
+  containerCardContent: {
+    width: 'auto',
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  imagenList: {
+    width: '200%',
+    height: '200%',
+    borderRadius: 10,
+  },
+  iconList: {
+    width: 40,
+    height: 40,
+    marginRight: 15,
+  },
+  textCard: {
+    fontSize: 18,
+    fontWeight: '500',
+    marginLeft: 38,
+  },
+  textCardDate: {
+    fontSize: 14,
+    marginLeft: 38,
+  },
+  buttonCard: {
+    borderRadius: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+    padding: 5,
+    backgroundColor: "#63A355",
+  },
+  textButton2: {
+    color: "#ffffff",
+  },
+  gridContainer: {
+    padding: 0,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20
+  },
+  emptyContainer: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center'
+  },
+  emptyText: {
+    fontSize: 18,
+    color: 'grey'
   },
 });

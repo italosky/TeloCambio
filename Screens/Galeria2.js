@@ -32,18 +32,21 @@ export default function Galeria2() {
       const allItemsArray = [];
       const articulosPublicadosRef = collection(db, "Publicaciones");
       const usersSnapshot = await getDocs(articulosPublicadosRef);
+      const user = auth.currentUser;
       usersSnapshot.forEach((postDoc) => {
         const postData = postDoc.data();
-        allItemsArray.push({
-          id: postDoc.id,
-          imagenURL: postData.imagenURL,
-          imagenURL2: postData.imagenURL2,
-          imagenURL3: postData.imagenURL3,
-          nombreArticulo: postData.nombreArticulo,
-          tipo: postData.tipo,
-          estadoArticulo: postData.estadoArticulo,
-          comuna: postData.comuna,
-        });
+        if (postData.estadoPublicacion === 'activa' && postData.uid !== user.uid) {
+          allItemsArray.push({
+            id: postDoc.id,
+            imagenURL: postData.imagenURL,
+            imagenURL2: postData.imagenURL2,
+            imagenURL3: postData.imagenURL3,
+            nombreArticulo: postData.nombreArticulo,
+            tipo: postData.tipo,
+            estadoArticulo: postData.estadoArticulo,
+            comuna: postData.comuna,
+          });
+        }
       });
       setDataSource(allItemsArray);
     } catch (error) {
@@ -51,7 +54,7 @@ export default function Galeria2() {
     } finally {
       setLoading(false);
     }
-  };
+  };    
 
   useEffect(() => {
     //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
@@ -84,14 +87,14 @@ export default function Galeria2() {
     try {
       await auth.signOut();
       await AsyncStorage.removeItem("isLoggedIn");
-      navigation.navigate("Login");
+      navigation.navigate("Ingreso");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
   };
 
-  const goMiPerfil = () => {
-    navigation.navigate("MiPerfil");
+  const goPublicacionReportada = () => {
+    navigation.navigate("PublicacionReportada");
   };
 
   const goGaleria2 = () => {
@@ -108,6 +111,14 @@ export default function Galeria2() {
 
   const goSubirArticulos = () => {
     navigation.navigate("SubirArticulos");
+  };
+
+  const goMiPerfil = () => {
+    navigation.navigate("MiPerfil");
+
+  };
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
   };
 
   const changeDrawerPosition = () => {
@@ -143,7 +154,7 @@ export default function Galeria2() {
       <AnimatedFAB
         icon="plus"
         label="Subir Artículo"
-        onPress={() => navigation.navigate("SubirArticulos")}
+        onPress={goSubirArticulos}
         style={styles.fabStyle}
         extended={isExtended}
         visible={true}
@@ -165,8 +176,10 @@ export default function Galeria2() {
       <View style={styles.separatorLine} />
 
       <Drawer.Section>
+
         <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
           <Text style={styles.drawerText}>Mi Perfil</Text>
+
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
           <Text style={styles.drawerText}>Galería de Artículos</Text>
@@ -176,6 +189,9 @@ export default function Galeria2() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 
@@ -190,22 +206,26 @@ export default function Galeria2() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
-      <View style={styles.itemOverlay}>
-        <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
-        <Text style={styles.itemInfo}>{item.estadoArticulo || ""}</Text>
-        <Text style={styles.itemInfo}>{item.comuna || ""}</Text>
-        {item.tipo === "Intercambiar artículo" && (
-          <TouchableOpacity style={[styles.teLoCambioButton]}>
-            <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-          </TouchableOpacity>
-        )}
-        {item.tipo === "Regalar artículo" && (
-          <TouchableOpacity style={[styles.teLoRegaloButton]}>
-            <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("DetalleArticulo", { item })}
+      >
+        <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
+        <View style={styles.itemOverlay}>
+          <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
+          <Text style={styles.itemInfo}>{item.estadoArticulo || ""}</Text>
+          <Text style={styles.itemInfo}>{item.comuna || ""}</Text>
+          {item.tipo === "Intercambiar artículo" && (
+            <TouchableOpacity style={[styles.teLoCambioButton]}>
+              <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+            </TouchableOpacity>
+          )}
+          {item.tipo === "Regalar artículo" && (
+            <TouchableOpacity style={[styles.teLoRegaloButton]}>
+              <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
     </View>
   );
 
@@ -215,7 +235,6 @@ export default function Galeria2() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8,
   },
   containerDrawer: {
     flex: 1,
@@ -226,21 +245,20 @@ const styles = StyleSheet.create({
   },
   drawerItem: {
     backgroundColor: "#8AAD34",
-    marginTop: 5,
-    marginBottom: 5,
-    borderRadius: 2,
+    marginBottom: 12,
+    borderRadius: 5,
     alignItems: "center",
   },
   drawerText: {
     fontSize: 18,
+    fontWeight: "500",
     color: "#ffffff",
-    padding: 12,
+    padding: 10,
   },
   separatorLine: {
-    borderBottomWidth: 0.5,
-    color: "gray",
-    marginVertical: 15,
-    marginHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#7A7A7A",
+    margin: 15,
   },
   logo: {
     width: 255,

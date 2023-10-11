@@ -4,24 +4,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home({ navigation }) {
   useEffect(() => {
-    const checkLoggedInStatus = async () => {
-      const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
-      if (isLoggedIn === "true") {
-        
-        navigation.navigate("Galeria2"); 
-      } else {
-        
-        const timer = setTimeout(() => {
-          navigation.navigate("Ingreso"); 
-        }, 2000);
+    const timer = setTimeout(() => {
+      navigation.navigate("Ingreso");
+    }, 3000);
 
-        return () => clearTimeout(timer);
-      }
-    };
+    return () => clearTimeout(timer); 
 
-    checkLoggedInStatus();
-  }, []);
-
+  }, [navigation]);
   return (
     
     <View style={styles.container}>
@@ -39,7 +28,7 @@ export default function Home({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
   },

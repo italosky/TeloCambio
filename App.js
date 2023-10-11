@@ -11,21 +11,20 @@ import Login from "./Screens/Login";
 import Home from "./Screens/Home";
 import Ingreso from "./Screens/Ingreso";
 import Registro from "./Screens/Registro";
-import Galeria from "./Screens/Galeria";
 import Galeria2 from "./Screens/Galeria2";
 import SubirArticulos from "./Screens/SubirArticulos";
 import Concretar from "./Screens/Concretar";
 import DatosCambio from "./Screens/DatosCambio";
-import DetalleCambio from "./Screens/DetalleCambio";
-import DetalleGratis from "./Screens/DetalleGratis";
 import MiPerfil from "./Screens/MiPerfil";
 import MisOfertas from "./Screens/MisOfertas";
 import MisPublicados from "./Screens/MisPublicados";
-import PerfilOtros from "./Screens/PerfilOtros";
 import ReporteUsuario from "./Screens/ReporteUsuario";
 import RecuperarContraseña from "./Screens/RecuperarContraseña";
-import Categoria from "./Screens/Categoria";
 import DetalleArticulo from "./Screens/DetalleArticulo";
+import ListaReportesAdmin from "./Screens/ListaReportesAdmin";
+import MisIntercambios from "./Screens/MisIntercambios";
+import ConcretarInfo from "./Screens/ConcretarInfo";
+import PublicacionReportada from "./Screens/PublicacionReportada";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -38,9 +37,8 @@ export default function App() {
           component={Home}
           options={{
             title: "Bienvenido/a!",
-            headerTintColor: "white",
+            headerTintColor: "#ffffff",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
           }}
         />
         <Stack.Screen
@@ -50,7 +48,6 @@ export default function App() {
             title: "Ingresar",
             headerTintColor: "white",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
           }}
         />
         <Stack.Screen
@@ -68,16 +65,6 @@ export default function App() {
           component={Registro}
           options={{
             title: "Registro",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
-          name="Galeria"
-          component={Galeria}
-          options={{
-            title: "Galería",
             headerTintColor: "white",
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
@@ -124,26 +111,6 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="DetalleCambio"
-          component={DetalleCambio}
-          options={{
-            title: "Detalle de un articulo cuando es para cambio",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
-          name="DetalleGratis"
-          component={DetalleGratis}
-          options={{
-            title: "Detalle de un articulo cuando es gratis",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
           name="MiPerfil"
           component={MiPerfil}
           options={{
@@ -174,16 +141,6 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="PerfilOtros"
-          component={PerfilOtros}
-          options={{
-            title: "Perfil de otros Telocambistas",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
           name="ReporteUsuario"
           component={ReporteUsuario}
           options={{
@@ -204,20 +161,50 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="Categoria"
-          component={Categoria}
+          name="DetalleArticulo"
+          component={DetalleArticulo}
           options={{
-            title: "Categoría",
+            title: "Detalle Artículo",
             headerTintColor: "white",
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
         <Stack.Screen
-          name="DetalleArticulo"
-          component={DetalleArticulo}
+          name="ListaReportesAdmin"
+          component={ListaReportesAdmin}
           options={{
-            title: "Detalle Artículo",
+            title: "Lista de Reportes Administrador",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
+        <Stack.Screen
+          name="MisIntercambios"
+          component={MisIntercambios}
+          options={{
+            title: "Mis Intercambios",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
+        <Stack.Screen
+          name="ConcretarInfo"
+          component={ConcretarInfo}
+          options={{
+            title: "Resumen",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
+        <Stack.Screen
+          name="PublicacionReportada"
+          component={PublicacionReportada}
+          options={{
+            title: "Publicacion Reportada",
             headerTintColor: "white",
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },

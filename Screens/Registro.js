@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   StyleSheet,
@@ -9,32 +9,41 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { auth, db } from "../firebaseConfig";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebaseConfig";
+import { updateDoc } from "firebase/firestore";
+import { Card } from "react-native-paper";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function Registro(props) {
   const [data, setData] = useState({
     nombre_apellido: "",
-    region: "",
     telefono: "",
     email: "",
     password: "",
+    role: ""
   });
 
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
   const validateEmailDetails = (email) => {
-    const [localPart, domainPart] = email.split('@');
+    const [localPart, domainPart] = email.split("@");
     if (!domainPart || !localPart) {
       return "El correo electrónico debe contener un '@'.";
     }
-    const domainParts = domainPart.split('.');
-    if (domainParts.some(part => part.length === 0)) {
+    const domainParts = domainPart.split(".");
+    if (domainParts.some((part) => part.length === 0)) {
       return "La parte de dominio no debe tener puntos consecutivos o empezar/terminar con un punto.";
     }
-    if (!domainPart.includes('.')) {
+    if (!domainPart.includes(".")) {
       return "La parte de dominio debe contener un punto ('.').";
     }
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -48,15 +57,23 @@ export default function Registro(props) {
     const regex = /^[0-9]{0,12}$/;
     return regex.test(telefono);
   };
-  
+
   const handleRegister = async () => {
     let errorMessage = null;
-    if (!data.password || !data.email || !data.nombre_apellido || !data.telefono) {
+    if (
+      !data.password ||
+      !data.email ||
+      !data.nombre_apellido ||
+      !data.telefono
+    ) {
       Alert.alert("Error", "Todos los campos son obligatorios.");
       return;
     }
-    if (data.region === "") {
-      Alert.alert("Error", "Selecciona una región.");
+    if (!hasSelectedImage) {
+      Alert.alert(
+        "Error",
+        "Selecciona una foto de perfil antes de registrarte."
+      );
       return;
     }
     const trimmedEmail = data.email.trim();
@@ -71,33 +88,74 @@ export default function Registro(props) {
       Alert.alert("Error", errorMessage);
       return;
     }
+
     try {
-      const response = await createUserWithEmailAndPassword(auth, trimmedEmail, data.password);
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        trimmedEmail,
+        data.password
+      );
       if (response.user) {
         const userUID = response.user.uid;
-        const normalizedNombre = data.nombre_apellido.toLowerCase().replace(/\s+/g, '');
+        const normalizedNombre = data.nombre_apellido
+          .toLowerCase()
+          .replace(/\s+/g, "");
         const readableID = `${normalizedNombre}-${userUID}`;
         const userDoc = doc(db, "Usuarios", readableID);
         await setDoc(userDoc, {
           uid: userUID,
           nombre_apellido: data.nombre_apellido,
-          region: data.region,
           telefono: data.telefono,
           email: data.email,
-        });      
-        Alert.alert('Registro exitoso!');
+          role: "usuario"
+        });
+
+        if (selectedImages.length > 0) {
+          setUploading(true);
+          const urls = await Promise.all(
+            selectedImages.map(async (imageUri, index) => {
+              const response = await fetch(imageUri);
+              const blob = await response.blob();
+              const filename = `imagen${index + 1}-${Date.now()}`;
+              const storageRef = ref(storage, `Perfil/${filename}`);
+              const uploadTask = uploadBytesResumable(storageRef, blob);
+              return new Promise((resolve, reject) => {
+                uploadTask.on(
+                  "state_changed",
+                  (snapshot) => {
+                    setProgress(
+                      (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    );
+                  },
+                  (error) => reject(error),
+                  async () => {
+                    const downloadURL = await getDownloadURL(
+                      uploadTask.snapshot.ref
+                    );
+                    resolve(downloadURL);
+                  }
+                );
+              });
+            })
+          );
+          await updateDoc(userDoc, { imagenen: urls });
+
+          setUploading(false);
+        }
+
+        Alert.alert("Registro exitoso!");
         props.navigation.navigate("Login");
       }
     } catch (error) {
       errorMessage = "Error al registrar.";
       switch (error.code) {
-        case 'auth/email-already-in-use':
+        case "auth/email-already-in-use":
           errorMessage = "Email ya en uso.";
           break;
-        case 'auth/invalid-email':
+        case "auth/invalid-email":
           errorMessage = "Email inválido.";
           break;
-        case 'auth/weak-password':
+        case "auth/weak-password":
           errorMessage = "Contraseña muy corta.";
           break;
         default:
@@ -106,86 +164,168 @@ export default function Registro(props) {
       Alert.alert("Error", errorMessage);
     }
   };
-    
+
+  useEffect(() => {
+    (async () => {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permiso necesario para acceder a la cámara y a la galería.");
+      }
+      const user = auth.currentUser;
+      if (user) setUserId(user.uid);
+    })();
+  }, []);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setSelectedImages([result.assets[0].uri]);
+      setHasSelectedImage(true);
+    }
+  };
+
+  const removeImage = (indexToRemove) => {
+    setSelectedImages(
+      selectedImages.filter((_, index) => index !== indexToRemove)
+    );
+  };
+  const [hasSelectedImage, setHasSelectedImage] = useState(false);
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.padre}
-    >
-      <View style={styles.padre}>
-        <View style={styles.tarjeta}>
-          <View style={styles.cajaTexto}>
-            <TextInput
-              placeholder="Nombre y Apellido"
-              style={{ paddingHorizontal: 15 }}
-              onChangeText={(text) => setData({ ...data, nombre_apellido: text })}
-              value={data.nombre_apellido}
-            />
+    <ScrollView contentContainerStyle={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "position" : "height"}
+        style={styles.padre}
+      >
+        <View style={styles.padre}>
+          <View style={styles.tarjeta}>
+            <View style={styles.containerImage}>
+              <View style={styles.imagesContainer}>
+                {selectedImages.map((selectedImages, index) => (
+                  <View style={styles.imageWrapper} key={index}>
+                    <Card style={styles.imageCard}>
+                      <Image
+                        source={{ uri: selectedImages }}
+                        style={styles.image}
+                      />
+                    </Card>
+                    <TouchableOpacity
+                      style={styles.deleteIconContainer}
+                      onPress={() => removeImage(index)}
+                    >
+                      <View style={styles.circle}>
+                        <Icon name="trash" size={20} color="white" />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+              <TouchableOpacity style={styles.cajaBotonimg} onPress={pickImage}>
+                <Text style={styles.textoBotonimg}>
+                  Seleccionar Foto de Perfil
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.cajaTexto}>
+              <TextInput
+                placeholder="Nombre y Apellido"
+                style={{ paddingHorizontal: 15 }}
+                onChangeText={(text) =>
+                  setData({ ...data, nombre_apellido: text })
+                }
+                value={data.nombre_apellido}
+              />
+            </View>
+
+            <View style={styles.cajaTexto}>
+              <TextInput
+                placeholder="Número de Teléfono (+569-XXXXXXX)"
+                keyboardType="numeric"
+                style={{ paddingHorizontal: 15 }}
+                onChangeText={(text) => setData({ ...data, telefono: text })}
+                value={data.telefono}
+              />
+            </View>
+            <View style={styles.cajaTexto}>
+              <TextInput
+                placeholder="Correo (telocambio@mail.cl)"
+                style={{ paddingHorizontal: 15 }}
+                onChangeText={(text) => setData({ ...data, email: text })}
+                value={data.email}
+              />
+            </View>
+            <View style={styles.cajaTexto}>
+              <TextInput
+                placeholder="Contraseña"
+                style={{ paddingHorizontal: 15 }}
+                secureTextEntry={true}
+                onChangeText={(text) => setData({ ...data, password: text })}
+                value={data.password}
+              />
+            </View>
+            <View style={styles.padreBoton}>
+              <TouchableOpacity
+                style={styles.cajaBoton}
+                onPress={handleRegister}
+              >
+                <Text style={styles.textoBoton}>Registrarse</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <View style={styles.cajaTexto}>
-          <Picker
-            selectedValue={data.region}
-            onValueChange={(itemValue) => setData({ ...data, region: itemValue })}
-          >
-            <Picker.Item label="Selecciona una region"       value="" />
-            <Picker.Item label="I	   Región de Tarapacá"     value="I	   Región de Tarapacá" />
-            <Picker.Item label="II	 Región de Antofagasta"  value="II	 Región de Antofagasta" />
-            <Picker.Item label="III	 Región de Atacama"      value="III	 Región de Atacama" />
-            <Picker.Item label="IV	 Región de Coquimbo"     value="IV	 Región de Coquimbo" />
-            <Picker.Item label="V	   Región de Valparaíso"   value="V	   Región de Valparaíso" />
-            <Picker.Item label="VI	 Región de OHiggins"     value="VI	 Región de OHiggins" />
-            <Picker.Item label="VII	 Región del Maule"       value="VII	 Región del Maule" />
-            <Picker.Item label="VIII Región del Bio-bío"     value="VIII Región del Bio-bío" />
-            <Picker.Item label="IX	 Región de La Araucanía" value="IX	 Región de La Araucanía" />
-            <Picker.Item label="X	   Región de Los Lagos"    value="X	   Región de Los Lagos" />
-            <Picker.Item label="XI	 Región Aysén"           value="XI	 Región Aysén" />
-            <Picker.Item label="XII	 Región de Magallanes"   value="XII	 Región de Magallanes" />
-            <Picker.Item label="R.M  Región Metropolitana"   value="R.M  Región Metropolitana de Santiago" />
-            <Picker.Item label="XIV	 Región de Los Ríos"     value="XIV	 Región de Los Ríos" />
-            <Picker.Item label="XV	 Región de Arica y Parinacota" value="XV	 Región de Arica y Parinacota" />
-            <Picker.Item label="XVI	 Región de Ñuble"        value="XVI	 Región de Ñuble" />
-          </Picker>
-        </View>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Número de Teléfono (+569-XXXXXXX)"
-            keyboardType="numeric"
-            style={{ paddingHorizontal: 15 }}
-            onChangeText={(text) => setData({ ...data, telefono: text })}
-            value={data.telefono}
-          />
-        </View>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Correo (telocambio@mail.cl)"
-            style={{ paddingHorizontal: 15 }}
-            onChangeText={(text) => setData({ ...data, email: text })}
-            value={data.email}
-          />
-        </View>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Contraseña"
-            style={{ paddingHorizontal: 15 }}
-            secureTextEntry={true}
-            onChangeText={(text) => setData({ ...data, password: text })}
-            value={data.password}
-          />
-        </View>
-        <View style={styles.padreBoton}>
-          <TouchableOpacity style={styles.cajaBoton} onPress={handleRegister}>
-            <Text style={styles.textoBoton}>Registrarse</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+  },
+  circle: {
+    backgroundColor: "rgba(255, 100, 100, 0.8)",
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  image: {
+    width: 120,
+    height: 120,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    margin: 15,
+  },
+  imagesContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+
+  imageWrapper: {
+    position: "relative",
+    margin: 3,
+  },
+  containerImage: {
+    alignItems: "center",
+    paddingVertical: 1,
+  },
   padre: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
@@ -230,5 +370,19 @@ const styles = StyleSheet.create({
   textoBoton: {
     textAlign: "center",
     color: "white",
+  },
+  cajaBotonimg: {
+    backgroundColor: "#ffffff",
+    borderRadius: 30,
+    paddingVertical: 13,
+    width: 270,
+    borderWidth: 2,
+    borderColor: "#8AAD34",
+    marginVertical: 25,
+  },
+  textoBotonimg: {
+    textAlign: "center",
+
+    color: "#8AAD34",
   },
 });
