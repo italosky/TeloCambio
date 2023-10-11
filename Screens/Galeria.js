@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Animated
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, createAppContainer } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MyProductItem from "./common/MyProductItem";
@@ -57,14 +58,6 @@ export default function Home() {
   };
 
   const drawer = useRef(null);
-  const [drawerPosition, setDrawerPosition] = useState("left");
-  const changeDrawerPosition = () => {
-    if (drawerPosition === "left") {
-      setDrawerPosition("right");
-    } else {
-      setDrawerPosition("left");
-    }
-  };
 
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
@@ -146,7 +139,7 @@ export default function Home() {
     <DrawerLayout
       ref={drawer}
       drawerWidth={300}
-      drawerPosition={drawerPosition}
+      drawerPosition='left'
       renderNavigationView={navigationView}
     >
       <ScrollView>
@@ -183,7 +176,7 @@ export default function Home() {
       </ScrollView>
       <AnimatedFAB
         icon={"plus"}
-        label={"Subir Artículo"}
+        label={"Subir Artículo     "}
         extended={isExtended}
         onPress={goSubirArticulos}
         visible={true}
@@ -207,7 +200,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginLeft: 15,
     borderRadius: 20,
-    backgroundColor: "#8AAD34",
+    backgroundColor: "#A5CB48",
     opacity: 30,
   },
   titleCategory: {
@@ -261,10 +254,10 @@ const styles = StyleSheet.create({
     height: 47,
   },
   fabStyle: {
-    bottom: 56,
-    right: 16,
+    bottom: 20,
+    right: 20,
     position: "absolute",
-    backgroundColor: "#8AAD34",
+    backgroundColor: "#A5CB48",
   },
   logoutButton: {
     alignItems: 'center',
