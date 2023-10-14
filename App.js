@@ -38,9 +38,8 @@ export default function App() {
           component={Home}
           options={{
             title: "Bienvenido/a!",
-            headerTintColor: "white",
+            headerTintColor: "#ffffff",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
           }}
         />
         <Stack.Screen
@@ -50,7 +49,7 @@ export default function App() {
             title: "Ingresar",
             headerTintColor: "white",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
+       
           }}
         />
         <Stack.Screen

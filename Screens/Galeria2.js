@@ -143,7 +143,7 @@ export default function Galeria2() {
       <AnimatedFAB
         icon="plus"
         label="Subir Artículo"
-        onPress={() => navigation.navigate("SubirArticulos")}
+        onPress={goSubirArticulos}
         style={styles.fabStyle}
         extended={isExtended}
         visible={true}
