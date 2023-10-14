@@ -109,6 +109,9 @@ export default function Galeria2() {
   const goSubirArticulos = () => {
     navigation.navigate("SubirArticulos");
   };
+  const ListaReportesAdmin = () => {
+    navigation.navigate("ListaReportesAdmin");
+  };
 
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
@@ -189,7 +192,9 @@ export default function Galeria2() {
   );
 
   const renderItem = ({ item }) => (
+  
     <View style={styles.itemContainer}>
+      <TouchableOpacity onPress={() => navigation.navigate("ListaReportesAdmin")}>
       <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
       <View style={styles.itemOverlay}>
         <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
@@ -206,7 +211,9 @@ export default function Galeria2() {
           </TouchableOpacity>
         )}
       </View>
+      </TouchableOpacity>
     </View>
+  
   );
 
   return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
