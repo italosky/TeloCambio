@@ -84,7 +84,7 @@ export default function Galeria2() {
     try {
       await auth.signOut();
       await AsyncStorage.removeItem("isLoggedIn");
-      navigation.navigate("Login");
+      navigation.navigate("Ingreso");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }

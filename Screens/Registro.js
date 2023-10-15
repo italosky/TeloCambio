@@ -23,6 +23,7 @@ export default function Registro(props) {
     telefono: "",
     email: "",
     password: "",
+    role: "",
   });
 
   const validateEmailDetails = (email) => {
@@ -75,7 +76,7 @@ export default function Registro(props) {
       const response = await createUserWithEmailAndPassword(auth, trimmedEmail, data.password);
       if (response.user) {
         const userUID = response.user.uid;
-        const normalizedNombre = data.nombre_apellido.toLowerCase().replace(/\s+/g, '');
+        const normalizedNombre = "(" + data.nombre_apellido + ")".toLowerCase().replace(/\s+/g, '');
         const readableID = `${normalizedNombre}-${userUID}`;
         const userDoc = doc(db, "Usuarios", readableID);
         await setDoc(userDoc, {
@@ -84,6 +85,7 @@ export default function Registro(props) {
           region: data.region,
           telefono: data.telefono,
           email: data.email,
+          role: 'usuario',
         });      
         Alert.alert('Registro exitoso!');
         props.navigation.navigate("Login");
