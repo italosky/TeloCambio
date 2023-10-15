@@ -26,6 +26,7 @@ import ReporteUsuario from "./Screens/ReporteUsuario";
 import RecuperarContraseña from "./Screens/RecuperarContraseña";
 import Categoria from "./Screens/Categoria";
 import DetalleArticulo from "./Screens/DetalleArticulo";
+import ListaReportesAdmin from "./Screens/ListaReportesAdmin";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -38,9 +39,8 @@ export default function App() {
           component={Home}
           options={{
             title: "Bienvenido/a!",
-            headerTintColor: "white",
+            headerTintColor: "#ffffff",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
           }}
         />
         <Stack.Screen
@@ -50,7 +50,7 @@ export default function App() {
             title: "Ingresar",
             headerTintColor: "white",
             headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
+       
           }}
         />
         <Stack.Screen
@@ -223,7 +223,18 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
+        <Stack.Screen
+          name="ListaReportesAdmin"
+          component={ListaReportesAdmin}
+          options={{
+            title: "Lista de Reportes Administrador",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
       </Stack.Navigator>
+      
     );
   }
 
