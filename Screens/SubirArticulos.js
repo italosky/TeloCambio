@@ -21,6 +21,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
+
 export default function SubirArticulos() {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([]);
@@ -69,7 +70,7 @@ export default function SubirArticulos() {
         : alert("Debes seleccionar 3 imagenes");
     }
   };
-
+  
   const SubirArticulo = async () => {
     try {
       if (selectedImages.length < 3) {
@@ -388,5 +389,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "white",
+  },
+  cajaPicker: {
+    backgroundColor: "#cccccc50",
+    borderRadius: 30,
+    marginVertical: 9,
+    width: 295,
   },
 });
