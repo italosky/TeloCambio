@@ -14,7 +14,6 @@ import {
 import { auth, db } from "../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebaseConfig";
@@ -138,11 +137,13 @@ export default function Registro(props) {
         await updateDoc(userDoc, { imagenen: urls });
         setUploading(false);
       }
-      Alert.alert("Registro exitoso!");
-      props.navigation.navigate("Login");
+      Alert.alert(
+        "Registro realizado con exito",
+        [{ onPress: () => navigation.navigate("Galeria2") }],
+        { cancelable: false }
+      );
     } 
     catch (error) {
-      errorMessage = "Error al registrar.";
       switch (error.code) {
         case "auth/email-already-in-use":
           errorMessage = "Email ya en uso.";
@@ -156,7 +157,6 @@ export default function Registro(props) {
         default:
           break;
       }
-      Alert.alert("Error", errorMessage);
     }
   };
 

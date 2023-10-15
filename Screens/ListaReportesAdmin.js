@@ -41,15 +41,7 @@ export default function ListaReportesAdmin() {
     products.category.map((item) => {
       tempCategory.push(item);
     });
-    setcategoryList(tempCategory);
-    setAccesoriosList(products.category[0].data);
-    setComidaList(products.category[1].data);
-    setDeportesList(products.category[2].data);
-    setFerreteriaList(products.category[3].data);
-    setHogarList(products.category[4].data);
-    setInstrumentosList(products.category[5].data);
-    setJuguetesList(products.category[6].data);
-    setLibrosList(products.category[7].data);
+   
   }, []);
 
   
