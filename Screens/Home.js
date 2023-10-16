@@ -8,7 +8,7 @@ export default function Home({ navigation }) {
       const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
       if (isLoggedIn === "true") {
         
-        navigation.navigate("Galeria2"); 
+        navigation.navigate("DetalleArticulo"); 
       } else {
         
         const timer = setTimeout(() => {
