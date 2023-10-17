@@ -1,3 +1,4 @@
+// SACAR LA DESCRIPCION Y AGREGAR "NUEVO/USADO" Y "GRATIS/INTERCAMBIO"
 import React, { useRef, useState } from "react";
 import {
   Text,
@@ -64,15 +65,19 @@ export default function Registro() {
     </View>
   );
   const objeto1 = {
-    nombre: "Nombre del producto klo que ofrecí",
-    descripcion: "Datos de la primera wea",
+    nombre: "Yo mismo",
+    Estado: "Nuevo",
+    Tipo: "Intercambio",
     imagen: require("../assets/yo.png"),
+    fotoPerfil: require("../assets/FotoPerfil.com.png"),
   };
 
   const objeto2 = {
-    nombre: "Nombre del art klo que te ofrecieron",
-    descripcion: "Datos de la segunda wea",
-    imagen2: require("../assets/SubirProducto.png"),
+    nombre: "Cama",
+    Estado: "Usado",
+    Tipo: "Intercambio",
+    imagen: require("../assets/SubirProducto.png"),
+    fotoPerfil: require("../assets/FotoPerfil.com.png"),
   };
 
   return (
@@ -83,32 +88,43 @@ export default function Registro() {
       renderNavigationView={navigationView}
     >
       <View style={styles.container}>
-        <Text style={styles.bigText}>Objetos de Intercambio</Text>
+        <Text style={{ ...styles.bigText, ...styles.boldTextTittle }}>
+          Objetos de Intercambio
+        </Text>
         <View style={styles.itemContainer}>
+          <Text style={styles.boldTextTittle}>Mis articulos</Text>
           <View style={styles.item}>
             <Image source={objeto1.imagen} style={styles.imagen} />
             <View style={styles.detallesContainer}>
               <Text style={styles.text}>
-                <Text style={styles.boldText}>Nombre:</Text> {objeto1.nombre}
+                <Text style={styles.boldText}></Text> {objeto1.nombre}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.boldText}>Descripción:</Text>{" "}
-                {objeto1.descripcion}
+                <Text style={styles.boldText}></Text> {objeto1.Estado}
+              </Text>
+              <Text style={styles.text}>
+                <Text style={styles.boldText}></Text> {objeto1.Tipo}
               </Text>
             </View>
+            <Image source={objeto1.fotoPerfil} style={styles.fotoPerfil} />
           </View>
-
+          <Text style={styles.boldTextTittle}>
+            Articulo de "Nombre del Estupido"
+          </Text>
           <View style={styles.item}>
-            <Image source={objeto2.imagen2} style={styles.imagen} />
+            <Image source={objeto2.imagen} style={styles.imagen} />
             <View style={styles.detallesContainer}>
               <Text style={styles.text}>
-                <Text style={styles.boldText}>Nombre:</Text> {objeto2.nombre}
+                <Text style={styles.boldText}></Text> {objeto2.nombre}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.boldText}>Descripción:</Text>{" "}
-                {objeto2.descripcion}
+                <Text style={styles.boldText}></Text> {objeto2.Estado}
+              </Text>
+              <Text style={styles.text}>
+                <Text style={styles.boldText}></Text> {objeto2.Tipo}
               </Text>
             </View>
+            <Image source={objeto2.fotoPerfil} style={styles.fotoPerfil} />
           </View>
         </View>
 
@@ -156,6 +172,11 @@ const styles = StyleSheet.create({
   boldText: {
     fontSize: 18,
     color: "white",
+    fontWeight: "bold",
+  },
+  boldTextTittle: {
+    fontSize: 18,
+    color: "black",
     fontWeight: "bold",
   },
   bigText: {
@@ -229,8 +250,8 @@ const styles = StyleSheet.create({
     height: 47,
   },
   imagen: {
-    width: 150,
-    height: 150,
+    width: 100,
+    height: 100,
   },
   detallesContainer: {
     flex: 1,
@@ -238,5 +259,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#8AAD34",
     borderRadius: 7,
     marginVertical: 10,
+  },
+  fotoPerfil: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
 });
