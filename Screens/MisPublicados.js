@@ -20,8 +20,8 @@ export default function MisPublicados() {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => null, 
-      gestureEnabled: false, 
+      headerLeft: () => null,
+      gestureEnabled: false,
     });
   }, [navigation]);
 
@@ -30,7 +30,7 @@ export default function MisPublicados() {
   };
 
   const goGaleria = () => {
-    navigation.navigate("Galeria");
+    navigation.navigate("Galeria2");
   };
 
   const goMisPublicados = () => {
@@ -55,11 +55,11 @@ export default function MisPublicados() {
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       {/* Título "TeloCambio" encima de la línea superior, mi opcion B era dejarlo como texto */}
       <View>
-          <Image
-            source={require("../assets/LogoTeLoCambio.png")}
-            style={styles.logo}
-          />
-        </View>
+        <Image
+          source={require("../assets/LogoTeLoCambio.png")}
+          style={styles.logo}
+        />
+      </View>
 
       {/* Línea de separación */}
       <View style={styles.separatorLine} />
@@ -81,7 +81,6 @@ export default function MisPublicados() {
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
-
     </View>
   );
 
@@ -121,14 +120,14 @@ export default function MisPublicados() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={AccesoriosList}
-            renderItem={({ item, index }) => {
-              return <MisListItem item={item} />;
-            }}
-          />
-        </View>
+      <View style={{ marginTop: 15 }}>
+        <FlatList
+          data={AccesoriosList}
+          renderItem={({ item, index }) => {
+            return <MisListItem item={item} />;
+          }}
+        />
+      </View>
     </DrawerLayout>
   );
 
@@ -156,7 +155,7 @@ const styles = StyleSheet.create({
   },
   textButton: {
     color: "#ffffff",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   containerDrawer: {
     flex: 1,
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   logo: {
-    width:260,
+    width: 260,
     height: 47,
   },
 });

@@ -84,7 +84,7 @@ export default function Galeria2() {
     try {
       await auth.signOut();
       await AsyncStorage.removeItem("isLoggedIn");
-      navigation.navigate("Login");
+      navigation.navigate("Ingreso");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
@@ -108,6 +108,12 @@ export default function Galeria2() {
 
   const goSubirArticulos = () => {
     navigation.navigate("SubirArticulos");
+  };
+  const ListaReportesAdmin = () => {
+    navigation.navigate("ListaReportesAdmin");
+  };
+  const Concretar = () => {
+    navigation.navigate("Concretar");
   };
 
   const changeDrawerPosition = () => {
@@ -190,22 +196,24 @@ export default function Galeria2() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
-      <View style={styles.itemOverlay}>
-        <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
-        <Text style={styles.itemInfo}>{item.estadoArticulo || ""}</Text>
-        <Text style={styles.itemInfo}>{item.comuna || ""}</Text>
-        {item.tipo === "Intercambiar artículo" && (
-          <TouchableOpacity style={[styles.teLoCambioButton]}>
-            <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-          </TouchableOpacity>
-        )}
-        {item.tipo === "Regalar artículo" && (
-          <TouchableOpacity style={[styles.teLoRegaloButton]}>
-            <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      <TouchableOpacity onPress={() => navigation.navigate("Concretar")}>
+        <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
+        <View style={styles.itemOverlay}>
+          <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
+          <Text style={styles.itemInfo}>{item.estadoArticulo || ""}</Text>
+          <Text style={styles.itemInfo}>{item.comuna || ""}</Text>
+          {item.tipo === "Intercambiar artículo" && (
+            <TouchableOpacity style={[styles.teLoCambioButton]}>
+              <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+            </TouchableOpacity>
+          )}
+          {item.tipo === "Regalar artículo" && (
+            <TouchableOpacity style={[styles.teLoRegaloButton]}>
+              <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
     </View>
   );
 
