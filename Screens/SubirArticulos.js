@@ -390,10 +390,4 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "white",
   },
-  cajaPicker: {
-    backgroundColor: "#cccccc50",
-    borderRadius: 30,
-    marginVertical: 9,
-    width: 295,
-  },
 });
