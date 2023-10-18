@@ -1,14 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Carousel, { Pagination } from 'react-native-snap-carousel'; // eslint-disable-next-line react/prop-types
+import Swiper from "react-native-swiper";
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
   
-  const { width } = Dimensions.get('window');
-  const carouselRef = useRef(null);
-  const [activeSlide, setActiveSlide] = useState(0);
+  
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
@@ -28,37 +26,28 @@ export default function DetalleArticulo() {
     setMostrarModal(!mostrarModal);
   };
 
-  const renderItem = ({ item, index }) => {
-    return (
-      <TouchableOpacity onPress={() => toggleModal(index)}>
-        <View style={styles.slide}>
-          <Image source={item} style={styles.imageCarrusel} />
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   return (
+    
     <View style={styles.container}>
       <View style={styles.userInfoContainer}>
-        <View style={styles.userDetails}>
-          <Text style={styles.text1}>Patines</Text>
-          <Carousel
-            ref={carouselRef}
-            data={images}
-            renderItem={renderItem}
-            sliderWidth={150} // Ancho del carrusel
-            itemWidth={200} // Ancho de cada elemento del carrusel
-            onSnapToItem={(index) => setActiveSlide(index)}
-          />
-          <Pagination
-            dotsLength={images.length}
-            activeDotIndex={activeSlide}
-            containerStyle={{ backgroundColor: 'transparent', paddingTop: 10 }}
-            dotStyle={styles.paginationDot}
-            inactiveDotOpacity={0.4}
-            inactiveDotScale={0.7}
-          />
+        <View style={styles.containerSwiper}>
+          <Text style={styles.tittle}>Patines</Text>
+          <Swiper
+            showsButtons={true}
+            loop={false}
+            autoplay={false}
+            onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
+            dotStyle={styles.dot}
+            activeDot={<View style={styles.activeDot}/>}
+            nextButton={<Text style={styles.buttonSwiper}>❯</Text>} // Botón siguiente
+            prevButton={<Text style={styles.buttonSwiper}>❮</Text>} // Botón anterior
+          >
+            {images.map((item, index) => (
+              <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
+                <Image source={item} style={styles.imageCarrusel} />
+              </TouchableOpacity>
+            ))}
+          </Swiper>
           <Text style={styles.text2}>• Usado</Text>
           <Text style={styles.text2}>• Intercambio</Text>
         </View>
@@ -67,6 +56,7 @@ export default function DetalleArticulo() {
           <Text style={styles.nombreUser}>Juanito Perez</Text>
         </View>
       </View>
+
       <View style={styles.containerBoton}>
         <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
           <Text style={styles.textoBoton}>Eliminar Publicación</Text>
@@ -75,6 +65,7 @@ export default function DetalleArticulo() {
           <Text style={styles.textoBoton}>Banear Usuario</Text>
         </TouchableOpacity>
       </View>
+
       <Modal visible={mostrarModal} transparent={true}>
         <View style={styles.modalContainer}>
           <Image
@@ -98,47 +89,47 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 60,
+    paddingTop: 80,
+    alignItems: "center"
   },
-  slide: {
-    width: - 60,
-    height: 150, // Altura de las imágenes en el carrusel
-    borderRadius: 10,
-    backgroundColor: "#f0f0f0",
-    marginTop: 25,
+  containerSwiper:{
+    flex: 1,
+    marginRight: 50,
+    marginTop: -25,
+  },
+  buttonSwiper: {
+    color: '#353535',
+    fontSize: 50,
   },
   imageCarrusel: {
-    width: 150,
-    height: 150,
+    width: 170,
+    height: 170,
     borderRadius: 5,
   },
   userInfoContainer: {
     flexDirection: "row",
-    paddingHorizontal: 30,
-    marginTop: 40,
+    width: 320,
+    height: 300,
+    fontSize: 70,
+    marginTop: 30,
   },
-  userDetails: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-  userProfile: {
-    alignItems: "center",
-    marginRight: 5,
-    marginTop: 50,
-  },
-  text1: {
+  tittle: {
     fontSize: 25,
     fontWeight: "600",
+    marginVertical: 20,
   },
   text2: {
     fontSize: 18,
     fontWeight: "500",
-    marginTop: 10,
+  },
+  userProfile: {
+    alignItems: "center",
+    marginTop: 50,
   },
   nombreUser:{
     fontSize: 20,
     fontWeight: "500",
-    marginTop: 15,
+    marginTop: 23,
   },
   imageUser: {
     width: 90,
@@ -161,15 +152,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
   },
-  paginationDot: {
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 5,
+    marginHorizontal: 5,
+    backgroundColor: '#404040',
+  },
+  activeDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginHorizontal: 5,
-    backgroundColor: 'green',
-  },
-  containerText: {
-    justifyContent: "space-around",
+    backgroundColor: '#1BA209',
   },
   modalContainer: {
     flex: 1,
@@ -178,8 +173,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   imageModal: {
-    width: 300,
-    height: 300,
+    width: 350,
+    height: 350,
   },
   cerrarButton: {
     marginTop: 20,
