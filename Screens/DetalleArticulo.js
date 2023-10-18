@@ -5,8 +5,6 @@ import Swiper from "react-native-swiper";
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
-  
-  
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
@@ -56,7 +54,6 @@ export default function DetalleArticulo() {
           <Text style={styles.nombreUser}>Juanito Perez</Text>
         </View>
       </View>
-
       <View style={styles.containerBoton}>
         <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
           <Text style={styles.textoBoton}>Eliminar Publicación</Text>
@@ -65,7 +62,6 @@ export default function DetalleArticulo() {
           <Text style={styles.textoBoton}>Banear Usuario</Text>
         </TouchableOpacity>
       </View>
-
       <Modal visible={mostrarModal} transparent={true}>
         <View style={styles.modalContainer}>
           <Image
