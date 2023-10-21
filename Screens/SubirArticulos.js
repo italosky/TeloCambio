@@ -155,7 +155,6 @@ export default function SubirArticulos() {
       fetch(selectedRegionUrl)
         .then((response) => response.json())
         .then((data) => {
-          console.log("Datos de la región seleccionada:", data);
           setItemProvincia(data.provinces);
           setItemComuna(data.communes);
         })

@@ -128,9 +128,11 @@ export default function MisPublicados() {
     const unsubscribe = navigation.addListener("focus", () => {
       fetchPosts();
     });
-    fetchPosts();
+    if (userId){
+      fetchPosts();
+    }
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, userId]);
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchPosts();
