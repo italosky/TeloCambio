@@ -8,15 +8,26 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { Card } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
-import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
 import MisListItem from "./common/MisListItem";
 import { Drawer } from "react-native-paper";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db, auth } from "../firebaseConfig";
+import {  signInWithEmailAndPassword } from "firebase/auth";
+
 
 export default function MisPublicados() {
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState();
+  const [email, setEmail] = useState();
   const navigation = useNavigation();
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [numColumns, setNumColumns] = useState(2);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -84,35 +95,63 @@ export default function MisPublicados() {
 
     </View>
   );
-
-  const [active, setActive] = React.useState("");
-
-  const [categoryList, setcategoryList] = useState([]);
-  const [AccesoriosList, setAccesoriosList] = useState([]);
-  const [ComidaList, setComidaList] = useState([]);
-  const [DeportesList, setDeportesList] = useState([]);
-  const [FerreteriaList, setFerreteriaList] = useState([]);
-  const [HogarList, setHogarList] = useState([]);
-  const [InstrumentosList, setInstrumentosList] = useState([]);
-  const [JuguetesList, setJuguetesList] = useState([]);
-  const [LibrosList, setLibrosList] = useState([]);
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) setUserId(user.uid);
+  }, []);
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const allItemsArray = [];
+      const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
+      articulosPublicadosRef.forEach((postDoc) => {
+        const postData = postDoc.data();
+        allItemsArray.push({
+          uid: postDoc.id,  
+          imagenURL: postData.imagenURL,
+          nombreArticulo: postData.nombreArticulo,
+          tipo: postData.tipo,
+          estadoArticulo: postData.estadoArticulo,
+          comuna: postData.comuna,
+        });
+      });  
+      setDataSource(allItemsArray);
+    } catch (error) {
+      console.error("Error al cargar los artículos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   useEffect(() => {
-    console.log(products);
-    let tempCategory = [];
-    products.category.map((item) => {
-      tempCategory.push(item);
+    //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchPosts();
     });
-    setcategoryList(tempCategory);
-    setAccesoriosList(products.category[0].data);
-    setComidaList(products.category[1].data);
-    setDeportesList(products.category[2].data);
-    setFerreteriaList(products.category[3].data);
-    setHogarList(products.category[4].data);
-    setInstrumentosList(products.category[5].data);
-    setJuguetesList(products.category[6].data);
-    setLibrosList(products.category[7].data);
-  }, []);
+    fetchPosts();
+    return unsubscribe;
+  }, [navigation]);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
+  const renderItem = ({item}) => {
+  
+    return (
+      <Card style={styles.containerCard} onPress={goMiPerfil}> 
+        <Card.Title
+        style={styles.containerCardContent} 
+        title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
+        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
+        left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
+        right={(props) => <Image source={require("../assets/Eliminar.png")} style={styles.iconList}/>}
+        />
+      </Card>
+  
+    );
+  };
 
   const renderDrawerAndroid = () => (
     <DrawerLayout
@@ -122,12 +161,14 @@ export default function MisPublicados() {
       renderNavigationView={navigationView}
     >
         <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={AccesoriosList}
-            renderItem={({ item, index }) => {
-              return <MisListItem item={item} />;
-            }}
-          />
+        <FlatList
+        data={dataSource} 
+        renderItem={renderItem}
+        keyExtractor={(item) => (item && item.uid ? item.uid.toString() : 'defaultKey')}
+        contentContainerStyle={styles.gridContainer}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+      />
         </View>
     </DrawerLayout>
   );
@@ -196,5 +237,56 @@ const styles = StyleSheet.create({
   logo: {
     width:260,
     height: 47,
+  },
+  containerCard: {
+    width: 'auto',
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginHorizontal: 15,
+    marginBottom: 10,
+  },
+  containerCardContent: {
+    width: 'auto',
+    height: 100,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  imagenList: {
+    width: '200%',
+    height: '200%',
+    borderRadius: 10,
+  },
+  iconList: {
+    width: 40,
+    height: 40,
+    marginRight: 15,
+  },
+  viewCard: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  textCard: {
+    fontSize: 18,
+    fontWeight: '500',
+    marginLeft: 38,
+  },
+  textCardDate: {
+    fontSize: 14,
+    marginLeft: 38,
+  },
+  buttonCard: {
+    borderRadius: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+    padding: 5,
+    backgroundColor: "#63A355",
+  },
+  textButton2: {
+    color: "#ffffff",
+  },
+  gridContainer: {
+    padding: 0,
   },
 });

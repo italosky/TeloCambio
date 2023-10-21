@@ -88,18 +88,6 @@ export default function Registro() {
             <Text style={styles.text}> Experto</Text>
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.buttonPublicadas}
-          onPress={goPublicaciones}
-        >
-          <Text style={styles.buttonText}>Cosas Publicadas</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.buttonReportar, styles.buttonPublicadas]}
-          onPress={goOfertas}
-        >
-          <Text style={styles.buttonText}>Ofertas recibidas</Text>
-        </TouchableOpacity>
       </View>
     </DrawerLayout>
   );
