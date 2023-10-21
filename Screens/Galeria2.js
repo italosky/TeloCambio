@@ -223,7 +223,6 @@ export default function Galeria2() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8,
   },
   containerDrawer: {
     flex: 1,
