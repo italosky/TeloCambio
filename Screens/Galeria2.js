@@ -234,21 +234,20 @@ const styles = StyleSheet.create({
   },
   drawerItem: {
     backgroundColor: "#8AAD34",
-    marginTop: 5,
-    marginBottom: 5,
-    borderRadius: 2,
+    marginBottom: 12,
+    borderRadius: 5,
     alignItems: "center",
   },
   drawerText: {
     fontSize: 18,
+    fontWeight: "500",
     color: "#ffffff",
-    padding: 12,
+    padding: 10,
   },
   separatorLine: {
-    borderBottomWidth: 0.5,
-    color: "gray",
-    marginVertical: 15,
-    marginHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#7A7A7A",
+    margin: 15,
   },
   logo: {
     width: 255,

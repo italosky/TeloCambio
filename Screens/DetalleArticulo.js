@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
+import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
+import { Drawer } from "react-native-paper";
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
@@ -24,61 +26,147 @@ export default function DetalleArticulo() {
     setMostrarModal(!mostrarModal);
   };
 
-  return (
-    
-    <View style={styles.container}>
-      <View style={styles.userInfoContainer}>
-        <View style={styles.containerSwiper}>
-          <Text style={styles.tittle}>Patines</Text>
-          <Swiper
-            showsButtons={true}
-            loop={false}
-            autoplay={false}
-            onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
-            dotStyle={styles.dot}
-            activeDot={<View style={styles.activeDot}/>}
-            nextButton={<Text style={styles.buttonSwiper}>❯</Text>} // Botón siguiente
-            prevButton={<Text style={styles.buttonSwiper}>❮</Text>} // Botón anterior
-          >
-            {images.map((item, index) => (
-              <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
-                <Image source={item} style={styles.imageCarrusel} />
-              </TouchableOpacity>
-            ))}
-          </Swiper>
-          <Text style={styles.text2}>• Usado</Text>
-          <Text style={styles.text2}>• Intercambio</Text>
-        </View>
-        <View style={styles.userProfile}>
-          <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser}/>
-          <Text style={styles.nombreUser}>Juanito Perez</Text>
-        </View>
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null,
+      gestureEnabled: false,
+    });
+  }, [navigation]);
+
+  const goMiPerfil = () => {
+    navigation.navigate("MiPerfil");
+  };
+
+  const goGaleria2 = () => {
+    navigation.navigate("Galeria2");
+  };
+
+  const goMisPublicados = () => {
+    navigation.navigate("MisPublicados");
+  };
+
+  const goMisOfertas = () => {
+    navigation.navigate("MisOfertas");
+  };
+
+  const drawer = useRef(null);
+  const [drawerPosition, setDrawerPosition] = useState("left");
+
+  const changeDrawerPosition = () => {
+    if (drawerPosition === "left") {
+      setDrawerPosition("right");
+    } else {
+      setDrawerPosition("left");
+    }
+  };
+
+  const cerrarSesion = async () => {
+    try {
+      await auth.signOut();
+      await AsyncStorage.removeItem("isLoggedIn");
+      navigation.navigate("Ingreso");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
+  const navigationView = () => (
+    <View style={[styles.containerDrawer, styles.navigationContainer]}>
+      <View>
+        <Image
+          source={require("../assets/LogoTeLoCambio.png")}
+          style={styles.logo}
+        />
       </View>
-      <View style={styles.containerBoton}>
-        <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-          <Text style={styles.textoBoton}>Eliminar Publicación</Text>
+      <View style={styles.separatorLine} />
+
+      <Drawer.Section>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
+          <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-          <Text style={styles.textoBoton}>Banear Usuario</Text>
+        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
+          <Text style={styles.drawerText}>Galería de Artículos</Text>
         </TouchableOpacity>
-      </View>
-      <Modal visible={mostrarModal} transparent={true}>
-        <View style={styles.modalContainer}>
-          <Image
-            source={images[indiceImagenAmpliada]}
-            style={styles.imageModal}
-            resizeMode="contain"
-          />
-          <TouchableOpacity
-            style={styles.cerrarButton}
-            onPress={() => toggleModal(indiceImagenAmpliada)}
-          >
-            <Text style={styles.cerrarButtonText}>Cerrar</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
+          <Text style={styles.drawerText}>Mis Publicados</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
+          <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+      </Drawer.Section>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
+        <Image
+          source={require("../assets/Salir.png")}
+          style={styles.logoutImage}
+        />
+      </TouchableOpacity>
     </View>
   );
+
+  const renderDrawerAndroid = () => (
+    <DrawerLayout
+      ref={drawer}
+      drawerWidth={200}
+      drawerPosition={drawerPosition}
+      renderNavigationView={navigationView}
+    >
+      <View style={styles.container}>
+        <View style={styles.userInfoContainer}>
+          <View style={styles.containerSwiper}>
+            <Text style={styles.tittle}>Patines</Text>
+            <Swiper
+              showsButtons={true}
+              loop={false}
+              autoplay={false}
+              onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
+              dotStyle={styles.dot}
+              activeDot={<View style={styles.activeDot}/>}
+              nextButton={<Text style={styles.buttonSwiper}>❯</Text>} // Botón siguiente
+              prevButton={<Text style={styles.buttonSwiper}>❮</Text>} // Botón anterior
+            >
+              {images.map((item, index) => (
+                <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
+                  <Image source={item} style={styles.imageCarrusel} />
+                </TouchableOpacity>
+              ))}
+            </Swiper>
+            <Text style={styles.text2}>• Usado</Text>
+            <Text style={styles.text2}>• Intercambio</Text>
+          </View>
+          <View style={styles.userProfile}>
+            <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser}/>
+            <Text style={styles.nombreUser}>Juanito Perez</Text>
+          </View>
+        </View>
+        <View style={styles.containerBoton}>
+          <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+            <Text style={styles.textoBoton}>Eliminar Publicación</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+            <Text style={styles.textoBoton}>Banear Usuario</Text>
+          </TouchableOpacity>
+        </View>
+        <Modal visible={mostrarModal} transparent={true}>
+          <View style={styles.modalContainer}>
+            <Image
+              source={images[indiceImagenAmpliada]}
+              style={styles.imageModal}
+              resizeMode="contain"
+            />
+            <TouchableOpacity
+              style={styles.cerrarButton}
+              onPress={() => toggleModal(indiceImagenAmpliada)}
+            >
+              <Text style={styles.cerrarButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </View>
+    </DrawerLayout>  
+  );
+
+  return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
 }
 
 const styles = StyleSheet.create({
@@ -181,5 +269,41 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
     padding: 10,
     borderRadius: 5,
+  },
+  containerDrawer: {
+    flex: 1,
+    padding: 5,
+  },
+  navigationContainer: {
+    backgroundColor: "#ecf0f1",
+  },
+  drawerItem: {
+    backgroundColor: "#8AAD34",
+    marginBottom: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  drawerText: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#ffffff",
+    padding: 10,
+  },
+  separatorLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#7A7A7A",
+    margin: 15,
+  },
+  logo: {
+    width: 255,
+    height: 55,
+  },
+  logoutButton: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  logoutImage: {
+    width: 80,
+    height: 80,
   },
 });
