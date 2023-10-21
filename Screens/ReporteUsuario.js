@@ -39,14 +39,15 @@ export default function Registro(props) {
   const handleRegister = async () => {
     if (data.causa_reporte && data.reporte) {
       try {
-        // Asegurate de que tienes una colección 'Reportes' en tu Firestore
-        const reportesRef = collection(db, 'Reportes'); // <- Aqui
-        const reportesVigentesDocRef = doc(reportesRef, 'ReportesVigentes');
-        const userReportsCollectionRef = collection(reportesVigentesDocRef, userId); 
-        await addDoc(userReportsCollectionRef, {
+        const normalizedNombre =
+        "(" + causa_reporte + ")".toLowerCase().replace(/\s+/g, "");
+        const readableID = `${normalizedNombre}-${userId}`;
+        const reportesRef = collection(db, 'Reportes',readableID); // <- Aqui
+        await addDoc(reportesRef, {
           causa_reporte: data.causa_reporte,
           reporte: data.reporte,
           timestamp: serverTimestamp(),
+          userid: uid
         });
         Alert.alert('¡Reporte enviado!', 'Un administrador revisara su solicitud');
         setData({
