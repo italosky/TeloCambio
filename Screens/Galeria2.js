@@ -196,7 +196,7 @@ export default function Galeria2() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => navigation.navigate("DetalleArticulo")}>
+      <TouchableOpacity onPress={() => navigation.navigate("DetalleArticulo", { item })}>
         <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
         <View style={styles.itemOverlay}>
           <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
