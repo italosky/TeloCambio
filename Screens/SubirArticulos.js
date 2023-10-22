@@ -36,7 +36,7 @@ export default function SubirArticulos() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState("");
   const [progress, setProgress] = useState(0);
-
+  const [selectedRegion, setSelectedRegion] = useState("");
   const removeImage = (indexToRemove) => {
     setSelectedImages(
       selectedImages.filter((_, index) => index !== indexToRemove)
@@ -117,12 +117,13 @@ export default function SubirArticulos() {
       await setDoc(itemDoc, {
         nombreArticulo: itemName,
         estadoArticulo: itemCondition,
-        comuna: itemComuna,
+        comuna: selectedComuna.name,
+        region: selectedRegion.name,
         tipo: itemTrade,
         imagenURL: url1,
         imagenURL2: url2,
         imagenURL3: url3,
-        userId: userId,
+        uid: userId,
       });
       setUploading(false);
       Alert.alert(
@@ -154,7 +155,6 @@ export default function SubirArticulos() {
       fetch(selectedRegionUrl)
         .then((response) => response.json())
         .then((data) => {
-          console.log("Datos de la región seleccionada:", data);
           setItemProvincia(data.provinces);
           setItemComuna(data.communes);
         })
@@ -202,18 +202,19 @@ export default function SubirArticulos() {
         </View>
         
         <View style={styles.cajaPicker}>
-          <Picker
-            selectedValue={selectedRegionUrl}
-            onValueChange={(itemValue) => setSelectedRegionUrl(itemValue)}
-          >
-            <Picker.Item label="Seleccionar Región" value="" />
-            {itemRegion.map((region) => (
-              <Picker.Item 
-                key={region.id} 
-                label={region.name} 
-                value={region.url} />
-            ))}
-          </Picker>
+        <Picker
+    selectedValue={selectedRegionUrl}
+    onValueChange={(itemValue, itemIndex) => {
+      const selectedRegionData = itemRegion.find(region => region.url === itemValue);
+      setSelectedRegion(selectedRegionData);
+      setSelectedRegionUrl(itemValue);
+    }}
+>
+    <Picker.Item label="Seleccionar Región" value="" />
+    {itemRegion.map((region) => (
+        <Picker.Item key={region.id} label={region.name} value={region.url} />
+    ))}
+</Picker>
         </View>
 
         <View style={styles.cajaPicker}>
