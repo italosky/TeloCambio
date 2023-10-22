@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
 import MisListItem from "./common/MisListItem";
 import { Drawer } from "react-native-paper";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import {  signInWithEmailAndPassword } from "firebase/auth";
 
@@ -28,7 +28,14 @@ export default function MisPublicados() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [numColumns, setNumColumns] = useState(2);
-
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await deleteDoc(doc(db, "Publicaciones", itemId));
+      setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
+    } catch (error) {
+      console.error("Error al eliminar el artículo:", error);
+    }
+  };
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => null,
@@ -51,7 +58,7 @@ export default function MisPublicados() {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
-
+  
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
   const changeDrawerPosition = () => {
@@ -128,9 +135,11 @@ export default function MisPublicados() {
     const unsubscribe = navigation.addListener("focus", () => {
       fetchPosts();
     });
-    fetchPosts();
+    if (userId){
+      fetchPosts();
+    }
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, userId]);
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchPosts();
@@ -145,7 +154,13 @@ export default function MisPublicados() {
         title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
         subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
         left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
-        right={(props) => <Image source={require("../assets/Eliminar.png")} style={styles.iconList}/>}
+        right={(props) => (
+          <TouchableOpacity
+            onPress={() => handleDeleteItem(item.uid)}
+          >
+            <Image source={require("../assets/Eliminar.png")} style={styles.iconList} />
+          </TouchableOpacity>
+        )}
         />
       </Card>
   

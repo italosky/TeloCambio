@@ -1,19 +1,18 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
+
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const item = route.params?.item;
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
 
-  const images = [
-    require('./assets,articulos/Patines.png'),
-    require('./assets,articulos/LucesBici.png'),
-    require('./assets,articulos/Lentes.png'),
-  ];
+  const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
 
   const ReporteUsuario = () => {
     navigation.navigate("ReporteUsuario");
@@ -25,33 +24,42 @@ export default function DetalleArticulo() {
   };
 
   return (
-    
     <View style={styles.container}>
       <View style={styles.userInfoContainer}>
         <View style={styles.containerSwiper}>
-          <Text style={styles.tittle}>Patines</Text>
+          <Text style={styles.tittle}>{item.nombreArticulo}</Text>
           <Swiper
             showsButtons={true}
             loop={false}
             autoplay={false}
             onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
-            dotStyle={styles.dot}
-            activeDot={<View style={styles.activeDot}/>}
-            nextButton={<Text style={styles.buttonSwiper}>❯</Text>} // Botón siguiente
-            prevButton={<Text style={styles.buttonSwiper}>❮</Text>} // Botón anterior
+           dotStyle={styles.dotContainer}
+            activeDot={<View style={styles.activeDot} />}
+            nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
+            prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
           >
             {images.map((item, index) => (
               <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
-                <Image source={item} style={styles.imageCarrusel} />
+                <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="cover"/>
               </TouchableOpacity>
             ))}
           </Swiper>
-          <Text style={styles.text2}>• Usado</Text>
-          <Text style={styles.text2}>• Intercambio</Text>
+          <Text style={styles.text2}>Estado: {item.estadoArticulo}</Text>
+          <Text style={styles.text2}>Comuna: {item.comuna}</Text>
         </View>
         <View style={styles.userProfile}>
-          <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser}/>
-          <Text style={styles.nombreUser}>Juanito Perez</Text>
+          <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
+          <Text style={styles.nombreUser}> Juanito{item.usuario}</Text>
+          {item.tipo === "Intercambiar artículo" && (
+            <TouchableOpacity style={[styles.teLoCambioButton]}>
+              <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+            </TouchableOpacity>
+          )}
+          {item.tipo === "Regalar artículo" && (
+            <TouchableOpacity style={[styles.teLoRegaloButton]}>
+              <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <View style={styles.containerBoton}>
@@ -65,7 +73,7 @@ export default function DetalleArticulo() {
       <Modal visible={mostrarModal} transparent={true}>
         <View style={styles.modalContainer}>
           <Image
-            source={images[indiceImagenAmpliada]}
+            source={{ uri: images[indiceImagenAmpliada] }}
             style={styles.imageModal}
             resizeMode="contain"
           />
@@ -85,22 +93,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 80,
+    paddingTop: 90,
     alignItems: "center"
   },
   containerSwiper:{
     flex: 1,
-    marginRight: 50,
-    marginTop: -25,
+    marginRight: 55,
+    backgroundColor:  "#ffffff",
   },
   buttonSwiper: {
-    color: '#353535',
-    fontSize: 50,
+    color: "#ffffff",
+    fontSize: 40,
   },
   imageCarrusel: {
     width: 170,
     height: 170,
     borderRadius: 5,
+    position: 'absolute',
   },
   userInfoContainer: {
     flexDirection: "row",
@@ -110,13 +119,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   tittle: {
-    fontSize: 25,
+    fontSize: 18,
     fontWeight: "600",
     marginVertical: 20,
+    textAlign: "center",
   },
   text2: {
     fontSize: 18,
     fontWeight: "500",
+    paddingBottom: 10,
   },
   userProfile: {
     alignItems: "center",
@@ -149,18 +160,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dot: {
-    width: 7,
-    height: 7,
+    width: 10,
+    height: 10,
     borderRadius: 5,
-    marginHorizontal: 5,
-    backgroundColor: '#404040',
+    marginHorizontal: 0,
+    backgroundColor: "#ffffff",
   },
   activeDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginHorizontal: 5,
-    backgroundColor: '#1BA209',
+    backgroundColor: "gray",
   },
   modalContainer: {
     flex: 1,
@@ -181,5 +192,36 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
     padding: 10,
     borderRadius: 5,
+  },
+  teLoCambioButton: {
+    alignSelf: "flex-end",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    backgroundColor: "#63A355",
+  },
+  teLoCambioButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  teLoRegaloButton: {
+    alignSelf: "flex-end",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    backgroundColor: "#efb810",
+  },
+  teLoRegaloButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  dotContainer: {
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginTop: 0, 
   },
 });
