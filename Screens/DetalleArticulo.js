@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 
@@ -8,11 +8,17 @@ export default function DetalleArticulo() {
   const navigation = useNavigation();
   const route = useRoute();
   const item = route.params?.item;
-
   const [mostrarModal, setMostrarModal] = useState(false);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
-
-  const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
+  const images = [
+    item.imagenURL,
+    item.imagenURL2,
+    item.imagenURL3
+  ];
+  
+  const navigateToDatosCambio = () => {
+    navigation.navigate("DatosCambio", { item });
+  };
 
   const ReporteUsuario = () => {
     navigation.navigate("ReporteUsuario");
@@ -22,6 +28,21 @@ export default function DetalleArticulo() {
     setIndiceImagenAmpliada(index);
     setMostrarModal(!mostrarModal);
   };
+
+  const confirmarReclamo = () => {
+    Alert.alert(
+      "Confirmación",
+      "¿Estás seguro de que deseas reclamar este artículo?", 
+      [
+        {
+          text: "No",
+          style: "cancel"
+        },
+        { text: "Sí", onPress: navigateToDatosCambio }
+      ],
+      { cancelable: false }
+    );
+  }  
 
   return (
     <View style={styles.container}>
@@ -56,7 +77,7 @@ export default function DetalleArticulo() {
             </TouchableOpacity>
           )}
           {item.tipo === "Regalar artículo" && (
-            <TouchableOpacity style={[styles.teLoRegaloButton]}>
+            <TouchableOpacity style={[styles.teLoRegaloButton]} onPress={confirmarReclamo}>
               <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
             </TouchableOpacity>
           )}
