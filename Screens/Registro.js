@@ -28,6 +28,7 @@ export default function Registro(props) {
     email: "",
     password: "",
     role: "",
+    ImgPerfil: ""
   });
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -103,6 +104,7 @@ export default function Registro(props) {
           email: data.email,
           password:data.password,
           role: 'usuario',
+          ImgPerfil: imageUri
         });      
         Alert.alert('Registro exitoso!');
       };

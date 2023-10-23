@@ -70,14 +70,21 @@ export default function SubirArticulos() {
         : alert("Debes seleccionar 3 imagenes");
     }
   };
-  
+
   const SubirArticulo = async () => {
     try {
       if (selectedImages.length < 3) {
         Alert.alert("Atención!", "Debes seleccionar 3 imágenes minimo");
         return;
       }
-      if (!selectedComuna || selectedImages.length < 3 || !userId || !itemName || !itemCondition || !itemTrade) {
+      if (
+        !selectedComuna ||
+        selectedImages.length < 3 ||
+        !userId ||
+        !itemName ||
+        !itemCondition ||
+        !itemTrade
+      ) {
         Alert.alert("Todos los campos son obligatorios");
         return;
       }
@@ -139,7 +146,8 @@ export default function SubirArticulos() {
     }
   };
 
-  useEffect(() => { // Obtener todas las regiones al cargar el componente
+  useEffect(() => {
+    // Obtener todas las regiones al cargar el componente
     fetch("http://70.37.82.88:8020/api/regions")
       .then((response) => response.json())
       .then((data) => {
@@ -149,7 +157,7 @@ export default function SubirArticulos() {
         console.error("Error al obtener las regiones:", error);
       });
   }, []);
-  
+
   useEffect(() => {
     if (selectedRegionUrl) {
       fetch(selectedRegionUrl)
@@ -167,7 +175,6 @@ export default function SubirArticulos() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
-
         <View style={styles.containerImage}>
           <View style={styles.imagesContainer}>
             {selectedImages.map((selectedImages, index) => (
@@ -178,7 +185,10 @@ export default function SubirArticulos() {
                     style={styles.image}
                   />
                 </Card>
-                <TouchableOpacity style={styles.deleteIconContainer} onPress={() => removeImage(index)}>
+                <TouchableOpacity
+                  style={styles.deleteIconContainer}
+                  onPress={() => removeImage(index)}
+                >
                   <View style={styles.circle}>
                     <Icon name="trash" size={20} color="white" />
                   </View>
@@ -200,30 +210,46 @@ export default function SubirArticulos() {
             value={itemName}
           />
         </View>
-        
+
         <View style={styles.cajaPicker}>
-        <Picker
-    selectedValue={selectedRegionUrl}
-    onValueChange={(itemValue, itemIndex) => {
-      const selectedRegionData = itemRegion.find(region => region.url === itemValue);
-      setSelectedRegion(selectedRegionData);
-      setSelectedRegionUrl(itemValue);
-    }}
->
-    <Picker.Item label="Seleccionar Región" value="" />
-    {itemRegion.map((region) => (
-        <Picker.Item key={region.id} label={region.name} value={region.url} />
-    ))}
-</Picker>
+          <Picker
+            selectedValue={selectedRegionUrl}
+            onValueChange={(itemValue, itemIndex) => {
+              const selectedRegionData = itemRegion.find(
+                (region) => region.url === itemValue
+              );
+              setSelectedRegion(selectedRegionData);
+              setSelectedRegionUrl(itemValue);
+            }}
+          >
+            <Picker.Item
+              label="Seleccionar Región"
+              value=""
+              enabled={isEnabled}
+            />
+            {itemRegion.map((region) => (
+              <Picker.Item
+                key={region.id}
+                label={region.name}
+                value={region.url}
+              />
+            ))}
+          </Picker>
         </View>
 
         <View style={styles.cajaPicker}>
           <Picker
             selectedValue={selectedComuna}
-            onValueChange={(itemValue, itemIndex) => setSelectedComuna(itemValue)}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedComuna(itemValue)
+            }
             enabled={selectedRegionUrl !== ""}
           >
-            <Picker.Item label="Seleccionar Comuna" value="" />
+            <Picker.Item
+              label="Seleccionar Comuna"
+              value=""
+              enabled={isEnabled}
+            />
             {itemComuna.map((comuna) => (
               <Picker.Item
                 key={comuna.id}
@@ -238,8 +264,12 @@ export default function SubirArticulos() {
           <Picker
             selectedValue={itemCondition}
             onValueChange={(itemValue) => setItemCondition(itemValue)}
-            >
-            <Picker.Item label="Estado del Artículo" value="" enabled={isEnabled}/>
+          >
+            <Picker.Item
+              label="Estado del Artículo"
+              value=""
+              enabled={isEnabled}
+            />
             <Picker.Item label="Usado" value="Usado" />
             <Picker.Item label="Nuevo" value="Nuevo" />
           </Picker>
@@ -249,9 +279,16 @@ export default function SubirArticulos() {
           <Picker
             selectedValue={itemTrade}
             onValueChange={(itemValue) => setItemTrade(itemValue)}
-            >
-            <Picker.Item label="Motivo de Publicación" value="" enabled={isEnabled}/>
-            <Picker.Item label="Intercambiar artículo" value="Intercambiar artículo"/>
+          >
+            <Picker.Item
+              label="Motivo de Publicación"
+              value=""
+              enabled={isEnabled}
+            />
+            <Picker.Item
+              label="Intercambiar artículo"
+              value="Intercambiar artículo"
+            />
             <Picker.Item label="Regalar artículo" value="Regalar artículo" />
           </Picker>
         </View>
