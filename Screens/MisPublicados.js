@@ -47,7 +47,7 @@ export default function MisPublicados() {
     navigation.navigate("MiPerfil");
   };
 
-  const goGaleria = () => {
+  const goGaleria2 = () => {
     navigation.navigate("Galeria2");
   };
 
@@ -61,6 +61,7 @@ export default function MisPublicados() {
   
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
+
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
       setDrawerPosition("right");
@@ -69,36 +70,47 @@ export default function MisPublicados() {
     }
   };
 
+  const cerrarSesion = async () => {
+    try {
+      await auth.signOut();
+      await AsyncStorage.removeItem("isLoggedIn");
+      navigation.navigate("Ingreso");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
-      {/* Título "TeloCambio" encima de la línea superior, mi opcion B era dejarlo como texto */}
       <View>
         <Image
           source={require("../assets/LogoTeLoCambio.png")}
           style={styles.logo}
         />
       </View>
-
-      {/* Línea de separación */}
       <View style={styles.separatorLine} />
 
       <Drawer.Section>
         <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
           <Text style={styles.drawerText}>Mi Perfil</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria}>
-          <Text style={styles.drawerText}>Galeria de Artículos</Text>
+        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
+          <Text style={styles.drawerText}>Galería de Artículos</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
           <Text style={styles.drawerText}>Mis Publicados</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.drawerItemEnd} onPress={goMisOfertas}>
+        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
       </Drawer.Section>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
+        <Image
+          source={require("../assets/Salir.png")}
+          style={styles.logoutImage}
+        />
+      </TouchableOpacity>
     </View>
   );
   useEffect(() => {
@@ -170,7 +182,7 @@ export default function MisPublicados() {
   const renderDrawerAndroid = () => (
     <DrawerLayout
       ref={drawer}
-      drawerWidth={300}
+      drawerWidth={200}
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
@@ -195,62 +207,41 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  HorizontalScroll: {
-    padding: 10,
-    marginLeft: 15,
-    borderRadius: 20,
-    backgroundColor: "#A5CB48",
-    opacity: 30,
-  },
-  titleCategory: {
-    marginTop: 20,
-    marginLeft: 20,
-    color: "#000",
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  textButton: {
-    color: "#ffffff",
-    fontWeight: "500",
-  },
   containerDrawer: {
     flex: 1,
-    padding: 16,
+    padding: 5,
   },
   navigationContainer: {
     backgroundColor: "#ecf0f1",
   },
-  paragraph: {
-    padding: 16,
-    fontSize: 15,
-    textAlign: "center",
-  },
   drawerItem: {
     backgroundColor: "#8AAD34",
-    margin: 10,
-    borderRadius: 30,
-  },
-  drawerItemEnd: {
-    backgroundColor: "#8AAD34",
-    margin: 10,
-    borderRadius: 30,
-    marginVertical: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+    alignItems: "center",
   },
   drawerText: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "500",
     color: "#ffffff",
-    padding: 12,
-    paddingHorizontal: 20,
+    padding: 10,
   },
   separatorLine: {
     borderBottomWidth: 1,
-    borderBottomColor: "gray",
-    marginVertical: 10,
+    borderBottomColor: "#7A7A7A",
+    margin: 15,
   },
   logo: {
-    width: 260,
-    height: 47,
+    width: 255,
+    height: 55,
+  },
+  logoutButton: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  logoutImage: {
+    width: 80,
+    height: 80,
   },
   containerCard: {
     width: 'auto',
