@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 import Swiper from "react-native-swiper";
 
 
@@ -8,6 +10,8 @@ export default function DetalleArticulo() {
   const navigation = useNavigation();
   const route = useRoute();
   const item = route.params?.item;
+  const [userData, setUserData] = useState(null);
+  const userId = item.id.match(/-(.*)/)[1];
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
@@ -22,7 +26,26 @@ export default function DetalleArticulo() {
     setIndiceImagenAmpliada(index);
     setMostrarModal(!mostrarModal);
   };
-
+  useEffect(() => {
+    const fetchUserData = async () => {
+      console.log('Fetching user data for userId:', userId);
+      if (!userId) return;
+      try {
+        const usuariosCollection = collection(db, 'Usuarios');
+        const usuariosQuery = query(usuariosCollection, where("uid", "==", userId));
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+        if (!usuariosSnapshot.empty) {
+          const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
+          setUserData(userDataFromSnapshot);
+        } else {
+          console.log('No se encuentra el uid');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUserData();
+  }, [userId]);
   return (
     <View style={styles.container}>
       <View style={styles.userInfoContainer}>
@@ -47,9 +70,10 @@ export default function DetalleArticulo() {
           <Text style={styles.text2}>Estado: {item.estadoArticulo}</Text>
           <Text style={styles.text2}>Comuna: {item.comuna}</Text>
         </View>
+        {userData && (
         <View style={styles.userProfile}>
           <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
-          <Text style={styles.nombreUser}> Juanito{item.usuario}</Text>
+          <Text style={styles.text2}>{userData.nombre_apellido}</Text>
           {item.tipo === "Intercambiar artículo" && (
             <TouchableOpacity style={[styles.teLoCambioButton]}>
               <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
@@ -61,6 +85,7 @@ export default function DetalleArticulo() {
             </TouchableOpacity>
           )}
         </View>
+        )}
       </View>
       <View style={styles.containerBoton}>
         <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
