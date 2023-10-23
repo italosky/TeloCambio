@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, FlatList } from "react-native";
+import { Card } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
@@ -102,6 +103,30 @@ export default function DetalleArticulo() {
     </View>
   );
 
+  const [modalArticulo, setModalArticulo] = useState(false);
+
+  const closeModal = () => {
+    setModalArticulo(false);
+  };
+  
+  const openModal = () => {
+    setModalArticulo(true);
+  };
+
+  const [columns, setColumns] = useState(2);
+
+  const data = [
+    { id: 1, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
+    { id: 2, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
+    { id: 3, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
+    { id: 4, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
+    { id: 5, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
+    { id: 6, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
+    { id: 7, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
+    { id: 8, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
+    { id: 9, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
+  ];
+
   const renderDrawerAndroid = () => (
     <DrawerLayout
       ref={drawer}
@@ -119,7 +144,7 @@ export default function DetalleArticulo() {
               loop={false}
               autoplay={false}
               onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
-              dotStyle={styles.dotContainer}
+              dotStyle={styles.dot}
               activeDot={<View style={styles.activeDot} />}
               nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
               prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
@@ -138,7 +163,7 @@ export default function DetalleArticulo() {
             <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
             <Text style={styles.nombreUser}> Juanito{item.usuario}</Text>
             {item.tipo === "Intercambiar artículo" && (
-              <TouchableOpacity style={[styles.teLoCambioButton]}>
+              <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
                 <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
               </TouchableOpacity>
             )}
@@ -158,7 +183,7 @@ export default function DetalleArticulo() {
             <Text style={styles.textoBoton}>Banear Usuario</Text>
           </TouchableOpacity>
         </View>
-
+        
         <Modal visible={mostrarModal} transparent={true}>
           <View style={styles.modalContainer}>
             <Image
@@ -170,6 +195,37 @@ export default function DetalleArticulo() {
               style={styles.cerrarButton}
               onPress={() => toggleModal(indiceImagenAmpliada)}
             >
+              <Text style={styles.cerrarButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalArticulo}
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>Disponible para Intercambio</Text>
+              
+                <FlatList style={styles.containerFlastList}
+                  numColumns={columns}
+                  data={data}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <Card style={styles.containerCard}>
+                      <View style={styles.containerImagen}>
+                        <Card.Cover source={item.imagen} style={styles.imagen}/>
+                        <Text style={styles.titleCard}>{item.nombre}</Text>
+                      </View>
+                      
+                    </Card>
+                  )}
+                />
+            </View>
+            <TouchableOpacity style={styles.cerrarButton} onPress={closeModal}>
               <Text style={styles.cerrarButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -186,29 +242,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingTop: 90,
-    alignItems: "center"
+    alignItems: "center",
   },
   containerSwiper:{
     flex: 1,
-    marginRight: 55,
+    marginRight: 20,
     backgroundColor:  "#ffffff",
   },
   buttonSwiper: {
     color: "#ffffff",
     fontSize: 40,
+    opacity: 70,
   },
   imageCarrusel: {
     width: 170,
-    height: 170,
+    height: 160,
     borderRadius: 5,
-    position: 'absolute',
   },
   userInfoContainer: {
     flexDirection: "row",
-    width: 320,
-    height: 300,
+    width: 362,
+    height: 310,
     fontSize: 70,
     marginTop: 30,
+    paddingHorizontal:5,
   },
   tittle: {
     fontSize: 18,
@@ -220,6 +277,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     paddingBottom: 10,
+    marginLeft: 9,
   },
   userProfile: {
     alignItems: "center",
@@ -228,7 +286,8 @@ const styles = StyleSheet.create({
   nombreUser:{
     fontSize: 20,
     fontWeight: "500",
-    marginTop: 23,
+    marginTop: 18,
+    marginBottom: 15,
   },
   imageUser: {
     width: 90,
@@ -252,18 +311,19 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dot: {
-    width: 10,
-    height: 10,
+    width: 7,
+    height: 7,
     borderRadius: 5,
-    marginHorizontal: 0,
-    backgroundColor: "#ffffff",
+    backgroundColor: "gray",
+    alignItems: "center",
+    marginBottom: 0.1,
   },
   activeDot: {
-    width: 10,
-    height: 10,
+    width: 9,
+    height: 9,
     borderRadius: 5,
     marginHorizontal: 5,
-    backgroundColor: "gray",
+    backgroundColor: "#ffffff",
   },
   modalContainer: {
     flex: 1,
@@ -322,9 +382,8 @@ const styles = StyleSheet.create({
     height: 80,
   },
   teLoCambioButton: {
-    alignSelf: "flex-end",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 45,
     borderRadius: 5,
     marginTop: 5,
     backgroundColor: "#63A355",
@@ -335,9 +394,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   teLoRegaloButton: {
-    alignSelf: "flex-end",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 45,
     borderRadius: 5,
     marginTop: 5,
     backgroundColor: "#efb810",
@@ -347,8 +405,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
-  dotContainer: {
-    flexDirection: "row", 
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    height: 350,
+    width: 300,
+    borderColor: "#63A355",
+    borderWidth: 1.5,
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: "500",
+    marginBottom: 20,
+    marginBottom: 5,
+  },
+  containerFlastList:{
+    marginBottom: 1,
+  },
+  containerCard: {
+    width: "46%",
+    height: 110,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginHorizontal: 5,
+    marginTop: 10,
+  },
+  containerImagen: {
+    marginTop: 8,
+    alignItems: "center",
+  },
+  imagen: {
+    width: 80,
+    height: "80%",
+    borderRadius: 5,
+  },
+  titleCard: {
+    fontSize: 15,
+    textAlign: "center",
+    paddingTop: 2,
   },
 });
