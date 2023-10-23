@@ -27,12 +27,13 @@ export default function Registro(props) {
     telefono: "",
     email: "",
     password: "",
-    role: "",
-    ImgPerfil: ""
+    role: ""
   });
+
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+
   const validateEmailDetails = (email) => {
     const [localPart, domainPart] = email.split("@");
     if (!domainPart || !localPart) {
@@ -51,6 +52,7 @@ export default function Registro(props) {
     }
     return null;
   };
+
   const isValidPhoneNumber = (telefono) => {
     const regex = /^[0-9]{0,12}$/;
     return regex.test(telefono);
@@ -86,6 +88,7 @@ export default function Registro(props) {
       Alert.alert("Error", errorMessage);
       return;
     }
+
     try {
       const response = await createUserWithEmailAndPassword(
         auth,
@@ -94,7 +97,9 @@ export default function Registro(props) {
       );
       if (response.user) {
         const userUID = response.user.uid;
-        const normalizedNombre = "(" + data.nombre_apellido + ")".toLowerCase().replace(/\s+/g, '');
+        const normalizedNombre = data.nombre_apellido
+          .toLowerCase()
+          .replace(/\s+/g, "");
         const readableID = `${normalizedNombre}-${userUID}`;
         const userDoc = doc(db, "Usuarios", readableID);
         await setDoc(userDoc, {
@@ -102,50 +107,47 @@ export default function Registro(props) {
           nombre_apellido: data.nombre_apellido,
           telefono: data.telefono,
           email: data.email,
-          password:data.password,
-          role: 'usuario',
-          ImgPerfil: imageUri
-        });      
-        Alert.alert('Registro exitoso!');
-      };
-      if (selectedImages.length > 0) {
-        setUploading(true);
-        const urls = await Promise.all(
-          selectedImages.map(async (imageUri, index) => {
-            const response = await fetch(imageUri);
-            const blob = await response.blob();
-            const filename = `imagen${index + 1}-${Date.now()}`;
-            const storageRef = ref(storage, `Perfil/${filename}`);
-            const uploadTask = uploadBytesResumable(storageRef, blob);
-            return new Promise((resolve, reject) => {
-              uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                  setProgress(
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                  );
-                },
-                (error) => reject(error),
-                async () => {
-                  const downloadURL = await getDownloadURL(
-                    uploadTask.snapshot.ref
-                  );
-                  resolve(downloadURL);
-                }
-              );
-            });
-          })
-        );
-        await updateDoc(userDoc, { imagenen: urls });
-        setUploading(false);
+          role: "usuario"
+        });
+
+        if (selectedImages.length > 0) {
+          setUploading(true);
+          const urls = await Promise.all(
+            selectedImages.map(async (imageUri, index) => {
+              const response = await fetch(imageUri);
+              const blob = await response.blob();
+              const filename = `imagen${index + 1}-${Date.now()}`;
+              const storageRef = ref(storage, `Perfil/${filename}`);
+              const uploadTask = uploadBytesResumable(storageRef, blob);
+              return new Promise((resolve, reject) => {
+                uploadTask.on(
+                  "state_changed",
+                  (snapshot) => {
+                    setProgress(
+                      (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    );
+                  },
+                  (error) => reject(error),
+                  async () => {
+                    const downloadURL = await getDownloadURL(
+                      uploadTask.snapshot.ref
+                    );
+                    resolve(downloadURL);
+                  }
+                );
+              });
+            })
+          );
+          await updateDoc(userDoc, { imagenen: urls });
+
+          setUploading(false);
+        }
+
+        Alert.alert("Registro exitoso!");
+        props.navigation.navigate("Login");
       }
-      Alert.alert(
-        "Registro realizado con exito",
-        [{ onPress: () => navigation.navigate("Galeria2") }],
-        { cancelable: false }
-      );
-    } 
-    catch (error) {
+    } catch (error) {
+      errorMessage = "Error al registrar.";
       switch (error.code) {
         case "auth/email-already-in-use":
           errorMessage = "Email ya en uso.";
@@ -159,6 +161,7 @@ export default function Registro(props) {
         default:
           break;
       }
+      Alert.alert("Error", errorMessage);
     }
   };
 
