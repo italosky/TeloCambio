@@ -1,10 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, FlatList, Alert } from "react-native";
 import { Card } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
@@ -12,12 +15,35 @@ export default function DetalleArticulo() {
   const item = route.params?.item;
   const [mostrarModal, setMostrarModal] = useState(false);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
+  const [userData, setUserData] = useState(null);
+  const userId = item.id.match(/-(.*)/)[1];
   const images = [
     item.imagenURL,
     item.imagenURL2,
     item.imagenURL3
   ];
   
+  useEffect(() => {
+    const fetchUserData = async () => {
+      console.log('Fetching user data for userId:', userId);
+      if (!userId) return;
+      try {
+        const usuariosCollection = collection(db, 'Usuarios');
+        const usuariosQuery = query(usuariosCollection, where("uid", "==", userId));
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+        if (!usuariosSnapshot.empty) {
+          const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
+          setUserData(userDataFromSnapshot);
+        } else {
+          console.log('No se encuentra el uid');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUserData();
+  }, [userId]);
+
   const navigateToDatosCambio = () => {
     navigation.navigate("DatosCambio", { item });
   };
@@ -179,10 +205,10 @@ export default function DetalleArticulo() {
             <Text style={styles.text2}>Estado: {item.estadoArticulo}</Text>
             <Text style={styles.text2}>Comuna: {item.comuna}</Text>
           </View>
-
+          {userData && (
           <View style={styles.userProfile}>
             <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
-            <Text style={styles.nombreUser}> Juanito{item.usuario}</Text>
+            <Text style={styles.text2}>{userData.nombre_apellido}</Text>
             {item.tipo === "Intercambiar artículo" && (
               <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
                 <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
@@ -194,6 +220,7 @@ export default function DetalleArticulo() {
               </TouchableOpacity>
             )}
           </View>
+          )}
         </View>
 
         <View style={styles.containerBoton}>
@@ -279,6 +306,7 @@ const styles = StyleSheet.create({
     width: 170,
     height: 160,
     borderRadius: 5,
+    position: 'absolute',
   },
   userInfoContainer: {
     flexDirection: "row",
@@ -332,8 +360,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dot: {
-    width: 7,
-    height: 7,
+    width: 10,
+    height: 10,
     borderRadius: 5,
     backgroundColor: "gray",
     alignItems: "center",
