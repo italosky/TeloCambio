@@ -112,7 +112,7 @@ export default function DatosCambio({ route }) {
         <Text style={styles.textoBotonP}>Volver a Galeria</Text>
       </TouchableOpacity>
     </View>
-  );
+  );  
 }
 
 const styles = StyleSheet.create({
