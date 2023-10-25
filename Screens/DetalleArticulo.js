@@ -1,12 +1,22 @@
 import React, { useState, useRef, useEffect, } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, FlatList, Alert } from "react-native";
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  Image, 
+  TouchableOpacity, 
+  Modal, 
+  FlatList, 
+  Alert 
+} from "react-native";
 import { Card } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db, auth } from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 export default function DetalleArticulo() {
