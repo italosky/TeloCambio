@@ -1,5 +1,14 @@
-import React, { useState, useRef, useEffect, } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, FlatList, Alert } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  Alert,
+} from "react-native";
 import { Card } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
@@ -7,7 +16,6 @@ import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
@@ -17,25 +25,24 @@ export default function DetalleArticulo() {
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
   const [userData, setUserData] = useState(null);
   const userId = item.id.match(/-(.*)/)[1];
-  const images = [
-    item.imagenURL,
-    item.imagenURL2,
-    item.imagenURL3
-  ];
-  
+  const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
+
   useEffect(() => {
     const fetchUserData = async () => {
-      console.log('Fetching user data for userId:', userId);
+      console.log("Fetching user data for userId:", userId);
       if (!userId) return;
       try {
-        const usuariosCollection = collection(db, 'Usuarios');
-        const usuariosQuery = query(usuariosCollection, where("uid", "==", userId));
+        const usuariosCollection = collection(db, "Usuarios");
+        const usuariosQuery = query(
+          usuariosCollection,
+          where("uid", "==", userId)
+        );
         const usuariosSnapshot = await getDocs(usuariosQuery);
         if (!usuariosSnapshot.empty) {
           const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
           setUserData(userDataFromSnapshot);
         } else {
-          console.log('No se encuentra el uid');
+          console.log("No se encuentra el uid");
         }
       } catch (error) {
         console.error(error);
@@ -138,24 +145,24 @@ export default function DetalleArticulo() {
   const confirmarReclamo = () => {
     Alert.alert(
       "Confirmación",
-      "¿Estás seguro de que deseas reclamar este artículo?", 
+      "¿Estás seguro de que deseas reclamar este artículo?",
       [
         {
           text: "No",
-          style: "cancel"
+          style: "cancel",
         },
-        { text: "Sí", onPress: navigateToDatosCambio }
+        { text: "Sí", onPress: navigateToDatosCambio },
       ],
       { cancelable: false }
     );
-  } 
+  };
 
   const [modalArticulo, setModalArticulo] = useState(false);
 
   const closeModal = () => {
     setModalArticulo(false);
   };
-  
+
   const openModal = () => {
     setModalArticulo(true);
   };
@@ -163,15 +170,51 @@ export default function DetalleArticulo() {
   const [columns, setColumns] = useState(2);
 
   const data = [
-    { id: 1, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
-    { id: 2, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
-    { id: 3, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
-    { id: 4, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
-    { id: 5, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
-    { id: 6, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
-    { id: 7, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
-    { id: 8, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
-    { id: 9, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
+    {
+      id: 1,
+      nombre: "Patines",
+      imagen: require("../Screens/assets,articulos/Patines.png"),
+    },
+    {
+      id: 2,
+      nombre: "Luces de Bicicleta",
+      imagen: require("../Screens/assets,articulos/LucesBici.png"),
+    },
+    {
+      id: 3,
+      nombre: "Lentes",
+      imagen: require("../Screens/assets,articulos/Lentes.png"),
+    },
+    {
+      id: 4,
+      nombre: "Patines",
+      imagen: require("../Screens/assets,articulos/Patines.png"),
+    },
+    {
+      id: 5,
+      nombre: "Luces de Bicicleta",
+      imagen: require("../Screens/assets,articulos/LucesBici.png"),
+    },
+    {
+      id: 6,
+      nombre: "Lentes",
+      imagen: require("../Screens/assets,articulos/Lentes.png"),
+    },
+    {
+      id: 7,
+      nombre: "Patines",
+      imagen: require("../Screens/assets,articulos/Patines.png"),
+    },
+    {
+      id: 8,
+      nombre: "Luces de Bicicleta",
+      imagen: require("../Screens/assets,articulos/LucesBici.png"),
+    },
+    {
+      id: 9,
+      nombre: "Lentes",
+      imagen: require("../Screens/assets,articulos/Lentes.png"),
+    },
   ];
 
   const renderDrawerAndroid = () => (
@@ -182,7 +225,6 @@ export default function DetalleArticulo() {
       renderNavigationView={navigationView}
     >
       <View style={styles.container}>
-
         <View style={styles.userInfoContainer}>
           <View style={styles.containerSwiper}>
             <Text style={styles.tittle}>{item.nombreArticulo}</Text>
@@ -197,8 +239,15 @@ export default function DetalleArticulo() {
               prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
             >
               {images.map((item, index) => (
-                <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
-                  <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="cover"/>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => toggleModal(index)}
+                >
+                  <Image
+                    source={{ uri: item }}
+                    style={styles.imageCarrusel}
+                    resizeMode="cover"
+                  />
                 </TouchableOpacity>
               ))}
             </Swiper>
@@ -206,20 +255,29 @@ export default function DetalleArticulo() {
             <Text style={styles.text2}>Comuna: {item.comuna}</Text>
           </View>
           {userData && (
-          <View style={styles.userProfile}>
-            <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
-            <Text style={styles.text2}>{userData.nombre_apellido}</Text>
-            {item.tipo === "Intercambiar artículo" && (
-              <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
-                <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-              </TouchableOpacity>
-            )}
-            {item.tipo === "Regalar artículo" && (
-              <TouchableOpacity style={[styles.teLoRegaloButton]} onPress={confirmarReclamo}>
-                <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+            <View style={styles.userProfile}>
+              <Image
+                source={{ uri: userData.imagenen[0] }}
+                style={styles.imageUser}
+              />
+              <Text style={styles.text2}>{userData.nombre_apellido}</Text>
+              {item.tipo === "Intercambiar artículo" && (
+                <TouchableOpacity
+                  style={[styles.teLoCambioButton]}
+                  onPress={openModal}
+                >
+                  <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+                </TouchableOpacity>
+              )}
+              {item.tipo === "Regalar artículo" && (
+                <TouchableOpacity
+                  style={[styles.teLoRegaloButton]}
+                  onPress={confirmarReclamo}
+                >
+                  <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
 
@@ -231,11 +289,11 @@ export default function DetalleArticulo() {
             <Text style={styles.textoBoton}>Banear Usuario</Text>
           </TouchableOpacity>
         </View>
-        
+
         <Modal visible={mostrarModal} transparent={true}>
           <View style={styles.modalContainer}>
             <Image
-              source={{ uri: images[indiceImagenAmpliada]}}
+              source={{ uri: images[indiceImagenAmpliada] }}
               style={styles.imageModal}
               resizeMode="contain"
             />
@@ -257,21 +315,21 @@ export default function DetalleArticulo() {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalText}>Disponible para Intercambio</Text>
-              
-                <FlatList style={styles.containerFlastList}
-                  numColumns={columns}
-                  data={data}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => (
-                    <Card style={styles.containerCard}>
-                      <View style={styles.containerImagen}>
-                        <Card.Cover source={item.imagen} style={styles.imagen}/>
-                        <Text style={styles.titleCard}>{item.nombre}</Text>
-                      </View>
-                      
-                    </Card>
-                  )}
-                />
+
+              <FlatList
+                style={styles.containerFlastList}
+                numColumns={columns}
+                data={data}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <Card style={styles.containerCard}>
+                    <View style={styles.containerImagen}>
+                      <Card.Cover source={item.imagen} style={styles.imagen} />
+                      <Text style={styles.titleCard}>{item.nombre}</Text>
+                    </View>
+                  </Card>
+                )}
+              />
             </View>
             <TouchableOpacity style={styles.cerrarButton} onPress={closeModal}>
               <Text style={styles.cerrarButtonText}>Cerrar</Text>
@@ -279,7 +337,7 @@ export default function DetalleArticulo() {
           </View>
         </Modal>
       </View>
-    </DrawerLayout>  
+    </DrawerLayout>
   );
 
   return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
@@ -292,10 +350,10 @@ const styles = StyleSheet.create({
     paddingTop: 90,
     alignItems: "center",
   },
-  containerSwiper:{
+  containerSwiper: {
     flex: 1,
     marginRight: 20,
-    backgroundColor:  "#ffffff",
+    backgroundColor: "#ffffff",
   },
   buttonSwiper: {
     color: "#ffffff",
@@ -306,7 +364,7 @@ const styles = StyleSheet.create({
     width: 170,
     height: 160,
     borderRadius: 5,
-    position: 'absolute',
+    position: "absolute",
   },
   userInfoContainer: {
     flexDirection: "row",
@@ -314,7 +372,7 @@ const styles = StyleSheet.create({
     height: 310,
     fontSize: 70,
     marginTop: 30,
-    paddingHorizontal:5,
+    paddingHorizontal: 5,
   },
   tittle: {
     fontSize: 18,
@@ -326,13 +384,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     paddingBottom: 10,
+    paddingTop: 10,
     marginLeft: 9,
   },
   userProfile: {
     alignItems: "center",
-    marginTop: 50,
+    marginTop: 33,
   },
-  nombreUser:{
+  nombreUser: {
     fontSize: 20,
     fontWeight: "500",
     marginTop: 18,
@@ -475,14 +534,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginBottom: 5,
   },
-  containerFlastList:{
+  containerFlastList: {
     marginBottom: 1,
   },
   containerCard: {
     width: "46%",
     height: 110,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 5,
     marginTop: 10,
   },

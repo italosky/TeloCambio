@@ -17,7 +17,7 @@ export default function MiPerfil() {
   const [userData, setUserData] = useState(null);
   const userId = auth.currentUser ? auth.currentUser.uid : null;
   const navigation = useNavigation();
-  
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       gestureEnabled: false,
@@ -46,17 +46,20 @@ export default function MiPerfil() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      console.log('Fetching user data for userId:', userId);
+      console.log("Fetching user data for userId:", userId);
       if (!userId) return;
       try {
-        const usuariosCollection = collection(db, 'Usuarios');
-        const usuariosQuery = query(usuariosCollection, where("uid", "==", userId));
+        const usuariosCollection = collection(db, "Usuarios");
+        const usuariosQuery = query(
+          usuariosCollection,
+          where("uid", "==", userId)
+        );
         const usuariosSnapshot = await getDocs(usuariosQuery);
         if (!usuariosSnapshot.empty) {
           const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
           setUserData(userDataFromSnapshot);
         } else {
-          console.log('No se encuentra el uid');
+          console.log("No se encuentra el uid");
         }
       } catch (error) {
         console.error(error);
@@ -130,9 +133,9 @@ export default function MiPerfil() {
       {userData && (
         <View style={styles.container}>
           {userData.imagenen && userData.imagenen[0] && (
-            <Image 
-              style={styles.tinyLogo} 
-              source={{ uri: userData.imagenen[0] }} 
+            <Image
+              style={styles.tinyLogo}
+              source={{ uri: userData.imagenen[0] }}
             />
           )}
           <View>
