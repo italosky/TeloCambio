@@ -8,15 +8,16 @@ import {
   Platform,
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
-import { doc, getDoc, collection, query, where } from "firebase/firestore";
+import { getDocs, collection, query, where } from "firebase/firestore";
 
 export default function MiPerfil() {
   const [userData, setUserData] = useState(null);
   const userId = auth.currentUser ? auth.currentUser.uid : null;
   const navigation = useNavigation();
+  
   React.useLayoutEffect(() => {
     navigation.setOptions({
       gestureEnabled: false,
@@ -45,15 +46,17 @@ export default function MiPerfil() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      console.log("Fetching user data for userId:", userId);
+      console.log('Fetching user data for userId:', userId);
       if (!userId) return;
       try {
-        const userRef = doc(db, "Usuarios", userId);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setUserData(userSnap.data());
+        const usuariosCollection = collection(db, 'Usuarios');
+        const usuariosQuery = query(usuariosCollection, where("uid", "==", userId));
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+        if (!usuariosSnapshot.empty) {
+          const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
+          setUserData(userDataFromSnapshot);
         } else {
-          console.log("No se encuentra el uid");
+          console.log('No se encuentra el uid');
         }
       } catch (error) {
         console.error(error);
@@ -126,15 +129,20 @@ export default function MiPerfil() {
     >
       {userData && (
         <View style={styles.container}>
-          <Image style={styles.tinyLogo} source={require("../assets/yo.png")} />
+          {userData.imagenen && userData.imagenen[0] && (
+            <Image 
+              style={styles.tinyLogo} 
+              source={{ uri: userData.imagenen[0] }} 
+            />
+          )}
           <View>
             <Text style={styles.bigText}>{userData.nombre_apellido}</Text>
           </View>
           <View style={[styles.textContainer, styles.espacioContainer]}>
-            <Text style={styles.text}>Correo@correo.cl </Text>
+            <Text style={styles.text}>{userData.email}</Text>
           </View>
           <View style={[styles.textContainer]}>
-            <Text style={styles.text}>987564123 </Text>
+            <Text style={styles.text}>{userData.telefono}</Text>
           </View>
         </View>
       )}
