@@ -130,9 +130,9 @@ export default function MiPerfil() {
       {userData && (
         <View style={styles.container}>
           {userData.imagenen && userData.imagenen[0] && (
-            <Image 
-              style={styles.tinyLogo} 
-              source={{ uri: userData.imagenen[0] }} 
+            <Image
+              style={styles.tinyLogo}
+              source={{ uri: userData.imagenen[0] }}
             />
           )}
           <View>
