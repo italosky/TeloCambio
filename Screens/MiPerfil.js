@@ -1,10 +1,21 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Text, StyleSheet, View, Image, TouchableOpacity } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
+import { db, auth } from "../firebaseConfig";
+import { doc, getDoc, collection, query, where } from "firebase/firestore";
 
-export default function Registro() {
+export default function MiPerfil() {
+  const [userData, setUserData] = useState(null);
+  const userId = auth.currentUser ? auth.currentUser.uid : null;
   const navigation = useNavigation();
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -31,6 +42,25 @@ export default function Registro() {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      console.log("Fetching user data for userId:", userId);
+      if (!userId) return;
+      try {
+        const userRef = doc(db, "Usuarios", userId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+        } else {
+          console.log("No se encuentra el uid");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUserData();
+  }, [userId]);
 
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
@@ -87,8 +117,6 @@ export default function Registro() {
     </View>
   );
 
-  const [active, setActive] = React.useState("");
-
   const renderDrawerAndroid = () => (
     <DrawerLayout
       ref={drawer}
@@ -96,18 +124,20 @@ export default function Registro() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-      <View style={styles.container}>
-        <Image style={styles.tinyLogo} source={require("../assets/yo.png")} />
-        <View>
-          <Text style={styles.bigText}>Juan Pérez</Text>
+      {userData && (
+        <View style={styles.container}>
+          <Image style={styles.tinyLogo} source={require("../assets/yo.png")} />
+          <View>
+            <Text style={styles.bigText}>{userData.nombre_apellido}</Text>
+          </View>
+          <View style={[styles.textContainer, styles.espacioContainer]}>
+            <Text style={styles.text}>Correo@correo.cl </Text>
+          </View>
+          <View style={[styles.textContainer]}>
+            <Text style={styles.text}>987564123 </Text>
+          </View>
         </View>
-        <View style={[styles.textContainer, styles.espacioContainer]}>
-          <Text style={styles.text}>
-            Nivel de Telocambista:
-            <Text style={styles.text}> Experto</Text>
-          </Text>
-        </View>
-      </View>
+      )}
     </DrawerLayout>
   );
 
