@@ -15,15 +15,17 @@ import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db, auth } from "../firebaseConfig";
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
   const route = useRoute();
   const item = route.params?.item;
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [articulos, setArticulos] = useState([]);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
   const [userData, setUserData] = useState(null);
+  const userID = auth.currentUser ? auth.currentUser.uid : null;
   const userId = item.id.match(/-(.*)/)[1];
   const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
 
@@ -157,6 +159,24 @@ export default function DetalleArticulo() {
     );
   };
 
+  useEffect(() => {
+    const fetchPublicaciones = async () => {
+      try {
+        const publicacionesCollection = collection(db, 'Publicaciones');
+        const publicacionesQuery = query(publicacionesCollection, where("uid", "==", userID));
+        const publicacionesSnapshot = await getDocs(publicacionesQuery);
+        const publicacionesData = publicacionesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("Publicaciones:", publicacionesData);
+        setArticulos(publicacionesData);
+      } catch (error) {
+        console.error("Error al obtener las publicaciones:", error);
+      }
+    };    
+    fetchPublicaciones();
+  }, [userID]);
+  
+  
+
   const [modalArticulo, setModalArticulo] = useState(false);
 
   const closeModal = () => {
@@ -167,7 +187,7 @@ export default function DetalleArticulo() {
     setModalArticulo(true);
   };
 
-  const [columns, setColumns] = useState(2);
+  const [columns, setColumns] = useState(1);
 
   const data = [
     {
@@ -315,17 +335,20 @@ export default function DetalleArticulo() {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalText}>Disponible para Intercambio</Text>
-
-              <FlatList
+              
+              <FlatList 
                 style={styles.containerFlastList}
                 numColumns={columns}
-                data={data}
+                data={articulos}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                   <Card style={styles.containerCard}>
                     <View style={styles.containerImagen}>
-                      <Card.Cover source={item.imagen} style={styles.imagen} />
-                      <Text style={styles.titleCard}>{item.nombre}</Text>
+                      <Card.Cover source={{ uri: item.imagenURL }} style={styles.imagen}/>
+                      <View style={styles.textContainer}>
+                          <Text style={styles.titleCard}>{item.nombreArticulo}</Text>
+                          <Text style={styles.titleEstado}>{item.estadoArticulo}</Text>
+                      </View>
                     </View>
                   </Card>
                 )}
@@ -520,43 +543,56 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "white",
-    padding: 20,
+    padding: 12,
     borderRadius: 10,
-    alignItems: "center",
-    height: 350,
+    alignItems: "flex-start",
+    height: 360,
     width: 300,
     borderColor: "#63A355",
-    borderWidth: 1.5,
+    borderWidth: 2.0,
   },
   modalText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "500",
     marginBottom: 20,
     marginBottom: 5,
+    paddingStart: 12
   },
   containerFlastList: {
     marginBottom: 1,
   },
   containerCard: {
-    width: "46%",
+    width: 263,
     height: 110,
-    borderRadius: 10,
-    backgroundColor: "#fff",
+    borderRadius: 11,
+    backgroundColor: '#fff',
     marginHorizontal: 5,
-    marginTop: 10,
+    marginTop: 5,
+    alignItems: 'flex-start',
+    borderWidth: 0.5,
   },
+  
   containerImagen: {
-    marginTop: 8,
+    marginTop: 6,
     alignItems: "center",
+    marginHorizontal: 5,
+    flexDirection: 'row',
   },
   imagen: {
-    width: 80,
-    height: "80%",
-    borderRadius: 5,
+    width: 100,
+    height: 95,
+    borderRadius: 7,
   },
   titleCard: {
-    fontSize: 15,
-    textAlign: "center",
-    paddingTop: 2,
+    fontSize: 17,
+    textAlign: "auto",
+    flexDirection: 'row',
+  },
+  titleEstado:{
+    marginTop: 5,  
+  },
+  textContainer: {
+    flexDirection: 'column', 
+    marginLeft: 10,
   },
 });
