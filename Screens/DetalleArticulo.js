@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect, } from "react";
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  Image, 
-  TouchableOpacity, 
-  Modal, 
-  FlatList, 
-  Alert 
+import React, { useState, useRef, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  Alert,
 } from "react-native";
 import { Card } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -24,28 +24,29 @@ export default function DetalleArticulo() {
   const route = useRoute();
   const item = route.params?.item;
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [articulos, setArticulos] = useState([]);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
   const [userData, setUserData] = useState(null);
+  const userID = auth.currentUser ? auth.currentUser.uid : null;
   const userId = item.id.match(/-(.*)/)[1];
-  const images = [
-    item.imagenURL,
-    item.imagenURL2,
-    item.imagenURL3
-  ];
-  
+  const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
+
   useEffect(() => {
     const fetchUserData = async () => {
-      console.log('Fetching user data for userId:', userId);
+      console.log("Fetching user data for userId:", userId);
       if (!userId) return;
       try {
-        const usuariosCollection = collection(db, 'Usuarios');
-        const usuariosQuery = query(usuariosCollection, where("uid", "==", userId));
+        const usuariosCollection = collection(db, "Usuarios");
+        const usuariosQuery = query(
+          usuariosCollection,
+          where("uid", "==", userId)
+        );
         const usuariosSnapshot = await getDocs(usuariosQuery);
         if (!usuariosSnapshot.empty) {
           const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
           setUserData(userDataFromSnapshot);
         } else {
-          console.log('No se encuentra el uid');
+          console.log("No se encuentra el uid");
         }
       } catch (error) {
         console.error(error);
@@ -148,41 +149,47 @@ export default function DetalleArticulo() {
   const confirmarReclamo = () => {
     Alert.alert(
       "Confirmación",
-      "¿Estás seguro de que deseas reclamar este artículo?", 
+      "¿Estás seguro de que deseas reclamar este artículo?",
       [
         {
           text: "No",
-          style: "cancel"
+          style: "cancel",
         },
-        { text: "Sí", onPress: navigateToDatosCambio }
+        { text: "Sí", onPress: navigateToDatosCambio },
       ],
       { cancelable: false }
     );
-  } 
+  };
+
+  useEffect(() => {
+    const fetchPublicaciones = async () => {
+      try {
+        const publicacionesCollection = collection(db, 'Publicaciones');
+        const publicacionesQuery = query(publicacionesCollection, where("uid", "==", userID));
+        const publicacionesSnapshot = await getDocs(publicacionesQuery);
+        const publicacionesData = publicacionesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("Publicaciones:", publicacionesData);
+        setArticulos(publicacionesData);
+      } catch (error) {
+        console.error("Error al obtener las publicaciones:", error);
+      }
+    };    
+    fetchPublicaciones();
+  }, [userID]);
+  
+  
 
   const [modalArticulo, setModalArticulo] = useState(false);
 
   const closeModal = () => {
     setModalArticulo(false);
   };
-  
+
   const openModal = () => {
     setModalArticulo(true);
   };
 
   const [columns, setColumns] = useState(2);
-
-  const data = [
-    { id: 1, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
-    { id: 2, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
-    { id: 3, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
-    { id: 4, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
-    { id: 5, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
-    { id: 6, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
-    { id: 7, nombre: "Patines", imagen: require('../Screens/assets,articulos/Patines.png') },
-    { id: 8, nombre: "Luces de Bicicleta", imagen: require('../Screens/assets,articulos/LucesBici.png') },
-    { id: 9, nombre: "Lentes", imagen: require('../Screens/assets,articulos/Lentes.png') },
-  ];
 
   const renderDrawerAndroid = () => (
     <DrawerLayout
@@ -192,7 +199,6 @@ export default function DetalleArticulo() {
       renderNavigationView={navigationView}
     >
       <View style={styles.container}>
-
         <View style={styles.userInfoContainer}>
           <View style={styles.containerSwiper}>
             <Text style={styles.tittle}>{item.nombreArticulo}</Text>
@@ -215,23 +221,23 @@ export default function DetalleArticulo() {
         
           </View>
           {userData && (
-          <View style={styles.userProfile}>
-            <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
-            <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
-            {item.tipo === "Intercambiar artículo" && (
-              <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
-                <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-              </TouchableOpacity>
-            )}
-            {item.tipo === "Regalar artículo" && (
-              <TouchableOpacity style={[styles.teLoRegaloButton]} onPress={confirmarReclamo}>
-                <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+            <View style={styles.userProfile}>
+              <Image source={{ uri: userData.imagenen[0] }} style={styles.imageUser}/>
+              <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
+              {item.tipo === "Intercambiar artículo" && (
+                <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
+                  <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+                </TouchableOpacity>
+              )}
+              {item.tipo === "Regalar artículo" && (
+                <TouchableOpacity style={[styles.teLoRegaloButton]} onPress={confirmarReclamo}>
+                  <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
-        <View>
+        <View style={styles.containerText}>
           <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
           <Text style={styles.text}>Comuna: {item.comuna}</Text>
         </View>
@@ -244,11 +250,11 @@ export default function DetalleArticulo() {
             <Text style={styles.textoBoton}>Banear Usuario</Text>
           </TouchableOpacity>
         </View>
-        
+
         <Modal visible={mostrarModal} transparent={true}>
           <View style={styles.modalContainer}>
             <Image
-              source={{ uri: images[indiceImagenAmpliada]}}
+              source={{ uri: images[indiceImagenAmpliada] }}
               style={styles.imageModal}
               resizeMode="contain"
             />
@@ -271,20 +277,19 @@ export default function DetalleArticulo() {
             <View style={styles.modalContent}>
               <Text style={styles.modalText}>Disponible para Intercambio</Text>
               
-                <FlatList style={styles.containerFlastList}
-                  numColumns={columns}
-                  data={data}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => (
-                    <Card style={styles.containerCard}>
-                      <View style={styles.containerImagen}>
-                        <Card.Cover source={item.imagen} style={styles.imagen}/>
-                        <Text style={styles.titleCard}>{item.nombre}</Text>
-                      </View>
-                      
-                    </Card>
-                  )}
-                />
+              <FlatList 
+                numColumns={columns}
+                data={articulos}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <Card style={styles.containerCard}>
+                    <View style={styles.containerImagen}>
+                      <Card.Cover source={{ uri: item.imagenURL }} style={styles.imagen}/>
+                        <Text style={styles.titleCard}>{item.nombreArticulo}</Text>
+                    </View>
+                  </Card>
+                )}
+              />
             </View>
             <TouchableOpacity style={styles.cerrarButton} onPress={closeModal}>
               <Text style={styles.cerrarButtonText}>Cerrar</Text>
@@ -292,7 +297,7 @@ export default function DetalleArticulo() {
           </View>
         </Modal>
       </View>
-    </DrawerLayout>  
+    </DrawerLayout>
   );
 
   return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
@@ -305,11 +310,11 @@ const styles = StyleSheet.create({
     paddingTop: 90,
     alignItems: "center",
   },
-  containerSwiper:{
+  containerSwiper: {
     flex: 1,
     height: "100%",
     marginRight: 20,
-    backgroundColor:  "#ffffff",
+    backgroundColor: "#ffffff",
   },
   buttonSwiper: {
     color: "#ffffff",
@@ -333,21 +338,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff"
   },
   tittle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "700",
     marginVertical: 20,
     textAlign: "center",
+  },
+  containerText:{
+    width: "90%",
   },
   text: {
     fontSize: 18,
     fontWeight: "500",
     paddingTop: 10,
-    marginLeft: 9,
-    marginRight: 200,
   },
   userProfile: {
     alignItems: "center",
-    marginTop: 50,
+    marginTop: 60,
   },
   nombreUser:{
     fontSize: 19,
@@ -358,6 +364,7 @@ const styles = StyleSheet.create({
   imageUser: {
     width: 90,
     height: 90,
+    borderRadius: 50,
   },
   containerBoton: {
     alignItems: "center",
@@ -476,7 +483,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: "center",
-    height: 350,
+    height: 360,
     width: 300,
     borderColor: "#63A355",
     borderWidth: 1.5,
@@ -487,9 +494,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginBottom: 5,
   },
-  containerFlastList:{
-    marginBottom: 1,
-  },
   containerCard: {
     width: "46%",
     height: 110,
@@ -497,15 +501,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginHorizontal: 5,
     marginTop: 10,
+    marginBottom: 3,
   },
   containerImagen: {
-    marginTop: 8,
+    marginTop: 7,
     alignItems: "center",
   },
   imagen: {
     width: 80,
     height: "80%",
-    borderRadius: 5,
+    borderRadius: 6,
   },
   titleCard: {
     fontSize: 15,

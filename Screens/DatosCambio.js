@@ -69,12 +69,13 @@ export default function DatosCambio({ route }) {
       const email = userData.email;
       const nombreArticulo = item.nombreArticulo;
       const nombrePersona = userData.nombre_apellido;
-      const subject = `Solicitud Articulo ${nombreArticulo} `;
-      const message = `Hola ${nombrePersona}, deseo reclamar tu articulo publicado en la aplicación TeloCambio🌱 *${nombreArticulo}* Me gustaría que conversáramos para coordinar la entrega. 
-      `;
-      const gmailURL = `googlegmail://co?to=${email}&subject=${encodeURIComponent(
+      const subject = `Solicitud Articulo ${nombreArticulo}`;
+      const message = `Hola ${nombrePersona}, deseo reclamar tu artículo publicado en la aplicación TeloCambio🌱 ${nombreArticulo}. Me gustaría que conversáramos para coordinar la entrega.`;
+
+      const gmailURL = `mailto:${email}?subject=${encodeURIComponent(
         subject
       )}&body=${encodeURIComponent(message)}`;
+
       Linking.openURL(gmailURL)
         .then(() => {
           console.log("Abriendo Gmail con asunto y mensaje predeterminados...");
@@ -112,7 +113,7 @@ export default function DatosCambio({ route }) {
         <Text style={styles.textoBotonP}>Volver a Galeria</Text>
       </TouchableOpacity>
     </View>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
