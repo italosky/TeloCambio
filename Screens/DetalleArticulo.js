@@ -199,7 +199,7 @@ export default function DetalleArticulo() {
             <Swiper
               showsButtons={true}
               loop={false}
-              autoplay={false}
+              scrollEnabled={false}
               onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
               dotStyle={styles.dot}
               activeDot={<View style={styles.activeDot} />}
@@ -208,17 +208,16 @@ export default function DetalleArticulo() {
             >
               {images.map((item, index) => (
                 <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
-                  <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="cover"/>
+                  <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="center"/>
                 </TouchableOpacity>
               ))}
             </Swiper>
-            <Text style={styles.text2}>Estado: {item.estadoArticulo}</Text>
-            <Text style={styles.text2}>Comuna: {item.comuna}</Text>
+        
           </View>
           {userData && (
           <View style={styles.userProfile}>
             <Image source={require("../assets/FotoPerfil.com.png")} style={styles.imageUser} />
-            <Text style={styles.text2}>{userData.nombre_apellido}</Text>
+            <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
             {item.tipo === "Intercambiar artículo" && (
               <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
                 <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
@@ -231,6 +230,10 @@ export default function DetalleArticulo() {
             )}
           </View>
           )}
+        </View>
+        <View>
+          <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
+          <Text style={styles.text}>Comuna: {item.comuna}</Text>
         </View>
 
         <View style={styles.containerBoton}>
@@ -304,27 +307,30 @@ const styles = StyleSheet.create({
   },
   containerSwiper:{
     flex: 1,
+    height: "100%",
     marginRight: 20,
     backgroundColor:  "#ffffff",
   },
   buttonSwiper: {
     color: "#ffffff",
-    fontSize: 40,
+    fontSize: 42,
     opacity: 70,
   },
   imageCarrusel: {
     width: 170,
     height: 160,
     borderRadius: 5,
-    position: 'absolute',
+    justifyContent: "center",
+    alignItems: "center",
   },
   userInfoContainer: {
     flexDirection: "row",
-    width: 362,
-    height: 310,
+    width: 364,
+    height: 240,
     fontSize: 70,
     marginTop: 30,
-    paddingHorizontal:5,
+    paddingHorizontal: 5,
+    backgroundColor: "#ffffff"
   },
   tittle: {
     fontSize: 18,
@@ -332,18 +338,19 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     textAlign: "center",
   },
-  text2: {
+  text: {
     fontSize: 18,
     fontWeight: "500",
-    paddingBottom: 10,
+    paddingTop: 10,
     marginLeft: 9,
+    marginRight: 200,
   },
   userProfile: {
     alignItems: "center",
     marginTop: 50,
   },
   nombreUser:{
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: "500",
     marginTop: 18,
     marginBottom: 15,
@@ -370,16 +377,16 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dot: {
-    width: 10,
-    height: 10,
+    width: 8.5,
+    height: 8.5,
     borderRadius: 5,
     backgroundColor: "gray",
     alignItems: "center",
     marginBottom: 0.1,
   },
   activeDot: {
-    width: 9,
-    height: 9,
+    width: 10,
+    height: 10,
     borderRadius: 5,
     marginHorizontal: 5,
     backgroundColor: "#ffffff",
@@ -463,11 +470,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   modalContent: {
     backgroundColor: "white",
