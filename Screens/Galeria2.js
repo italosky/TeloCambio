@@ -115,6 +115,9 @@ export default function Galeria2() {
   const Concretar = () => {
     navigation.navigate("Concretar");
   };
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
 
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
@@ -183,6 +186,9 @@ export default function Galeria2() {
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
+        </TouchableOpacity>
       </Drawer.Section>
 
       <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
@@ -196,7 +202,9 @@ export default function Galeria2() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => navigation.navigate("DetalleArticulo", { item })}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("DetalleArticulo", { item })}
+      >
         <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
         <View style={styles.itemOverlay}>
           <Text style={styles.itemName}>{item.nombreArticulo || ""}</Text>
