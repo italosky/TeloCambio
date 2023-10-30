@@ -16,8 +16,7 @@ import MisListItem from "./common/MisListItem";
 import { Drawer } from "react-native-paper";
 import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
-import {  signInWithEmailAndPassword } from "firebase/auth";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisPublicados() {
   const [userId, setUserId] = useState("");
@@ -28,6 +27,7 @@ export default function MisPublicados() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [numColumns, setNumColumns] = useState(2);
+
   const handleDeleteItem = async (itemId) => {
     try {
       await deleteDoc(doc(db, "Publicaciones", itemId));
@@ -36,6 +36,7 @@ export default function MisPublicados() {
       console.error("Error al eliminar el artículo:", error);
     }
   };
+
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => null,
@@ -113,10 +114,12 @@ export default function MisPublicados() {
       </TouchableOpacity>
     </View>
   );
+
   useEffect(() => {
     const user = auth.currentUser;
     if (user) setUserId(user.uid);
   }, []);
+
   const fetchPosts = async () => {
     try {
       setLoading(true);
@@ -140,7 +143,6 @@ export default function MisPublicados() {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
@@ -157,6 +159,7 @@ export default function MisPublicados() {
     await fetchPosts();
     setRefreshing(false);
   };
+  
   const renderItem = ({item}) => {
   
     return (
