@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { Card } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { products } from "./common/Articulos";
@@ -17,6 +18,16 @@ import { db, auth } from "../firebaseConfig";
 
 export default function MisOfertas({ route }) {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [numColumns, setNumColumns] = useState(2);
+  const [itemName, setItemName] = useState("");
+  const [itemCondition, setItemCondition] = useState("");
+  const [selectedComuna, setSelectedComuna] = useState(null);
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [itemTrade, setItemTrade] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [dataSource, setDataSource] = useState([]);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -104,32 +115,100 @@ export default function MisOfertas({ route }) {
 
   const [active, setActive] = React.useState("");
 
-  const [categoryList, setcategoryList] = useState([]);
-  const [AccesoriosList, setAccesoriosList] = useState([]);
-  const [ComidaList, setComidaList] = useState([]);
-  const [DeportesList, setDeportesList] = useState([]);
-  const [FerreteriaList, setFerreteriaList] = useState([]);
-  const [HogarList, setHogarList] = useState([]);
-  const [InstrumentosList, setInstrumentosList] = useState([]);
-  const [JuguetesList, setJuguetesList] = useState([]);
-  const [LibrosList, setLibrosList] = useState([]);
+  
+  const realizarOferta = async (Ofertas) => {
+    try {
+      if (!itemName || !itemCondition || !selectedComuna || !selectedRegion || !itemTrade || !selectedImages.length || !userId) {
+        console.error("Algunas variables contienen valores no válidos.");
+        return;
+      }
+      const [url1, url2, url3] = urls;
+      const offerData = collection(db, Ofertas);
+      await setDoc(offerData, {
+        nombreArticulo: itemName,
+        estadoArticulo: itemCondition,
+        comuna: selectedComuna.name,
+        region: selectedRegion.name,
+        tipo: itemTrade,
+        imagenURL: url1,
+        imagenURL2: url2,
+        imagenURL3: url3,
+        uid: userId,
+      });
+      console.log(`Nueva colección "${Ofertas}" creada con éxito.`);
+    } catch (error) {
+      console.error("Error al crear la colección:", error);
+    }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const allItemsArray = [];
+      const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
+      articulosPublicadosRef.forEach((offerReceived) => {
+        const offerData = offerReceived.data();
+        allItemsArray.push({
+          uid: offerReceived.id,  
+          imagenURL: offerData.imagenURL,
+          nombreArticulo: offerData.nombreArticulo,
+          tipo: offerData.tipo,
+          estadoArticulo: offerData.estadoArticulo,
+          comuna: offerData.comuna,
+        });
+      });  
+      setDataSource(allItemsArray);
+    } catch (error) {
+      console.error("Error al cargar los artículos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await deleteDoc(doc(db, "Ofertas", itemId));
+      setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
+    } catch (error) {
+      console.error("Error al eliminar el artículo:", error);
+    }
+  };
 
   useEffect(() => {
-    console.log(products);
-    let tempCategory = [];
-    products.category.map((item) => {
-      tempCategory.push(item);
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchPosts();
     });
-    setcategoryList(tempCategory);
-    setAccesoriosList(products.category[0].data);
-    setComidaList(products.category[1].data);
-    setDeportesList(products.category[2].data);
-    setFerreteriaList(products.category[3].data);
-    setHogarList(products.category[4].data);
-    setInstrumentosList(products.category[5].data);
-    setJuguetesList(products.category[6].data);
-    setLibrosList(products.category[7].data);
-  }, []);
+    if (userId){
+      fetchPosts();
+    }
+    return unsubscribe;
+  }, [navigation, userId]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
+
+  const renderItem = ({item}) => {
+    return (
+      <Card style={styles.containerCard} onPress={goMiPerfil}> 
+        <Card.Title
+        style={styles.containerCardContent} 
+        title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
+        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
+        left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
+        right={(props) => (
+          <TouchableOpacity
+            onPress={() => handleDeleteItem(item.uid)}
+          >
+            <Image source={require("../assets/Eliminar.png")} style={styles.iconList} />
+          </TouchableOpacity>
+        )}
+        />
+      </Card>
+    );
+  };
 
   const renderDrawerAndroid = () => (
     <DrawerLayout
