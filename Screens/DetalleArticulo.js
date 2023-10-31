@@ -344,7 +344,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   containerText:{
-    width: "90%",
+    width: "45%",
+    marginRight: 175,
   },
   text: {
     fontSize: 18,
