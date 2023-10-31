@@ -189,54 +189,6 @@ export default function DetalleArticulo() {
 
   const [columns, setColumns] = useState(1);
 
-  const data = [
-    {
-      id: 1,
-      nombre: "Patines",
-      imagen: require("../Screens/assets,articulos/Patines.png"),
-    },
-    {
-      id: 2,
-      nombre: "Luces de Bicicleta",
-      imagen: require("../Screens/assets,articulos/LucesBici.png"),
-    },
-    {
-      id: 3,
-      nombre: "Lentes",
-      imagen: require("../Screens/assets,articulos/Lentes.png"),
-    },
-    {
-      id: 4,
-      nombre: "Patines",
-      imagen: require("../Screens/assets,articulos/Patines.png"),
-    },
-    {
-      id: 5,
-      nombre: "Luces de Bicicleta",
-      imagen: require("../Screens/assets,articulos/LucesBici.png"),
-    },
-    {
-      id: 6,
-      nombre: "Lentes",
-      imagen: require("../Screens/assets,articulos/Lentes.png"),
-    },
-    {
-      id: 7,
-      nombre: "Patines",
-      imagen: require("../Screens/assets,articulos/Patines.png"),
-    },
-    {
-      id: 8,
-      nombre: "Luces de Bicicleta",
-      imagen: require("../Screens/assets,articulos/LucesBici.png"),
-    },
-    {
-      id: 9,
-      nombre: "Lentes",
-      imagen: require("../Screens/assets,articulos/Lentes.png"),
-    },
-  ];
-
   const renderDrawerAndroid = () => (
     <DrawerLayout
       ref={drawer}

@@ -9,13 +9,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { products } from "./common/Articulos";
 import { FlatList } from "react-native-gesture-handler";
-import MisListItem from "./common/MisListItem";
-import { Drawer } from "react-native-paper";
+import { Drawer, Card } from "react-native-paper";
+import { db, auth } from "../firebaseConfig";
 
-export default function MisOfertas() {
+export default function MisOfertas({ route }) {
   const navigation = useNavigation();
 
   React.useLayoutEffect(() => {
@@ -24,6 +24,7 @@ export default function MisOfertas() {
       gestureEnabled: false,
     });
   }, [navigation]);
+
 
   const goMiPerfil = () => {
     navigation.navigate("MiPerfil");
@@ -96,6 +97,11 @@ export default function MisOfertas() {
     </View>
   );
 
+  const goDetalleArticulo = () => {
+    // Navega a la pantalla 'DetalleArticulo'
+    navigation.navigate('DetalleArticulo', { itemId: item.id });
+  };
+
   const [active, setActive] = React.useState("");
 
   const [categoryList, setcategoryList] = useState([]);
@@ -136,7 +142,33 @@ export default function MisOfertas() {
         <FlatList
           data={AccesoriosList}
           renderItem={({ item, index }) => {
-            return <MisListItem item={item} />;
+            return (
+              <Card style={styles.containerCard} onPress={goDetalleArticulo}> 
+                <Card.Title
+                  style={styles.containerCardContent} 
+                  left={(props) => (
+                    <View style={styles.exchangeContainer} >
+                      <View style={styles.leftContainer}>
+                        <Image source={item.imagen} style={styles.imagen}/>
+                        <Text style={styles.textCardOne} >{item.nombre}</Text> 
+                      </View>
+                      <View>
+                        <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                      </View>
+                    </View>
+                  )}
+                  right={(props) => (
+                    <View style={styles.exchangeContainer}>
+                      <View style={styles.rightContainer}>
+                        <Image source={item.imagen} style={styles.imagen}/>
+                        <Text style={styles.textCard} >{item.nombre}</Text> 
+                      </View>
+                      <Image source={require("../assets/Eliminar.png")} style={styles.icon}/>
+                    </View>
+                  )}
+                />
+              </Card>
+            );
           }}
         />
       </View>
@@ -147,6 +179,47 @@ export default function MisOfertas() {
 }
 
 const styles = StyleSheet.create({
+  containerCardContent: {
+    width: '100%',
+    height: 140,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  containerCard: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginHorizontal: 10,
+    marginBottom: 10,
+  },
+  textCard: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  textCardOne: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginHorizontal: 3
+  },
+  textCardDate: {
+    fontSize: 15,
+    marginLeft: 25,
+    marginEnd: 20,
+    marginTop: 23
+  },
+  imagen: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    marginBottom: 5,
+  },
+  icon: {
+    width: 50,
+    height: 50,
+    marginRight: 15,
+    marginLeft: 15
+  },
   container: {
     flex: 1,
     padding: 16,
@@ -186,5 +259,31 @@ const styles = StyleSheet.create({
   logoutImage: {
     width: 80,
     height: 80,
+  },
+  exchangeArrow: {
+    width: 60,
+    height: 50,
+    marginHorizontal: 8
+  },
+  exchangeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  textContainer: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    paddingBottom: 16,
+  },
+  leftContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    margin: 5,
+  },
+  rightContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    margin: 5,
   },
 });
