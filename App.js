@@ -27,6 +27,8 @@ import RecuperarContraseña from "./Screens/RecuperarContraseña";
 import Categoria from "./Screens/Categoria";
 import DetalleArticulo from "./Screens/DetalleArticulo";
 import ListaReportesAdmin from "./Screens/ListaReportesAdmin";
+import MisIntercambios from "./Screens/MisIntercambios";
+import ConcretarInfo from "./Screens/ConcretarInfo";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -50,7 +52,6 @@ export default function App() {
             title: "Ingresar",
             headerTintColor: "white",
             headerTitleAlign: "center",
-       
           }}
         />
         <Stack.Screen
@@ -233,8 +234,27 @@ export default function App() {
             headerStyle: { backgroundColor: "#63A355" },
           }}
         />
+        <Stack.Screen
+          name="MisIntercambios"
+          component={MisIntercambios}
+          options={{
+            title: "Mis Intercambios",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
+        <Stack.Screen
+          name="ConcretarInfo"
+          component={ConcretarInfo}
+          options={{
+            title: "Resumen",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
       </Stack.Navigator>
-      
     );
   }
 

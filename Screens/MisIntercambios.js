@@ -8,35 +8,42 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { Card } from 'react-native-paper';
+import { Card } from "react-native-paper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
 import MisListItem from "./common/MisListItem";
 import { Drawer } from "react-native-paper";
-import { collection, getDocs, query, where, deleteDoc, doc, setDoc } from "firebase/firestore";
-import { db, auth, storage  } from "../firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db, auth } from "../firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
-
-export default function MisOfertas() {
+export default function MisPublicados() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState();
   const [email, setEmail] = useState();
   const navigation = useNavigation();
+  const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [numColumns, setNumColumns] = useState(2);
-
-  const [itemName, setItemName] = useState("");
-  const [itemCondition, setItemCondition] = useState("");
-  const [selectedComuna, setSelectedComuna] = useState(null);
-  const [selectedRegion, setSelectedRegion] = useState(null);
-  const [itemTrade, setItemTrade] = useState("");
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [dataSource, setDataSource] = useState([]);
-
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await deleteDoc(doc(db, "Publicaciones", itemId));
+      setDataSource((prevData) =>
+        prevData.filter((item) => item.uid !== itemId)
+      );
+    } catch (error) {
+      console.error("Error al eliminar el artículo:", error);
+    }
+  };
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => null,
@@ -58,6 +65,13 @@ export default function MisOfertas() {
 
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
+  };
+
+  const goConcretarInfo = () => {
+    navigation.navigate("ConcretarInfo");
+  };
+  const goDatosCambio = () => {
+    navigation.navigate("DatosCambio", { item });
   };
 
   const drawer = useRef(null);
@@ -114,54 +128,28 @@ export default function MisOfertas() {
       </TouchableOpacity>
     </View>
   );
-
   useEffect(() => {
     const user = auth.currentUser;
     if (user) setUserId(user.uid);
   }, []);
-
-  
-  const realizarOferta = async (Ofertas) => {
-    try {
-      if (!itemName || !itemCondition || !selectedComuna || !selectedRegion || !itemTrade || !selectedImages.length || !userId) {
-        console.error("Algunas variables contienen valores no válidos.");
-        return;
-      }
-      const [url1, url2, url3] = urls;
-      const offerData = collection(db, Ofertas);
-      await setDoc(offerData, {
-        nombreArticulo: itemName,
-        estadoArticulo: itemCondition,
-        comuna: selectedComuna.name,
-        region: selectedRegion.name,
-        tipo: itemTrade,
-        imagenURL: url1,
-        imagenURL2: url2,
-        imagenURL3: url3,
-        uid: userId,
-      });
-      console.log(`Nueva colección "${Ofertas}" creada con éxito.`);
-    } catch (error) {
-      console.error("Error al crear la colección:", error);
-    }
-  };
-
   const fetchPosts = async () => {
     try {
       setLoading(true);
       const allItemsArray = [];
-      const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
-      articulosPublicadosRef.forEach((offerReceived) => {
-        const offerData = offerReceived.data();
+      const articulosPublicadosRef = await getDocs(
+        query(collection(db, "Publicaciones"), where("uid", "==", userId))
+      );
+      articulosPublicadosRef.forEach((postDoc) => {
+        const postData = postDoc.data();
         allItemsArray.push({
-          uid: offerReceived.id,  
-          imagenURL: offerData.imagenURL,
-          nombreArticulo: offerData.nombreArticulo,
-          tipo: offerData.tipo,
-          estadoArticulo: offerData.estadoArticulo,
-          comuna: offerData.comuna,
+          uid: postDoc.id,
+          imagenURL: postData.imagenURL,
+          nombreArticulo: postData.nombreArticulo,
+          tipo: postData.tipo,
+          estadoArticulo: postData.estadoArticulo,
+          comuna: postData.comuna,
         });
-      });  
+      });
       setDataSource(allItemsArray);
     } catch (error) {
       console.error("Error al cargar los artículos:", error);
@@ -170,46 +158,41 @@ export default function MisOfertas() {
     }
   };
 
-  const handleDeleteItem = async (itemId) => {
-    try {
-      await deleteDoc(doc(db, "Ofertas", itemId));
-      setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
-    } catch (error) {
-      console.error("Error al eliminar el artículo:", error);
-    }
-  };
-
   useEffect(() => {
+    //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
     const unsubscribe = navigation.addListener("focus", () => {
       fetchPosts();
     });
-    if (userId){
+    if (userId) {
       fetchPosts();
     }
     return unsubscribe;
   }, [navigation, userId]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchPosts();
     setRefreshing(false);
   };
-
-  const renderItem = ({item}) => {
+  const renderItem = ({ item }) => {
     return (
-      <Card style={styles.containerCard} onPress={goMiPerfil}> 
+      <Card style={styles.containerCard} onPress={goConcretarInfo}>
         <Card.Title
-        style={styles.containerCardContent} 
-        title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
-        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
-        left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
-        right={(props) => (
-          <TouchableOpacity
-            onPress={() => handleDeleteItem(item.uid)}
-          >
-            <Image source={require("../assets/Eliminar.png")} style={styles.iconList} />
-          </TouchableOpacity>
-        )}
+          style={styles.containerCardContent}
+          title={<Text style={styles.textCard}>{item.nombreArticulo}</Text>}
+          subtitle={
+            <Text style={styles.textCardDate}>Publicado el {item.fecha}</Text>
+          }
+          left={(props) => (
+            <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />
+          )}
+          right={(props) => (
+            <TouchableOpacity onPress={() => handleDeleteItem(item.uid)}>
+              <Image
+                source={require("../assets/Eliminar.png")}
+                style={styles.iconList}
+              />
+            </TouchableOpacity>
+          )}
         />
       </Card>
     );
@@ -226,7 +209,9 @@ export default function MisOfertas() {
         <FlatList
           data={dataSource}
           renderItem={renderItem}
-          keyExtractor={(item) => (item && item.uid ? item.uid.toString() : 'defaultKey')}
+          keyExtractor={(item) =>
+            item && item.uid ? item.uid.toString() : "defaultKey"
+          }
           contentContainerStyle={styles.gridContainer}
           onRefresh={handleRefresh}
           refreshing={refreshing}
@@ -280,22 +265,22 @@ const styles = StyleSheet.create({
     height: 80,
   },
   containerCard: {
-    width: 'auto',
+    width: "auto",
     height: 100,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 15,
     marginBottom: 10,
   },
   containerCardContent: {
-    width: 'auto',
+    width: "auto",
     height: 100,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   imagenList: {
-    width: '200%',
-    height: '200%',
+    width: "200%",
+    height: "200%",
     borderRadius: 10,
   },
   iconList: {
@@ -304,13 +289,13 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   viewCard: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   textCard: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: "500",
     marginLeft: 38,
   },
   textCardDate: {
