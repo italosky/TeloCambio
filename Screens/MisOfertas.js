@@ -4,38 +4,24 @@ import {
   Text,
   View,
   Image,
+  Alert,
   Platform,
-  TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { Card } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
+import { collection, getDocs, doc, getDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { FlatList } from "react-native-gesture-handler";
-import MisListItem from "./common/MisListItem";
-import { Drawer } from "react-native-paper";
-import { collection, getDocs, query, where, deleteDoc, doc, setDoc } from "firebase/firestore";
-import { db, auth, storage  } from "../firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-
+import { Drawer, Card } from "react-native-paper";
+import { db, auth } from "../firebaseConfig";
 
 export default function MisOfertas() {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState();
-  const [email, setEmail] = useState();
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [numColumns, setNumColumns] = useState(2);
-
-  const [itemName, setItemName] = useState("");
-  const [itemCondition, setItemCondition] = useState("");
-  const [selectedComuna, setSelectedComuna] = useState(null);
-  const [selectedRegion, setSelectedRegion] = useState(null);
-  const [itemTrade, setItemTrade] = useState("");
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [dataSource, setDataSource] = useState([]);
+  const [ofertas, setOfertas] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const drawer = useRef(null);
+  const [drawerPosition, setDrawerPosition] = useState("left");;
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -43,6 +29,98 @@ export default function MisOfertas() {
       gestureEnabled: false,
     });
   }, [navigation]);
+
+  useEffect(() => {
+    const fetchOfertas = async () => {
+      try {
+        // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
+        const offersRef = query(collection(db, 'Ofertas'), where('UsuarioGaleria', '==', auth.currentUser.uid));
+        const offersSnap = await getDocs(offersRef);
+        
+        const fetchedOfertas = [];
+        for (let offerDoc of offersSnap.docs) {
+          const ofertaData = offerDoc.data();
+          // AQUI LLAMA A LA COLECCION Publicaciones Y OBTIENE LOS ARTICULOS SEGUN LOS UID DE OFERTAS
+          const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
+          const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
+          const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
+            getDoc(publicacionGaleriaRef),
+            getDoc(publicacionOfertaRef)
+          ]);
+          // AQUI YA CON LOS UID OBTENIDOS DE Publicaciones LLAMA A LA DATA DE LA OFERTA
+          // ESTOS SON LOS DATOS QUE VA A MOSTRAR EN EL FRONT, SE OBTUVIERON COMPARANDO LOS UID DE Ofertas Y Publicaciones
+          fetchedOfertas.push({
+            id: offerDoc.id,
+            fecha: ofertaData.fecha,
+            ArticuloGaleria: {
+              imagenURL: publicacionGaleriaSnap.data().imagenURL,
+              nombreArticulo: publicacionGaleriaSnap.data().nombreArticulo
+            },
+            ArticuloOferta: {
+              imagenURL: publicacionOfertaSnap.data().imagenURL,
+              nombreArticulo: publicacionOfertaSnap.data().nombreArticulo
+            }
+          });
+        }    
+        setOfertas(fetchedOfertas);
+        setIsLoading(false); 
+      } catch (error) {
+          console.error("Error al obtener ofertas:", error);
+          setIsLoading(false);
+      }
+    };
+    fetchOfertas();
+  }, []);
+
+
+  const EliminarOferta = async (oferta) => {
+    Alert.alert(
+        "Confirmación",
+        "¿Estás seguro de eliminar la oferta?",
+        [
+          {
+            text: "No",
+            onPress: () => console.log("Eliminación cancelada"),
+            style: "cancel"
+          },
+          {
+            text: "Sí", 
+            onPress: async () => {
+              try {
+                console.log("Dentro de eliminarOferta, ofertaId:", oferta.id);
+                const offerRef = doc(db, 'Ofertas', oferta.id);
+                await deleteDoc(offerRef);
+                setOfertas(prevOfertas => prevOfertas.filter(item => item.id !== oferta.id));
+                Alert.alert(
+                  "¡Éxito!",
+                  "La oferta ha sido eliminada.",
+                );
+              } catch (error) {
+                console.error("Error al eliminar la oferta:", error);
+              }
+            }
+          }
+        ],
+        { cancelable: false }
+    );
+  };
+
+  const EmptyListComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>¡Ups! No tienes ofertas disponibles.</Text>
+    </View>
+  );
+
+  const formatDateFromDatabase = (timestamp) => {
+    if (!timestamp) return '';  // or return a default value or error message
+    const date = timestamp.toDate();
+    return getCurrentDateFormatted(date);
+  } 
+
+  const getCurrentDateFormatted = (date) => {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  };  
 
   const goMiPerfil = () => {
     navigation.navigate("MiPerfil");
@@ -59,9 +137,6 @@ export default function MisOfertas() {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
-
-  const drawer = useRef(null);
-  const [drawerPosition, setDrawerPosition] = useState("left");
 
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
@@ -115,104 +190,8 @@ export default function MisOfertas() {
     </View>
   );
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) setUserId(user.uid);
-  }, []);
-
-  
-  const realizarOferta = async (Ofertas) => {
-    try {
-      if (!itemName || !itemCondition || !selectedComuna || !selectedRegion || !itemTrade || !selectedImages.length || !userId) {
-        console.error("Algunas variables contienen valores no válidos.");
-        return;
-      }
-      const [url1, url2, url3] = urls;
-      const offerData = collection(db, Ofertas);
-      await setDoc(offerData, {
-        nombreArticulo: itemName,
-        estadoArticulo: itemCondition,
-        comuna: selectedComuna.name,
-        region: selectedRegion.name,
-        tipo: itemTrade,
-        imagenURL: url1,
-        imagenURL2: url2,
-        imagenURL3: url3,
-        uid: userId,
-      });
-      console.log(`Nueva colección "${Ofertas}" creada con éxito.`);
-    } catch (error) {
-      console.error("Error al crear la colección:", error);
-    }
-  };
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const allItemsArray = [];
-      const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
-      articulosPublicadosRef.forEach((offerReceived) => {
-        const offerData = offerReceived.data();
-        allItemsArray.push({
-          uid: offerReceived.id,  
-          imagenURL: offerData.imagenURL,
-          nombreArticulo: offerData.nombreArticulo,
-          tipo: offerData.tipo,
-          estadoArticulo: offerData.estadoArticulo,
-          comuna: offerData.comuna,
-        });
-      });  
-      setDataSource(allItemsArray);
-    } catch (error) {
-      console.error("Error al cargar los artículos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteItem = async (itemId) => {
-    try {
-      await deleteDoc(doc(db, "Ofertas", itemId));
-      setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
-    } catch (error) {
-      console.error("Error al eliminar el artículo:", error);
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      fetchPosts();
-    });
-    if (userId){
-      fetchPosts();
-    }
-    return unsubscribe;
-  }, [navigation, userId]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchPosts();
-    setRefreshing(false);
-  };
-
-  const renderItem = ({item}) => {
-    return (
-      <Card style={styles.containerCard} onPress={goMiPerfil}> 
-        <Card.Title
-        style={styles.containerCardContent} 
-        title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
-        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
-        left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
-        right={(props) => (
-          <TouchableOpacity
-            onPress={() => handleDeleteItem(item.uid)}
-          >
-            <Image source={require("../assets/Eliminar.png")} style={styles.iconList} />
-          </TouchableOpacity>
-        )}
-        />
-      </Card>
-    );
+  const goDetalleArticulo = () => {
+    navigation.navigate('DetalleArticulo', { itemId: item.id });
   };
 
   const renderDrawerAndroid = () => (
@@ -222,15 +201,53 @@ export default function MisOfertas() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-      <View style={{ marginTop: 15 }}>
-        <FlatList
-          data={dataSource}
-          renderItem={renderItem}
-          keyExtractor={(item) => (item && item.uid ? item.uid.toString() : 'defaultKey')}
-          contentContainerStyle={styles.gridContainer}
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-        />
+      <View style={{ flex: 1 }}>
+          {isLoading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : (
+            <FlatList
+              contentContainerStyle={{ flexGrow: 1 }}
+              data={ofertas}
+              keyExtractor={item => item.id}
+              renderItem={({ item, index }) => (
+                <Card style={styles.containerCard} onPress={goDetalleArticulo}>
+                  <Text style={styles.textCardDate}>Oferta recibida el {formatDateFromDatabase(item.fecha)}</Text>
+                  <Card.Title
+                    style={styles.containerCardContent}
+                    left={(props) => (
+                      // DATOS DEL ARTICULO DEL USUARIO AUTENTICADO
+                      <View style={styles.exchangeContainer}>
+                        <View style={styles.leftContainer}>
+                          
+                          <Image source={{uri: item.ArticuloGaleria.imagenURL}} style={styles.imagen}/>
+                          <Text style={styles.textCardOne}>{item.ArticuloGaleria.nombreArticulo}</Text>
+                        </View>
+                        <View>
+                          <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                        </View>
+                      </View>
+                    )}
+                    right={(props) => (
+                      // DATOS DEL ARTICULO OFERTADO 
+                      <View style={styles.exchangeContainer}>
+                        <View style={styles.rightContainer}>
+                          <Image source={{uri: item.ArticuloOferta.imagenURL}} style={styles.imagen}/>
+                          <Text style={styles.textCard}>{item.ArticuloOferta.nombreArticulo}</Text>
+                          
+                        </View>
+                        <TouchableOpacity onPress={() => EliminarOferta(item)}>
+                          <Image source={require("../assets/Eliminar.png")} style={styles.icon}/>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                </Card>
+              )}
+              ListEmptyComponent={EmptyListComponent} 
+            />
+        )}
       </View>
     </DrawerLayout>
   );
@@ -239,6 +256,48 @@ export default function MisOfertas() {
 }
 
 const styles = StyleSheet.create({
+  containerCardContent: {
+    width: '100%',
+    height: 140,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  containerCard: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginHorizontal: 10,
+    marginBottom: 10,
+    marginTop: 10
+  },
+  textCard: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  textCardOne: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginHorizontal: 3
+  },
+  textCardDate: {
+    fontSize: 15,
+    marginLeft: 25,
+    marginEnd: 20,
+    marginTop: 23
+  },
+  imagen: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    marginBottom: 5,
+  },
+  icon: {
+    width: 50,
+    height: 50,
+    marginRight: 15,
+    marginLeft: 15
+  },
   container: {
     flex: 1,
     padding: 16,
@@ -279,55 +338,48 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
-  containerCard: {
-    width: 'auto',
-    height: 100,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    marginHorizontal: 15,
-    marginBottom: 10,
+  exchangeArrow: {
+    width: 60,
+    height: 50,
+    marginHorizontal: 8
   },
-  containerCardContent: {
-    width: 'auto',
-    height: 100,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-  },
-  imagenList: {
-    width: '200%',
-    height: '200%',
-    borderRadius: 10,
-  },
-  iconList: {
-    width: 40,
-    height: 40,
-    marginRight: 15,
-  },
-  viewCard: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
+  exchangeContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
-  textCard: {
+  textContainer: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    paddingBottom: 16,
+  },
+  leftContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    margin: 5,
+  },
+  rightContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    margin: 5,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20
+  },
+  emptyText: {
     fontSize: 18,
-    fontWeight: '500',
-    marginLeft: 38,
+    color: 'gray',
+    alignItems: 'center'
   },
   textCardDate: {
-    fontSize: 14,
-    marginLeft: 38,
-  },
-  buttonCard: {
-    borderRadius: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
-    padding: 5,
-    backgroundColor: "#63A355",
-  },
-  textButton2: {
-    color: "#ffffff",
-  },
-  gridContainer: {
-    padding: 0,
+    fontSize: 17,
+    color: 'grey',
+    marginTop: 5,
+    marginHorizontal: 12,
+    alignSelf: "center"
   },
 });
