@@ -421,8 +421,8 @@ const styles = StyleSheet.create({
     opacity: 70,
   },
   imageCarrusel: {
-    width: 170,
-    height: 160,
+    width: "100%",
+    height: 170,
     borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
@@ -443,7 +443,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   containerText:{
-    width: "90%",
+    width: "45%",
+    marginRight: 175,
   },
   text: {
     fontSize: 18,
@@ -453,6 +454,7 @@ const styles = StyleSheet.create({
   userProfile: {
     alignItems: "center",
     marginTop: 60,
+    backgroundColor: "#ffffff"
   },
   nombreUser:{
     fontSize: 19,
@@ -461,9 +463,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   imageUser: {
-    width: 90,
-    height: 90,
-    borderRadius: 50,
+    width: 115,
+    height: 115,
+    borderRadius: 58,
   },
   containerBoton: {
     alignItems: "center",
