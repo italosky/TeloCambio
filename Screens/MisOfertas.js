@@ -4,30 +4,24 @@ import {
   Text,
   View,
   Image,
+  Alert,
   Platform,
-  TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { Card } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { products } from "./common/Articulos";
+import { useNavigation } from "@react-navigation/native";
+import { collection, getDocs, doc, getDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { FlatList } from "react-native-gesture-handler";
 import { Drawer, Card } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
 
-export default function MisOfertas({ route }) {
+export default function MisOfertas() {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [numColumns, setNumColumns] = useState(2);
-  const [itemName, setItemName] = useState("");
-  const [itemCondition, setItemCondition] = useState("");
-  const [selectedComuna, setSelectedComuna] = useState(null);
-  const [selectedRegion, setSelectedRegion] = useState(null);
-  const [itemTrade, setItemTrade] = useState("");
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [dataSource, setDataSource] = useState([]);
+  const [ofertas, setOfertas] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const drawer = useRef(null);
+  const [drawerPosition, setDrawerPosition] = useState("left");;
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -36,6 +30,97 @@ export default function MisOfertas({ route }) {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    const fetchOfertas = async () => {
+      try {
+        // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
+        const offersRef = query(collection(db, 'Ofertas'), where('UsuarioGaleria', '==', auth.currentUser.uid));
+        const offersSnap = await getDocs(offersRef);
+        
+        const fetchedOfertas = [];
+        for (let offerDoc of offersSnap.docs) {
+          const ofertaData = offerDoc.data();
+          // AQUI LLAMA A LA COLECCION Publicaciones Y OBTIENE LOS ARTICULOS SEGUN LOS UID DE OFERTAS
+          const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
+          const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
+          const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
+            getDoc(publicacionGaleriaRef),
+            getDoc(publicacionOfertaRef)
+          ]);
+          // AQUI YA CON LOS UID OBTENIDOS DE Publicaciones LLAMA A LA DATA DE LA OFERTA
+          // ESTOS SON LOS DATOS QUE VA A MOSTRAR EN EL FRONT, SE OBTUVIERON COMPARANDO LOS UID DE Ofertas Y Publicaciones
+          fetchedOfertas.push({
+            id: offerDoc.id,
+            fecha: ofertaData.fecha,
+            ArticuloGaleria: {
+              imagenURL: publicacionGaleriaSnap.data().imagenURL,
+              nombreArticulo: publicacionGaleriaSnap.data().nombreArticulo
+            },
+            ArticuloOferta: {
+              imagenURL: publicacionOfertaSnap.data().imagenURL,
+              nombreArticulo: publicacionOfertaSnap.data().nombreArticulo
+            }
+          });
+        }    
+        setOfertas(fetchedOfertas);
+        setIsLoading(false); 
+      } catch (error) {
+          console.error("Error al obtener ofertas:", error);
+          setIsLoading(false);
+      }
+    };
+    fetchOfertas();
+  }, []);
+
+
+  const EliminarOferta = async (oferta) => {
+    Alert.alert(
+        "Confirmación",
+        "¿Estás seguro de eliminar la oferta?",
+        [
+          {
+            text: "No",
+            onPress: () => console.log("Eliminación cancelada"),
+            style: "cancel"
+          },
+          {
+            text: "Sí", 
+            onPress: async () => {
+              try {
+                console.log("Dentro de eliminarOferta, ofertaId:", oferta.id);
+                const offerRef = doc(db, 'Ofertas', oferta.id);
+                await deleteDoc(offerRef);
+                setOfertas(prevOfertas => prevOfertas.filter(item => item.id !== oferta.id));
+                Alert.alert(
+                  "¡Éxito!",
+                  "La oferta ha sido eliminada.",
+                );
+              } catch (error) {
+                console.error("Error al eliminar la oferta:", error);
+              }
+            }
+          }
+        ],
+        { cancelable: false }
+    );
+  };
+
+  const EmptyListComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>¡Ups! No tienes ofertas disponibles.</Text>
+    </View>
+  );
+
+  const formatDateFromDatabase = (timestamp) => {
+    if (!timestamp) return '';  // or return a default value or error message
+    const date = timestamp.toDate();
+    return getCurrentDateFormatted(date);
+  } 
+
+  const getCurrentDateFormatted = (date) => {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  };  
 
   const goMiPerfil = () => {
     navigation.navigate("MiPerfil");
@@ -52,9 +137,6 @@ export default function MisOfertas({ route }) {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
-
-  const drawer = useRef(null);
-  const [drawerPosition, setDrawerPosition] = useState("left");
 
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
@@ -109,105 +191,7 @@ export default function MisOfertas({ route }) {
   );
 
   const goDetalleArticulo = () => {
-    // Navega a la pantalla 'DetalleArticulo'
     navigation.navigate('DetalleArticulo', { itemId: item.id });
-  };
-
-  const [active, setActive] = React.useState("");
-
-  
-  const realizarOferta = async (Ofertas) => {
-    try {
-      if (!itemName || !itemCondition || !selectedComuna || !selectedRegion || !itemTrade || !selectedImages.length || !userId) {
-        console.error("Algunas variables contienen valores no válidos.");
-        return;
-      }
-      const [url1, url2, url3] = urls;
-      const offerData = collection(db, Ofertas);
-      await setDoc(offerData, {
-        nombreArticulo: itemName,
-        estadoArticulo: itemCondition,
-        comuna: selectedComuna.name,
-        region: selectedRegion.name,
-        tipo: itemTrade,
-        imagenURL: url1,
-        imagenURL2: url2,
-        imagenURL3: url3,
-        uid: userId,
-      });
-      console.log(`Nueva colección "${Ofertas}" creada con éxito.`);
-    } catch (error) {
-      console.error("Error al crear la colección:", error);
-    }
-  };
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const allItemsArray = [];
-      const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
-      articulosPublicadosRef.forEach((offerReceived) => {
-        const offerData = offerReceived.data();
-        allItemsArray.push({
-          uid: offerReceived.id,  
-          imagenURL: offerData.imagenURL,
-          nombreArticulo: offerData.nombreArticulo,
-          tipo: offerData.tipo,
-          estadoArticulo: offerData.estadoArticulo,
-          comuna: offerData.comuna,
-        });
-      });  
-      setDataSource(allItemsArray);
-    } catch (error) {
-      console.error("Error al cargar los artículos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteItem = async (itemId) => {
-    try {
-      await deleteDoc(doc(db, "Ofertas", itemId));
-      setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
-    } catch (error) {
-      console.error("Error al eliminar el artículo:", error);
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      fetchPosts();
-    });
-    if (userId){
-      fetchPosts();
-    }
-    return unsubscribe;
-  }, [navigation, userId]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchPosts();
-    setRefreshing(false);
-  };
-
-  const renderItem = ({item}) => {
-    return (
-      <Card style={styles.containerCard} onPress={goMiPerfil}> 
-        <Card.Title
-        style={styles.containerCardContent} 
-        title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
-        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
-        left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
-        right={(props) => (
-          <TouchableOpacity
-            onPress={() => handleDeleteItem(item.uid)}
-          >
-            <Image source={require("../assets/Eliminar.png")} style={styles.iconList} />
-          </TouchableOpacity>
-        )}
-        />
-      </Card>
-    );
   };
 
   const renderDrawerAndroid = () => (
@@ -217,39 +201,53 @@ export default function MisOfertas({ route }) {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-      <View style={{ marginTop: 15 }}>
-        <FlatList
-          data={AccesoriosList}
-          renderItem={({ item, index }) => {
-            return (
-              <Card style={styles.containerCard} onPress={goDetalleArticulo}> 
-                <Card.Title
-                  style={styles.containerCardContent} 
-                  left={(props) => (
-                    <View style={styles.exchangeContainer} >
-                      <View style={styles.leftContainer}>
-                        <Image source={item.imagen} style={styles.imagen}/>
-                        <Text style={styles.textCardOne} >{item.nombre}</Text> 
+      <View style={{ flex: 1 }}>
+          {isLoading ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : (
+            <FlatList
+              contentContainerStyle={{ flexGrow: 1 }}
+              data={ofertas}
+              keyExtractor={item => item.id}
+              renderItem={({ item, index }) => (
+                <Card style={styles.containerCard} onPress={goDetalleArticulo}>
+                  <Text style={styles.textCardDate}>Oferta recibida el {formatDateFromDatabase(item.fecha)}</Text>
+                  <Card.Title
+                    style={styles.containerCardContent}
+                    left={(props) => (
+                      // DATOS DEL ARTICULO DEL USUARIO AUTENTICADO
+                      <View style={styles.exchangeContainer}>
+                        <View style={styles.leftContainer}>
+                          
+                          <Image source={{uri: item.ArticuloGaleria.imagenURL}} style={styles.imagen}/>
+                          <Text style={styles.textCardOne}>{item.ArticuloGaleria.nombreArticulo}</Text>
+                        </View>
+                        <View>
+                          <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                        </View>
                       </View>
-                      <View>
-                        <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                    )}
+                    right={(props) => (
+                      // DATOS DEL ARTICULO OFERTADO 
+                      <View style={styles.exchangeContainer}>
+                        <View style={styles.rightContainer}>
+                          <Image source={{uri: item.ArticuloOferta.imagenURL}} style={styles.imagen}/>
+                          <Text style={styles.textCard}>{item.ArticuloOferta.nombreArticulo}</Text>
+                          
+                        </View>
+                        <TouchableOpacity onPress={() => EliminarOferta(item)}>
+                          <Image source={require("../assets/Eliminar.png")} style={styles.icon}/>
+                        </TouchableOpacity>
                       </View>
-                    </View>
-                  )}
-                  right={(props) => (
-                    <View style={styles.exchangeContainer}>
-                      <View style={styles.rightContainer}>
-                        <Image source={item.imagen} style={styles.imagen}/>
-                        <Text style={styles.textCard} >{item.nombre}</Text> 
-                      </View>
-                      <Image source={require("../assets/Eliminar.png")} style={styles.icon}/>
-                    </View>
-                  )}
-                />
-              </Card>
-            );
-          }}
-        />
+                    )}
+                  />
+                </Card>
+              )}
+              ListEmptyComponent={EmptyListComponent} 
+            />
+        )}
       </View>
     </DrawerLayout>
   );
@@ -269,6 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginHorizontal: 10,
     marginBottom: 10,
+    marginTop: 10
   },
   textCard: {
     fontSize: 12,
@@ -364,5 +363,23 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     margin: 5,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20
+  },
+  emptyText: {
+    fontSize: 18,
+    color: 'gray',
+    alignItems: 'center'
+  },
+  textCardDate: {
+    fontSize: 17,
+    color: 'grey',
+    marginTop: 5,
+    marginHorizontal: 12,
+    alignSelf: "center"
   },
 });
