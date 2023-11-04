@@ -14,10 +14,17 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
-import { collection, query, where, getDocs, addDoc, limit, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  limit,
+  Timestamp,
+} from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
@@ -32,6 +39,7 @@ export default function DetalleArticulo() {
   const userID = auth.currentUser ? auth.currentUser.uid : null; // UID DEL USUARIO LOGEADO ACTUALMENTE
   const userId = item.id.match(/-(.*)/)[1];
   const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -57,7 +65,13 @@ export default function DetalleArticulo() {
     fetchUserData();
   }, [userId]);
 
-  const createOfferCollection = async (articleId) => { 
+  useEffect(() => {
+    if (userData && userData.role) {
+      setUserRole(userData.role);
+    }
+  }, [userData]);
+
+  const createOfferCollection = async (articleId) => {
     try {
       const offersRef = collection(db, "Ofertas");
       const q = query(
@@ -68,7 +82,9 @@ export default function DetalleArticulo() {
       );
       const existingOfferSnap = await getDocs(q);
       if (!existingOfferSnap.empty) {
-        console.log("Ya existe una oferta para este artículo por el usuario actual.");
+        console.log(
+          "Ya existe una oferta para este artículo por el usuario actual."
+        );
         return;
       }
       const offerDoc = {
@@ -77,7 +93,7 @@ export default function DetalleArticulo() {
         ArticuloGaleria: item.id,
         UsuarioGaleria: userId,
         Estado: "pendiente",
-        fecha: Timestamp
+        fecha: Timestamp,
       };
       await addDoc(offersRef, offerDoc);
       console.log("Documento de oferta añadido con éxito");
@@ -85,9 +101,6 @@ export default function DetalleArticulo() {
       console.error("Error al añadir el documento:", error);
     }
   };
-  
-
-
 
   const navigateToDatosCambio = () => {
     navigation.navigate("DatosCambio", { item });
@@ -123,6 +136,9 @@ export default function DetalleArticulo() {
 
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
+  };
+  const goReporteUsuario = () => {
+    navigation.navigate("ReporteUsuario");
   };
 
   const drawer = useRef(null);
@@ -198,20 +214,24 @@ export default function DetalleArticulo() {
   useEffect(() => {
     const fetchPublicaciones = async () => {
       try {
-        const publicacionesCollection = collection(db, 'Publicaciones');
-        const publicacionesQuery = query(publicacionesCollection, where("uid", "==", userID));
+        const publicacionesCollection = collection(db, "Publicaciones");
+        const publicacionesQuery = query(
+          publicacionesCollection,
+          where("uid", "==", userID)
+        );
         const publicacionesSnapshot = await getDocs(publicacionesQuery);
-        const publicacionesData = publicacionesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const publicacionesData = publicacionesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         console.log("Publicaciones:", publicacionesData);
         setArticulos(publicacionesData);
       } catch (error) {
         console.error("Error al obtener las publicaciones:", error);
       }
-    };    
+    };
     fetchPublicaciones();
   }, [userID]);
-  
-  
 
   const [modalArticulo, setModalArticulo] = useState(false);
 
@@ -245,13 +265,13 @@ export default function DetalleArticulo() {
               "Felicidades",
               "Tu solicitud de oferta ha sido ingresada con exito",
               [
-                { 
-                  text: "OK", 
-                  onPress: () => navigation.navigate("Galeria2") 
-                }
+                {
+                  text: "OK",
+                  onPress: () => navigation.navigate("Galeria2"),
+                },
               ]
             );
-          }
+          },
         },
       ],
       { cancelable: true }
@@ -259,8 +279,14 @@ export default function DetalleArticulo() {
   };
 
   useEffect(() => {
-      console.log("Después de establecer el estado - ID seleccionado:", selectedCard);
-      console.log("Después de establecer el estado - ID de artículo ofrecido:", articleId);
+    console.log(
+      "Después de establecer el estado - ID seleccionado:",
+      selectedCard
+    );
+    console.log(
+      "Después de establecer el estado - ID de artículo ofrecido:",
+      articleId
+    );
   }, [selectedCard, articleId]);
 
   const [columns, setColumns] = useState(1);
@@ -328,14 +354,19 @@ export default function DetalleArticulo() {
             </View>
           )}
         </View>
-
-        <View style={styles.containerBoton}>
-          <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-            <Text style={styles.textoBoton}>Eliminar Publicación</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-            <Text style={styles.textoBoton}>Banear Usuario</Text>
-          </TouchableOpacity>
+        <View>
+          {userRole === "admin" && (
+            <View style={styles.containerBoton}>
+              <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+                <Text style={styles.textoBoton}>Eliminar Publicación</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {userRole === "usuario" && (
+            <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+              <Text style={styles.textoBoton}>Reportar Usuario</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <Modal visible={mostrarModal} transparent={true}>
@@ -363,27 +394,40 @@ export default function DetalleArticulo() {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalText}>Disponible para Intercambio</Text>
-              
-              <FlatList 
+
+              <FlatList
                 style={styles.containerFlastList}
                 numColumns={columns}
                 data={articulos}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                  <Card 
+                  <Card
                     key={item.id}
-                    style={[styles.containerCard, selectedCard === item.id ? { borderWidth: 2 } : {}]}
+                    style={[
+                      styles.containerCard,
+                      selectedCard === item.id ? { borderWidth: 2 } : {},
+                    ]}
                     onPress={() => {
-                      console.log("Tarjeta seleccionada:", item.nombreArticulo, item.id);
+                      console.log(
+                        "Tarjeta seleccionada:",
+                        item.nombreArticulo,
+                        item.id
+                      );
                       ArticuloModal(item.nombreArticulo, item.id);
                     }}
-                    
                   >
                     <View style={styles.containerImagen}>
-                      <Card.Cover source={{ uri: item.imagenURL }} style={styles.imagen}/>
+                      <Card.Cover
+                        source={{ uri: item.imagenURL }}
+                        style={styles.imagen}
+                      />
                       <View style={styles.textContainer}>
-                        <Text style={styles.titleCard}>{item.nombreArticulo}</Text>
-                        <Text style={styles.titleEstado}>{item.estadoArticulo}</Text>
+                        <Text style={styles.titleCard}>
+                          {item.nombreArticulo}
+                        </Text>
+                        <Text style={styles.titleEstado}>
+                          {item.estadoArticulo}
+                        </Text>
                       </View>
                     </View>
                   </Card>
@@ -434,7 +478,7 @@ const styles = StyleSheet.create({
     fontSize: 70,
     marginTop: 30,
     paddingHorizontal: 5,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff",
   },
   tittle: {
     fontSize: 20,
@@ -442,7 +486,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     textAlign: "center",
   },
-  containerText:{
+  containerText: {
     width: "45%",
     marginRight: 175,
   },
@@ -454,9 +498,9 @@ const styles = StyleSheet.create({
   userProfile: {
     alignItems: "center",
     marginTop: 60,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff",
   },
-  nombreUser:{
+  nombreUser: {
     fontSize: 19,
     fontWeight: "500",
     marginTop: 18,
@@ -503,7 +547,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    
   },
   imageModal: {
     width: 350,
@@ -595,7 +638,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 20,
     marginBottom: 5,
-    paddingStart: 12
+    paddingStart: 12,
   },
   containerFlastList: {
     marginBottom: 1,
@@ -604,18 +647,18 @@ const styles = StyleSheet.create({
     width: 263,
     height: 110,
     borderRadius: 11,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 5,
     marginTop: 5,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     borderWidth: 0.3,
   },
-  
+
   containerImagen: {
     marginTop: 6,
     alignItems: "center",
     marginHorizontal: 5,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   imagen: {
     width: 100,
@@ -625,13 +668,13 @@ const styles = StyleSheet.create({
   titleCard: {
     fontSize: 17,
     textAlign: "auto",
-    flexDirection: 'row',
+    flexDirection: "row",
   },
-  titleEstado:{
-    marginTop: 5,  
+  titleEstado: {
+    marginTop: 5,
   },
   textContainer: {
-    flexDirection: 'column', 
+    flexDirection: "column",
     marginLeft: 10,
   },
 });

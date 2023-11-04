@@ -12,8 +12,18 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { appFirebase, auth, db } from "../firebaseConfig";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, getDocs, query, collection, where } from "firebase/firestore";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+import {
+  getFirestore,
+  getDocs,
+  query,
+  collection,
+  where,
+} from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login(props) {
@@ -33,15 +43,24 @@ export default function Login(props) {
 
   const LoginConRoles = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       await AsyncStorage.setItem("isLoggedIn", "true");
-      const userQuerySnapshot = await getDocs(query(collection(db, "Usuarios"), where("uid", "==", userCredential.user.uid)));
+      const userQuerySnapshot = await getDocs(
+        query(
+          collection(db, "Usuarios"),
+          where("uid", "==", userCredential.user.uid)
+        )
+      );
       if (!userQuerySnapshot.empty) {
         const userData = userQuerySnapshot.docs[0].data();
         if (userData.role === "admin") {
-            navigation.navigate("PAGINA PARA EL ADMIN");
+          navigation.navigate("ListaReportesAdmin");
         } else {
-            navigation.navigate("Galeria2");
+          navigation.navigate("Galeria2");
         }
       } else {
         console.error("No se encuentra el uid:", uid);
