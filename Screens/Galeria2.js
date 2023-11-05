@@ -32,18 +32,21 @@ export default function Galeria2() {
       const allItemsArray = [];
       const articulosPublicadosRef = collection(db, "Publicaciones");
       const usersSnapshot = await getDocs(articulosPublicadosRef);
+      const user = auth.currentUser;
       usersSnapshot.forEach((postDoc) => {
         const postData = postDoc.data();
-        allItemsArray.push({
-          id: postDoc.id,
-          imagenURL: postData.imagenURL,
-          imagenURL2: postData.imagenURL2,
-          imagenURL3: postData.imagenURL3,
-          nombreArticulo: postData.nombreArticulo,
-          tipo: postData.tipo,
-          estadoArticulo: postData.estadoArticulo,
-          comuna: postData.comuna,
-        });
+        if (user && postData.uid !== user.uid) {
+          allItemsArray.push({
+            id: postDoc.id,
+            imagenURL: postData.imagenURL,
+            imagenURL2: postData.imagenURL2,
+            imagenURL3: postData.imagenURL3,
+            nombreArticulo: postData.nombreArticulo,
+            tipo: postData.tipo,
+            estadoArticulo: postData.estadoArticulo,
+            comuna: postData.comuna,
+          });
+        }
       });
       setDataSource(allItemsArray);
     } catch (error) {
