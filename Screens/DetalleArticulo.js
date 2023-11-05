@@ -21,7 +21,7 @@ import {
   getDocs,
   addDoc,
   limit,
-  Timestamp,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -93,7 +93,7 @@ export default function DetalleArticulo() {
         ArticuloGaleria: item.id,
         UsuarioGaleria: userId,
         Estado: "pendiente",
-        fecha: Timestamp,
+        fecha: serverTimestamp(),
       };
       await addDoc(offersRef, offerDoc);
       console.log("Documento de oferta añadido con éxito");
