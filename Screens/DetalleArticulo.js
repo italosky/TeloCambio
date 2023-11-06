@@ -14,7 +14,15 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
-import { collection, query, where, getDocs, addDoc, limit, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  limit,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -74,7 +82,9 @@ export default function DetalleArticulo() {
       );
       const existingOfferSnap = await getDocs(q);
       if (!existingOfferSnap.empty) {
-        console.log("Ya existe una oferta para este artículo por el usuario actual.");
+        console.log(
+          "Ya existe una oferta para este artículo por el usuario actual."
+        );
         return;
       }
       const offerDoc = {
@@ -83,7 +93,7 @@ export default function DetalleArticulo() {
         ArticuloGaleria: item.id,
         UsuarioGaleria: userId,
         Estado: "pendiente",
-        fecha: Timestamp
+        fecha: serverTimestamp(),
       };
       await addDoc(offersRef, offerDoc);
       console.log("Documento de oferta añadido con éxito");
@@ -91,7 +101,7 @@ export default function DetalleArticulo() {
       console.error("Error al añadir el documento:", error);
     }
   };
-  
+
   const navigateToDatosCambio = () => {
     navigation.navigate("DatosCambio", { item });
   };
@@ -255,13 +265,13 @@ export default function DetalleArticulo() {
               "Felicidades",
               "Tu solicitud de oferta ha sido ingresada con exito",
               [
-                { 
-                  text: "OK", 
-                  onPress: () => navigation.navigate("Galeria2") 
-                }
+                {
+                  text: "OK",
+                  onPress: () => navigation.navigate("Galeria2"),
+                },
               ]
             );
-          }
+          },
         },
       ],
       { cancelable: true }
@@ -269,8 +279,14 @@ export default function DetalleArticulo() {
   };
 
   useEffect(() => {
-      console.log("Después de establecer el estado - ID seleccionado:", selectedCard);
-      console.log("Después de establecer el estado - ID de artículo ofrecido:", articleId);
+    console.log(
+      "Después de establecer el estado - ID seleccionado:",
+      selectedCard
+    );
+    console.log(
+      "Después de establecer el estado - ID de artículo ofrecido:",
+      articleId
+    );
   }, [selectedCard, articleId]);
 
   const [columns, setColumns] = useState(1);
