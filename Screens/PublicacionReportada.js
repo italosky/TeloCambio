@@ -83,7 +83,7 @@ export default function DetalleArticulo() {
       const existingOfferSnap = await getDocs(q);
       if (!existingOfferSnap.empty) {
         console.log(
-          "Ya existe una oferta para este artículo por el usuario actual."
+          "Ya realizaste una oferta por este articulo."
         );
         return;
       }
@@ -122,25 +122,6 @@ export default function DetalleArticulo() {
     });
   }, [navigation]);
 
-  const goMiPerfil = () => {
-    navigation.navigate("MiPerfil");
-  };
-
-  const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
-  };
-
-  const goMisPublicados = () => {
-    navigation.navigate("MisPublicados");
-  };
-
-  const goMisOfertas = () => {
-    navigation.navigate("MisOfertas");
-  };
-  const goReporteUsuario = () => {
-    navigation.navigate("ReporteUsuario");
-  };
-
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
 
@@ -171,21 +152,6 @@ export default function DetalleArticulo() {
         />
       </View>
       <View style={styles.separatorLine} />
-
-      <Drawer.Section>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
-          <Text style={styles.drawerText}>Mi Perfil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
-          <Text style={styles.drawerText}>Galería de Artículos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
-          <Text style={styles.drawerText}>Mis Publicados</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
-          <Text style={styles.drawerText}>Mis Ofertas</Text>
-        </TouchableOpacity>
-      </Drawer.Section>
 
       <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
         <Image
@@ -262,8 +228,8 @@ export default function DetalleArticulo() {
             closeModal();
             await createOfferCollection(id);
             Alert.alert(
-              "Felicidades",
-              "Tu solicitud de oferta ha sido ingresada con exito",
+              "Felicidades Telocambista",
+              "Tu oferta de intercambio ha sido ingresada con exito",
               [
                 {
                   text: "OK",
@@ -325,8 +291,8 @@ export default function DetalleArticulo() {
                 </TouchableOpacity>
               ))}
             </Swiper>
-            <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
-            <Text style={styles.text}>Comuna: {item.comuna}</Text>
+            <Text style={styles.text2}>Estado: {item.estadoArticulo}</Text>
+            <Text style={styles.text2}>Comuna: {item.comuna}</Text>
           </View>
           {userData && (
             <View style={styles.userProfile}>
@@ -334,7 +300,7 @@ export default function DetalleArticulo() {
                 source={{ uri: userData.imagenen[0] }}
                 style={styles.imageUser}
               />
-              <Text style={styles.text}>{userData.nombre_apellido}</Text>
+              <Text style={styles.text2}>{userData.nombre_apellido}</Text>
               {item.tipo === "Intercambiar artículo" && (
                 <TouchableOpacity
                   style={[styles.teLoCambioButton]}
@@ -483,9 +449,10 @@ const styles = StyleSheet.create({
   tittle: {
     fontSize: 20,
     fontWeight: "700",
+    marginVertical: 20,
     textAlign: "center",
   },
-  containerText:{
+  containerText: {
     width: "45%",
     marginRight: 175,
   },
@@ -497,6 +464,7 @@ const styles = StyleSheet.create({
   userProfile: {
     alignItems: "center",
     marginTop: 60,
+    backgroundColor: "#ffffff",
   },
   nombreUser: {
     fontSize: 19,
@@ -540,6 +508,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     backgroundColor: "#ffffff",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   imageModal: {
     width: 350,
@@ -609,11 +582,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 5,
     backgroundColor: "#efb810",
-  },
-  teLoRegaloButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
   },
   modalContainer: {
     flex: 1,

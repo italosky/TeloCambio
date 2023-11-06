@@ -11,24 +11,20 @@ import Login from "./Screens/Login";
 import Home from "./Screens/Home";
 import Ingreso from "./Screens/Ingreso";
 import Registro from "./Screens/Registro";
-import Galeria from "./Screens/Galeria";
 import Galeria2 from "./Screens/Galeria2";
 import SubirArticulos from "./Screens/SubirArticulos";
 import Concretar from "./Screens/Concretar";
 import DatosCambio from "./Screens/DatosCambio";
-import DetalleCambio from "./Screens/DetalleCambio";
-import DetalleGratis from "./Screens/DetalleGratis";
 import MiPerfil from "./Screens/MiPerfil";
 import MisOfertas from "./Screens/MisOfertas";
 import MisPublicados from "./Screens/MisPublicados";
-import PerfilOtros from "./Screens/PerfilOtros";
 import ReporteUsuario from "./Screens/ReporteUsuario";
 import RecuperarContraseña from "./Screens/RecuperarContraseña";
-import Categoria from "./Screens/Categoria";
 import DetalleArticulo from "./Screens/DetalleArticulo";
 import ListaReportesAdmin from "./Screens/ListaReportesAdmin";
 import MisIntercambios from "./Screens/MisIntercambios";
 import ConcretarInfo from "./Screens/ConcretarInfo";
+import PublicacionReportada from "./Screens/PublicacionReportada";
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -75,16 +71,6 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="Galeria"
-          component={Galeria}
-          options={{
-            title: "Galería",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
           name="Galeria2"
           component={Galeria2}
           options={{
@@ -125,26 +111,6 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="DetalleCambio"
-          component={DetalleCambio}
-          options={{
-            title: "Detalle de un articulo cuando es para cambio",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
-          name="DetalleGratis"
-          component={DetalleGratis}
-          options={{
-            title: "Detalle de un articulo cuando es gratis",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
           name="MiPerfil"
           component={MiPerfil}
           options={{
@@ -175,16 +141,6 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="PerfilOtros"
-          component={PerfilOtros}
-          options={{
-            title: "Perfil de otros Telocambistas",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
           name="ReporteUsuario"
           component={ReporteUsuario}
           options={{
@@ -199,16 +155,6 @@ export default function App() {
           component={RecuperarContraseña}
           options={{
             title: "Recuperar Contraseña",
-            headerTintColor: "white",
-            headerTitleAlign: "center",
-            headerStyle: { backgroundColor: "#63A355" },
-          }}
-        />
-        <Stack.Screen
-          name="Categoria"
-          component={Categoria}
-          options={{
-            title: "Categoría",
             headerTintColor: "white",
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
@@ -249,6 +195,16 @@ export default function App() {
           component={ConcretarInfo}
           options={{
             title: "Resumen",
+            headerTintColor: "white",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#63A355" },
+          }}
+        />
+        <Stack.Screen
+          name="PublicacionReportada"
+          component={PublicacionReportada}
+          options={{
+            title: "Publicacion Reportada",
             headerTintColor: "white",
             headerTitleAlign: "center",
             headerStyle: { backgroundColor: "#63A355" },
