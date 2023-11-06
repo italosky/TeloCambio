@@ -15,6 +15,7 @@ import { collection, getDocs, doc, getDoc, query, where, deleteDoc } from 'fireb
 import { FlatList } from "react-native-gesture-handler";
 import { Drawer, Card } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisOfertas() {
   const navigation = useNavigation();
@@ -219,15 +220,19 @@ export default function MisOfertas() {
                     style={styles.containerCardContent}
                     left={(props) => (
                       // DATOS DEL ARTICULO DEL USUARIO AUTENTICADO
-                      <View style={styles.exchangeContainer}>
-                        <View style={styles.leftContainer}>
-                          <Image source={{uri: item.ArticuloGaleria.imagenURL}} style={styles.imagenList}/>
+                      <View>
+                        <View style={styles.exchangeContainer}>
+                          <View style={styles.leftContainer}>
+                            <Image source={{uri: item.ArticuloGaleria.imagenURL}} style={styles.imagenList}/>
+                          </View>
+                          <View>
+                            <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                          </View>
+                        </View>
+                        <View style={styles.containerTextLeft}>
                           <Text style={styles.textCardLeft}>{item.ArticuloGaleria.nombreArticulo}</Text>
                         </View>
-                        <View>
-                          <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
-                        </View>
-                      </View>
+                      </View>   
                     )}
                     right={(props) => (
                       // DATOS DEL ARTICULO OFERTADO 
@@ -241,7 +246,6 @@ export default function MisOfertas() {
                               <Image source={require("../assets/Eliminar.png")} style={styles.iconList}/>
                             </TouchableOpacity>
                           </View>
-                          
                         </View>
                         <View style={styles.containerTextRight}>
                           <Text style={styles.textCardRight}>{item.ArticuloOferta.nombreArticulo}</Text>
@@ -321,6 +325,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: 100,
   },
+  containerTextLeft:{
+    alignItems: "center",
+    width: 100,
+  },
   textCardRight: {
     fontSize: 16,
     width: 150,
@@ -356,7 +364,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 40,
     marginHorizontal: 3,
-    marginBottom: 10,
+    marginBottom: 7,
   },
   exchangeContainer: {
     flexDirection: "row",
