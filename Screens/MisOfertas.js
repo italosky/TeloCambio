@@ -190,8 +190,8 @@ export default function MisOfertas() {
     </View>
   );
 
-  const goDetalleArticulo = () => {
-    navigation.navigate('DetalleArticulo', { itemId: item.id });
+  const goConcretar = (oferta) => {
+    navigation.navigate('Concretar', { ofertaSeleccionada: oferta });
   };
 
   const renderDrawerAndroid = () => (
@@ -212,7 +212,7 @@ export default function MisOfertas() {
               data={ofertas}
               keyExtractor={item => item.id}
               renderItem={({ item, index }) => (
-                <Card style={styles.containerCard} onPress={goDetalleArticulo}>
+                <Card style={styles.containerCard} onPress={goConcretar}>
                   <Text style={styles.textCardDate}>Oferta recibida el {formatDateFromDatabase(item.fecha)}</Text>
                   <Card.Title
                     style={styles.containerCardContent}

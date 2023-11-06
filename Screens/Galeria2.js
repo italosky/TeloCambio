@@ -93,8 +93,8 @@ export default function Galeria2() {
     }
   };
 
-  const goMiPerfil = () => {
-    navigation.navigate("MiPerfil");
+  const goPublicacionReportada = () => {
+    navigation.navigate("PublicacionReportada");
   };
 
   const goGaleria2 = () => {
@@ -115,8 +115,8 @@ export default function Galeria2() {
   const ListaReportesAdmin = () => {
     navigation.navigate("ListaReportesAdmin");
   };
-  const Concretar = () => {
-    navigation.navigate("Concretar");
+  const goMiPerfil = () => {
+    navigation.navigate("MiPerfil");
   };
   const MisIntercambios = () => {
     navigation.navigate("MisIntercambios");
@@ -178,7 +178,7 @@ export default function Galeria2() {
 
       <Drawer.Section>
         <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
-          <Text style={styles.drawerText}>Mi Perfil</Text>
+          <Text style={styles.drawerText}>Concretar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goGaleria2}>
           <Text style={styles.drawerText}>Galería de Artículos</Text>
