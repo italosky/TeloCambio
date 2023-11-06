@@ -7,6 +7,7 @@ import {
   Platform,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator
 } from "react-native";
 import { Card } from "react-native-paper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
@@ -158,6 +159,13 @@ export default function MisPublicados() {
     }
   };
 
+  const EmptyListComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>¡Ups! No tienes intercambio efectuados.</Text>
+    </View>
+  );
+
+
   useEffect(() => {
     //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
     const unsubscribe = navigation.addListener("focus", () => {
@@ -205,17 +213,24 @@ export default function MisPublicados() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-      <View style={{ marginTop: 15 }}>
-        <FlatList
-          data={dataSource}
-          renderItem={renderItem}
-          keyExtractor={(item) =>
-            item && item.uid ? item.uid.toString() : "defaultKey"
-          }
-          contentContainerStyle={styles.gridContainer}
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-        />
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        {loading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        ) : (
+          <FlatList
+            data={dataSource}
+            renderItem={renderItem}
+            keyExtractor={(item) =>
+              item && item.uid ? item.uid.toString() : "defaultKey"
+            }
+            contentContainerStyle={{ ...styles.gridContainer, flexGrow: dataSource.length ? 0 : 1 }}
+            ListEmptyComponent={EmptyListComponent}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+          />
+        )}
       </View>
     </DrawerLayout>
   );
@@ -314,5 +329,14 @@ const styles = StyleSheet.create({
   },
   gridContainer: {
     padding: 0,
+  },
+  emptyContainer: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center'
+  },
+  emptyText: {
+    fontSize: 18,
+    color: 'grey'
   },
 });

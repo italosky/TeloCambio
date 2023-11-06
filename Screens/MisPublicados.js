@@ -7,26 +7,29 @@ import {
   Platform,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator
 } from "react-native";
-import { Card } from 'react-native-paper';
+import { Card, Drawer } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
-import MisListItem from "./common/MisListItem";
-import { Drawer } from "react-native-paper";
-import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc
+} from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisPublicados() {
   const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState();
-  const [email, setEmail] = useState();
   const navigation = useNavigation();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [numColumns, setNumColumns] = useState(2);
 
   const handleDeleteItem = async (itemId) => {
     try {
@@ -121,28 +124,41 @@ export default function MisPublicados() {
   }, []);
 
   const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const allItemsArray = [];
-      const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
-      articulosPublicadosRef.forEach((postDoc) => {
-        const postData = postDoc.data();
-        allItemsArray.push({
-          uid: postDoc.id,  
-          imagenURL: postData.imagenURL,
-          nombreArticulo: postData.nombreArticulo,
-          tipo: postData.tipo,
-          estadoArticulo: postData.estadoArticulo,
-          comuna: postData.comuna,
-        });
-      });  
-      setDataSource(allItemsArray);
-    } catch (error) {
-      console.error("Error al cargar los artículos:", error);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    const allItemsArray = [];
+    const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
+    articulosPublicadosRef.forEach((postDoc) => {
+      const postData = postDoc.data();
+      allItemsArray.push({
+        uid: postDoc.id,
+        imagenURL: postData.imagenURL,
+        nombreArticulo: postData.nombreArticulo,
+        tipo: postData.tipo,
+        estadoArticulo: postData.estadoArticulo,
+        comuna: postData.comuna,
+        fecha: postData.fecha
+      });
+    });
+    setDataSource(allItemsArray);
+    setLoading(false);
   };
+  
+  const EmptyListComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>¡Ups! No tienes publicaciones vigentes.</Text>
+    </View>
+  );
+
+  const formatDateFromDatabase = (timestamp) => {
+    const date = timestamp.toDate();
+    return getCurrentDateFormatted(date);
+  }
+  
+  const getCurrentDateFormatted = (date) => {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  };
+  
 
   useEffect(() => {
     //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
@@ -161,13 +177,12 @@ export default function MisPublicados() {
   };
   
   const renderItem = ({item}) => {
-  
     return (
       <Card style={styles.containerCard} onPress={goMiPerfil}> 
         <Card.Title
         style={styles.containerCardContent} 
         title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
-        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
+        subtitle={<Text style={styles.textCardDate} >Publicado el {formatDateFromDatabase(item.fecha)}</Text>}
         left={(props) => <Image style={styles.imagenList} source={{ uri: item.imagenURL }} />}
         right={(props) => (
           <TouchableOpacity
@@ -178,9 +193,9 @@ export default function MisPublicados() {
         )}
         />
       </Card>
-  
     );
   };
+
 
   const renderDrawerAndroid = () => (
     <DrawerLayout
@@ -189,16 +204,23 @@ export default function MisPublicados() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-        <View style={{ marginTop: 15 }}>
-        <FlatList
-        data={dataSource} 
-        renderItem={renderItem}
-        keyExtractor={(item) => (item && item.uid ? item.uid.toString() : 'defaultKey')}
-        contentContainerStyle={styles.gridContainer}
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-      />
-        </View>
+      <View style={{ flex: 1 }}>
+        {loading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>        
+        ) : (
+          <FlatList
+            data={dataSource}
+            renderItem={renderItem}
+            keyExtractor={(item) => (item && item.uid ? item.uid.toString() : 'defaultKey')}
+            contentContainerStyle={{ ...styles.gridContainer, flexGrow: 1 }}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+            ListEmptyComponent={EmptyListComponent}
+          />
+        )}
+      </View>
     </DrawerLayout>
   );
 
@@ -253,6 +275,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginHorizontal: 15,
     marginBottom: 10,
+    marginTop: 10
   },
   containerCardContent: {
     width: 'auto',
@@ -296,5 +319,20 @@ const styles = StyleSheet.create({
   },
   gridContainer: {
     padding: 0,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20
+  },
+  emptyContainer: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center'
+  },
+  emptyText: {
+    fontSize: 18,
+    color: 'grey'
   },
 });

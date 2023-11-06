@@ -17,7 +17,7 @@ import { Card } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { auth, db, storage } from "../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -131,6 +131,7 @@ export default function SubirArticulos() {
         imagenURL2: url2,
         imagenURL3: url3,
         uid: userId,
+        fecha: serverTimestamp(),
       });
       setUploading(false);
       Alert.alert(

@@ -14,10 +14,17 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { Drawer } from "react-native-paper";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  limit,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 export default function DetalleArticulo() {
   const navigation = useNavigation();
@@ -25,11 +32,14 @@ export default function DetalleArticulo() {
   const item = route.params?.item;
   const [mostrarModal, setMostrarModal] = useState(false);
   const [articulos, setArticulos] = useState([]);
+  const [articleId, setarticleId] = useState(null);
+  const [selectedCard, setSelectedCard] = useState(null);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
   const [userData, setUserData] = useState(null);
-  const userID = auth.currentUser ? auth.currentUser.uid : null;
+  const userID = auth.currentUser ? auth.currentUser.uid : null; // UID DEL USUARIO LOGEADO ACTUALMENTE
   const userId = item.id.match(/-(.*)/)[1];
   const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -54,6 +64,43 @@ export default function DetalleArticulo() {
     };
     fetchUserData();
   }, [userId]);
+
+  useEffect(() => {
+    if (userData && userData.role) {
+      setUserRole(userData.role);
+    }
+  }, [userData]);
+
+  const createOfferCollection = async (articleId) => {
+    try {
+      const offersRef = collection(db, "Ofertas");
+      const q = query(
+        offersRef,
+        where("ArticuloOferta", "==", articleId),
+        where("ArticuloGaleria", "==", item.id),
+        limit(1)
+      );
+      const existingOfferSnap = await getDocs(q);
+      if (!existingOfferSnap.empty) {
+        console.log(
+          "Ya existe una oferta para este artículo por el usuario actual."
+        );
+        return;
+      }
+      const offerDoc = {
+        UsuarioOferta: userID,
+        ArticuloOferta: articleId,
+        ArticuloGaleria: item.id,
+        UsuarioGaleria: userId,
+        Estado: "pendiente",
+        fecha: serverTimestamp(),
+      };
+      await addDoc(offersRef, offerDoc);
+      console.log("Documento de oferta añadido con éxito");
+    } catch (error) {
+      console.error("Error al añadir el documento:", error);
+    }
+  };
 
   const navigateToDatosCambio = () => {
     navigation.navigate("DatosCambio", { item });
@@ -89,6 +136,9 @@ export default function DetalleArticulo() {
 
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
+  };
+  const goReporteUsuario = () => {
+    navigation.navigate("ReporteUsuario");
   };
 
   const drawer = useRef(null);
@@ -164,20 +214,24 @@ export default function DetalleArticulo() {
   useEffect(() => {
     const fetchPublicaciones = async () => {
       try {
-        const publicacionesCollection = collection(db, 'Publicaciones');
-        const publicacionesQuery = query(publicacionesCollection, where("uid", "==", userID));
+        const publicacionesCollection = collection(db, "Publicaciones");
+        const publicacionesQuery = query(
+          publicacionesCollection,
+          where("uid", "==", userID)
+        );
         const publicacionesSnapshot = await getDocs(publicacionesQuery);
-        const publicacionesData = publicacionesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const publicacionesData = publicacionesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         console.log("Publicaciones:", publicacionesData);
         setArticulos(publicacionesData);
       } catch (error) {
         console.error("Error al obtener las publicaciones:", error);
       }
-    };    
+    };
     fetchPublicaciones();
   }, [userID]);
-  
-  
 
   const [modalArticulo, setModalArticulo] = useState(false);
 
@@ -189,7 +243,53 @@ export default function DetalleArticulo() {
     setModalArticulo(true);
   };
 
-  const [columns, setColumns] = useState(2);
+  const ArticuloModal = (nombreArticulo, id) => {
+    Alert.alert(
+      "Atención",
+      `¿Deseas intercambiar por ${nombreArticulo}?`,
+      [
+        {
+          text: "No",
+          onPress: () => {
+            setSelectedCard(null);
+            setarticleId(null);
+          },
+          style: "cancel",
+        },
+        {
+          text: "Sí",
+          onPress: async () => {
+            closeModal();
+            await createOfferCollection(id);
+            Alert.alert(
+              "Felicidades",
+              "Tu solicitud de oferta ha sido ingresada con exito",
+              [
+                {
+                  text: "OK",
+                  onPress: () => navigation.navigate("Galeria2"),
+                },
+              ]
+            );
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  useEffect(() => {
+    console.log(
+      "Después de establecer el estado - ID seleccionado:",
+      selectedCard
+    );
+    console.log(
+      "Después de establecer el estado - ID de artículo ofrecido:",
+      articleId
+    );
+  }, [selectedCard, articleId]);
+
+  const [columns, setColumns] = useState(1);
 
   const renderDrawerAndroid = () => (
     <DrawerLayout
@@ -205,7 +305,7 @@ export default function DetalleArticulo() {
             <Swiper
               showsButtons={true}
               loop={false}
-              scrollEnabled={false}
+              autoplay={false}
               onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
               dotStyle={styles.dot}
               activeDot={<View style={styles.activeDot} />}
@@ -213,24 +313,40 @@ export default function DetalleArticulo() {
               prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
             >
               {images.map((item, index) => (
-                <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
-                  <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="center"/>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => toggleModal(index)}
+                >
+                  <Image
+                    source={{ uri: item }}
+                    style={styles.imageCarrusel}
+                    resizeMode="cover"
+                  />
                 </TouchableOpacity>
               ))}
             </Swiper>
-        
           </View>
+
           {userData && (
             <View style={styles.userProfile}>
-              <Image source={{ uri: userData.imagenen[0] }} style={styles.imageUser}/>
+              <Image
+                source={{ uri: userData.imagenen[0] }}
+                style={styles.imageUser}
+              />
               <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
               {item.tipo === "Intercambiar artículo" && (
-                <TouchableOpacity style={[styles.teLoCambioButton]} onPress={openModal}>
+                <TouchableOpacity
+                  style={[styles.teLoCambioButton]}
+                  onPress={openModal}
+                >
                   <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
                 </TouchableOpacity>
               )}
               {item.tipo === "Regalar artículo" && (
-                <TouchableOpacity style={[styles.teLoRegaloButton]} onPress={confirmarReclamo}>
+                <TouchableOpacity
+                  style={[styles.teLoRegaloButton]}
+                  onPress={confirmarReclamo}
+                >
                   <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
                 </TouchableOpacity>
               )}
@@ -241,14 +357,19 @@ export default function DetalleArticulo() {
           <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
           <Text style={styles.text}>Comuna: {item.comuna}</Text>
         </View>
+        
 
         <View style={styles.containerBoton}>
-          <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-            <Text style={styles.textoBoton}>Eliminar Publicación</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-            <Text style={styles.textoBoton}>Banear Usuario</Text>
-          </TouchableOpacity>
+          {userRole === "admin" && (
+              <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+                <Text style={styles.textoBoton}>Eliminar Publicación</Text>
+              </TouchableOpacity>
+          )}
+          {userRole === "usuario" && (
+            <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+              <Text style={styles.textoBoton}>Reportar Usuario</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <Modal visible={mostrarModal} transparent={true}>
@@ -276,16 +397,41 @@ export default function DetalleArticulo() {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalText}>Disponible para Intercambio</Text>
-              
-              <FlatList 
+
+              <FlatList
+                style={styles.containerFlastList}
                 numColumns={columns}
                 data={articulos}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                  <Card style={styles.containerCard}>
+                  <Card
+                    key={item.id}
+                    style={[
+                      styles.containerCard,
+                      selectedCard === item.id ? { borderWidth: 2 } : {},
+                    ]}
+                    onPress={() => {
+                      console.log(
+                        "Tarjeta seleccionada:",
+                        item.nombreArticulo,
+                        item.id
+                      );
+                      ArticuloModal(item.nombreArticulo, item.id);
+                    }}
+                  >
                     <View style={styles.containerImagen}>
-                      <Card.Cover source={{ uri: item.imagenURL }} style={styles.imagen}/>
-                        <Text style={styles.titleCard}>{item.nombreArticulo}</Text>
+                      <Card.Cover
+                        source={{ uri: item.imagenURL }}
+                        style={styles.imagen}
+                      />
+                      <View style={styles.textContainer}>
+                        <Text style={styles.titleCard}>
+                          {item.nombreArticulo}
+                        </Text>
+                        <Text style={styles.titleEstado}>
+                          {item.estadoArticulo}
+                        </Text>
+                      </View>
                     </View>
                   </Card>
                 )}
@@ -335,7 +481,7 @@ const styles = StyleSheet.create({
     fontSize: 70,
     marginTop: 30,
     paddingHorizontal: 5,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff",
   },
   tittle: {
     fontSize: 20,
@@ -355,9 +501,9 @@ const styles = StyleSheet.create({
   userProfile: {
     alignItems: "center",
     marginTop: 60,
-    backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff",
   },
-  nombreUser:{
+  nombreUser: {
     fontSize: 19,
     fontWeight: "500",
     marginTop: 18,
@@ -482,41 +628,56 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "white",
-    padding: 20,
+    padding: 12,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: "flex-start",
     height: 360,
     width: 300,
     borderColor: "#63A355",
-    borderWidth: 1.5,
+    borderWidth: 2.0,
   },
   modalText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "500",
     marginBottom: 20,
     marginBottom: 5,
+    paddingStart: 12,
+  },
+  containerFlastList: {
+    marginBottom: 1,
   },
   containerCard: {
-    width: "46%",
+    width: 263,
     height: 110,
-    borderRadius: 10,
-    backgroundColor: '#fff',
+    borderRadius: 11,
+    backgroundColor: "#fff",
     marginHorizontal: 5,
-    marginTop: 10,
-    marginBottom: 3,
+    marginTop: 5,
+    alignItems: "flex-start",
+    borderWidth: 0.3,
   },
+
   containerImagen: {
-    marginTop: 7,
+    marginTop: 6,
     alignItems: "center",
+    marginHorizontal: 5,
+    flexDirection: "row",
   },
   imagen: {
-    width: 80,
-    height: "80%",
-    borderRadius: 6,
+    width: 100,
+    height: 95,
+    borderRadius: 7,
   },
   titleCard: {
-    fontSize: 15,
-    textAlign: "center",
-    paddingTop: 2,
+    fontSize: 17,
+    textAlign: "auto",
+    flexDirection: "row",
+  },
+  titleEstado: {
+    marginTop: 5,
+  },
+  textContainer: {
+    flexDirection: "column",
+    marginLeft: 10,
   },
 });
