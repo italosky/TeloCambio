@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
 import { getDocs, collection, query, where } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MiPerfil() {
   const [userData, setUserData] = useState(null);

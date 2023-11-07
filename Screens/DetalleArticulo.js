@@ -325,16 +325,15 @@ export default function DetalleArticulo() {
                 </TouchableOpacity>
               ))}
             </Swiper>
-            <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
-            <Text style={styles.text}>Comuna: {item.comuna}</Text>
           </View>
+
           {userData && (
             <View style={styles.userProfile}>
               <Image
                 source={{ uri: userData.imagenen[0] }}
                 style={styles.imageUser}
               />
-              <Text style={styles.text}>{userData.nombre_apellido}</Text>
+              <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
               {item.tipo === "Intercambiar artículo" && (
                 <TouchableOpacity
                   style={[styles.teLoCambioButton]}
@@ -354,13 +353,17 @@ export default function DetalleArticulo() {
             </View>
           )}
         </View>
-        <View>
+        <View style={styles.containerText}>
+          <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
+          <Text style={styles.text}>Comuna: {item.comuna}</Text>
+        </View>
+        
+
+        <View style={styles.containerBoton}>
           {userRole === "admin" && (
-            <View style={styles.containerBoton}>
               <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
                 <Text style={styles.textoBoton}>Eliminar Publicación</Text>
               </TouchableOpacity>
-            </View>
           )}
           {userRole === "usuario" && (
             <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
@@ -483,6 +486,7 @@ const styles = StyleSheet.create({
   tittle: {
     fontSize: 20,
     fontWeight: "700",
+    marginVertical: 20,
     textAlign: "center",
   },
   containerText:{
@@ -540,6 +544,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     backgroundColor: "#ffffff",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   imageModal: {
     width: 350,
@@ -614,12 +624,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   modalContent: {
     backgroundColor: "white",
