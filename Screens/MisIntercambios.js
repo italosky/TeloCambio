@@ -13,7 +13,6 @@ import { Card } from "react-native-paper";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
-import MisListItem from "./common/MisListItem";
 import { Drawer } from "react-native-paper";
 import {
   collection,

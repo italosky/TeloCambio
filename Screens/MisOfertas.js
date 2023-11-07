@@ -191,8 +191,8 @@ export default function MisOfertas() {
     </View>
   );
 
-  const goDetalleArticulo = () => {
-    navigation.navigate('DetalleArticulo', { itemId: item.id });
+  const goConcretar = (oferta) => {
+    navigation.navigate('Concretar', { ofertaSeleccionada: oferta });
   };
 
   const renderDrawerAndroid = () => (
