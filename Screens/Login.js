@@ -48,7 +48,6 @@ export default function Login(props) {
         email,
         password
       );
-      await AsyncStorage.setItem("isLoggedIn", "true");
       const userQuerySnapshot = await getDocs(
         query(
           collection(db, "Usuarios"),
