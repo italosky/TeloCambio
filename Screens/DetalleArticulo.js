@@ -325,8 +325,6 @@ export default function DetalleArticulo() {
                 </TouchableOpacity>
               ))}
             </Swiper>
-            <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
-            <Text style={styles.text}>Comuna: {item.comuna}</Text>
           </View>
 
           {userData && (
