@@ -214,8 +214,8 @@ export default function MisOfertas() {
               style={styles.containerFlatList}
               keyExtractor={item => item.id}
               renderItem={({ item, index }) => (
-                <Card style={styles.containerCard} onPress={goDetalleArticulo}>
-                  <Text style={styles.textDate}>Oferta recibida el {formatDateFromDatabase(item.fecha)}</Text>
+                <Card style={styles.containerCard} onPress={goConcretar}>
+                  <Text style={styles.textCardDate}>Oferta recibida el {formatDateFromDatabase(item.fecha)}</Text>
                   <Card.Title
                     style={styles.containerCardContent}
                     left={(props) => (

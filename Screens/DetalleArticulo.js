@@ -486,7 +486,6 @@ const styles = StyleSheet.create({
   tittle: {
     fontSize: 20,
     fontWeight: "700",
-    marginVertical: 20,
     textAlign: "center",
   },
   containerText:{
