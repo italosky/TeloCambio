@@ -30,6 +30,7 @@ export default function DetalleArticulo() {
   const navigation = useNavigation();
   const route = useRoute();
   const item = route.params?.item;
+  const [modo, setModo] = useState('teloregalo');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [articulos, setArticulos] = useState([]);
   const [articleId, setarticleId] = useState(null);
@@ -102,8 +103,8 @@ export default function DetalleArticulo() {
     }
   };
 
-  const navigateToDatosCambio = () => {
-    navigation.navigate("DatosCambio", { item });
+  const navigateToDatosCambio = (userId, modo) => {
+    navigation.navigate("DatosCambio", { item : {id: userId}, modo: modo });
   };
 
   const ReporteUsuario = () => {

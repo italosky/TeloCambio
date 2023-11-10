@@ -34,9 +34,12 @@ export default function MisOfertas() {
     const fetchOfertas = async () => {
       try {
         // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
-        const offersRef = query(collection(db, 'Ofertas'), where('UsuarioGaleria', '==', auth.currentUser.uid));
+        const offersRef = query(
+          collection(db, 'Ofertas'),
+          where('UsuarioGaleria', '==', auth.currentUser.uid),
+          where('Estado', '==', 'pendiente')  // AQUI ESTA LA FUNCION QUE TRAE SOLO LOS QUE ESTAN PENDIENTE
+        );
         const offersSnap = await getDocs(offersRef);
-        
         const fetchedOfertas = [];
         for (let offerDoc of offersSnap.docs) {
           const ofertaData = offerDoc.data();
@@ -190,8 +193,8 @@ export default function MisOfertas() {
     </View>
   );
 
-  const goDetalleArticulo = () => {
-    navigation.navigate('DetalleArticulo', { itemId: item.id });
+  const goConcretar = () => {
+    navigation.navigate('Concretar');
   };
 
   const renderDrawerAndroid = () => (
@@ -212,7 +215,7 @@ export default function MisOfertas() {
               data={ofertas}
               keyExtractor={item => item.id}
               renderItem={({ item, index }) => (
-                <Card style={styles.containerCard} onPress={goDetalleArticulo}>
+                <Card style={styles.containerCard} onPress={goConcretar}>
                   <Text style={styles.textCardDate}>Oferta recibida el {formatDateFromDatabase(item.fecha)}</Text>
                   <Card.Title
                     style={styles.containerCardContent}
