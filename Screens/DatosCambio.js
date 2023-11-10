@@ -10,17 +10,30 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function DatosCambio({ route }) {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
-  const item = route.params.item;
-  const userId = item.id.match(/-(.*)/)[1];
+  const item = route.params?.item;
+  const modo = route.params?.modo;
 
+  if (!item || !item.id || !modo) {
+    console.error("Parámetros necesarios no proporcionados. Recibido:", { item, modo });
+    return <View><Text>Información no disponible</Text></View>;
+  }
+  const userId = item.id;
+  
   const backGaleria = () => {
     navigation.navigate("Galeria2");
   };
+
+  useEffect(() => {
+    if (!userId) {
+      console.error("UserId es undefined");
+      return;
+    }
+  }, [userId]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,6 +58,7 @@ export default function DatosCambio({ route }) {
     };
     fetchUserData();
   }, [userId]);
+
   const openWhatsApp = () => {
     if (userData && userData.telefono) {
       const phoneNumber = userData.telefono;
@@ -88,15 +102,21 @@ export default function DatosCambio({ route }) {
 
   return (
     <View style={styles.container}>
+      {modo === 'telocambio' ? (
+        <Text style={styles.felicitationText}>Felicidades Telocambista, has efectuado un intercambio con éxito</Text>
+      ) : (
+        <Text style={styles.felicitationText}>Felicidades Telocambista, has reclamado un artículo con éxito</Text>
+      )}
       <Image
         style={styles.tinyLogo}
         source={require("../assets/FotoPerfil.com.png")}
       />
       {userData && (
         <>
+          <Text style={styles.textonormal}>Nombre del Telocambista</Text>
           <View style={styles.textContainer}>
             <Text style={styles.text}>{userData.nombre_apellido}</Text>
-          </View>
+          </View>    
           <View style={styles.textContainer}>
             <Text style={styles.text} onPress={openGmailWithSubject}>
               {userData.email}
@@ -119,8 +139,9 @@ export default function DatosCambio({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
+    paddingTop: 50,
   },
   tinyLogo: {
     width: 150,
@@ -157,4 +178,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
   },
+  felicitationText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 5,
+    marginBottom: 50,
+  },
+  textonormal: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10
+  }
 });
