@@ -15,6 +15,7 @@ import { collection, getDocs, doc, getDoc, query, where, deleteDoc } from 'fireb
 import { FlatList } from "react-native-gesture-handler";
 import { Drawer, Card } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisOfertas() {
   const navigation = useNavigation();
@@ -213,6 +214,7 @@ export default function MisOfertas() {
             <FlatList
               contentContainerStyle={{ flexGrow: 1 }}
               data={ofertas}
+              style={styles.containerFlatList}
               keyExtractor={item => item.id}
               renderItem={({ item, index }) => (
                 <Card style={styles.containerCard} onPress={goConcretar}>
@@ -221,28 +223,36 @@ export default function MisOfertas() {
                     style={styles.containerCardContent}
                     left={(props) => (
                       // DATOS DEL ARTICULO DEL USUARIO AUTENTICADO
-                      <View style={styles.exchangeContainer}>
-                        <View style={styles.leftContainer}>
-                          
-                          <Image source={{uri: item.ArticuloGaleria.imagenURL}} style={styles.imagen}/>
-                          <Text style={styles.textCardOne}>{item.ArticuloGaleria.nombreArticulo}</Text>
+                      <View>
+                        <View style={styles.exchangeContainer}>
+                          <View style={styles.leftContainer}>
+                            <Image source={{uri: item.ArticuloGaleria.imagenURL}} style={styles.imagenList}/>
+                          </View>
+                          <View>
+                            <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                          </View>
                         </View>
-                        <View>
-                          <Image source={require("../assets/FlechaIntercambio.png")} style={styles.exchangeArrow}/>
+                        <View style={styles.containerTextLeft}>
+                          <Text style={styles.textCardLeft}>{item.ArticuloGaleria.nombreArticulo}</Text>
                         </View>
-                      </View>
+                      </View>   
                     )}
                     right={(props) => (
                       // DATOS DEL ARTICULO OFERTADO 
-                      <View style={styles.exchangeContainer}>
-                        <View style={styles.rightContainer}>
-                          <Image source={{uri: item.ArticuloOferta.imagenURL}} style={styles.imagen}/>
-                          <Text style={styles.textCard}>{item.ArticuloOferta.nombreArticulo}</Text>
-                          
+                      <View>
+                        <View style={styles.exchangeContainer}>
+                          <View style={styles.rightContainer}>
+                            <Image source={{uri: item.ArticuloOferta.imagenURL}} style={styles.imagenList}/>
+                          </View>
+                          <View style={styles.containerIcon}>
+                            <TouchableOpacity onPress={() => EliminarOferta(item)}>
+                              <Image source={require("../assets/Eliminar.png")} style={styles.iconList}/>
+                            </TouchableOpacity>
+                          </View>
                         </View>
-                        <TouchableOpacity onPress={() => EliminarOferta(item)}>
-                          <Image source={require("../assets/Eliminar.png")} style={styles.icon}/>
-                        </TouchableOpacity>
+                        <View style={styles.containerTextRight}>
+                          <Text style={styles.textCardRight}>{item.ArticuloOferta.nombreArticulo}</Text>
+                        </View>
                       </View>
                     )}
                   />
@@ -259,48 +269,6 @@ export default function MisOfertas() {
 }
 
 const styles = StyleSheet.create({
-  containerCardContent: {
-    width: '100%',
-    height: 140,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-  },
-  containerCard: {
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    marginHorizontal: 10,
-    marginBottom: 10,
-    marginTop: 10
-  },
-  textCard: {
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  textCardOne: {
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'center',
-    marginHorizontal: 3
-  },
-  textCardDate: {
-    fontSize: 15,
-    marginLeft: 25,
-    marginEnd: 20,
-    marginTop: 23
-  },
-  imagen: {
-    width: 90,
-    height: 90,
-    borderRadius: 10,
-    marginBottom: 5,
-  },
-  icon: {
-    width: 50,
-    height: 50,
-    marginRight: 15,
-    marginLeft: 15
-  },
   container: {
     flex: 1,
     padding: 16,
@@ -341,29 +309,77 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
+  containerFlatList: {
+    marginVertical: 15,
+  },
+  containerCard: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginHorizontal: 15,
+    marginBottom: 10,
+  },
+  containerCardContent: {
+    width: '100%',
+    height: 140,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+  containerTextRight:{
+    alignItems: "center",
+    width: 100,
+  },
+  containerTextLeft:{
+    alignItems: "center",
+    width: 100,
+  },
+  textCardRight: {
+    fontSize: 16,
+    width: 150,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  textCardLeft: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginHorizontal: 3
+  },
+  textDate: {
+    fontSize: 15,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  imagenList: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    marginBottom: 5,
+  },
+  containerIcon: {
+    marginLeft: 15,
+  },
+  iconList: {
+    width: 40,
+    height: 40,
+    marginRight: 20,
+  },
   exchangeArrow: {
     width: 60,
-    height: 50,
-    marginHorizontal: 8
+    height: 40,
+    marginHorizontal: 3,
+    marginBottom: 7,
   },
   exchangeContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     alignItems: 'center',
-    width: '100%',
-    height: '100%',
-  },
-  textContainer: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    paddingBottom: 16,
+    width: "100%",
+    height: 100,
   },
   leftContainer: {
-    flexDirection: 'column',
     alignItems: 'center',
     margin: 5,
   },
   rightContainer: {
-    flexDirection: 'column',
     alignItems: 'center',
     margin: 5,
   },
@@ -371,18 +387,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20
+    marginVertical: 20,
   },
   emptyText: {
     fontSize: 18,
     color: 'gray',
     alignItems: 'center'
-  },
-  textCardDate: {
-    fontSize: 17,
-    color: 'grey',
-    marginTop: 5,
-    marginHorizontal: 12,
-    alignSelf: "center"
   },
 });

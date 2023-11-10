@@ -218,6 +218,7 @@ export default function MisPublicados() {
             onRefresh={handleRefresh}
             refreshing={refreshing}
             ListEmptyComponent={EmptyListComponent}
+            style={styles.containerFlatList}
           />
         )}
       </View>
@@ -268,6 +269,9 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
   },
+  containerFlatList: {
+    marginVertical: 15,
+  },
   containerCard: {
     width: 'auto',
     height: 100,
@@ -275,7 +279,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginHorizontal: 15,
     marginBottom: 10,
-    marginTop: 10
   },
   containerCardContent: {
     width: 'auto',
@@ -292,11 +295,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 15,
-  },
-  viewCard: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   textCard: {
     fontSize: 18,

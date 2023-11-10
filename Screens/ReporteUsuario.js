@@ -39,17 +39,14 @@ export default function Registro(props) {
   const handleRegister = async () => {
     if (data.causa_reporte && data.reporte) {
       try {
-        const normalizedNombre =
-        "(" + causa_reporte + ")".toLowerCase().replace(/\s+/g, "");
-        const readableID = `${normalizedNombre}-${userId}`;
-        const reportesRef = collection(db, 'Reportes',readableID); // <- Aqui
-        await addDoc(reportesRef, {
+        const reportesRef = collection(db, 'Reportes');
+        const newReporteRef = await addDoc(reportesRef, {
           causa_reporte: data.causa_reporte,
           reporte: data.reporte,
           timestamp: serverTimestamp(),
-          userid: uid
+          userid: userId,
         });
-        Alert.alert('¡Reporte enviado!', 'Un administrador revisara su solicitud');
+        Alert.alert('¡Reporte enviado!', 'Un administrador revisará su solicitud');
         setData({
           causa_reporte: "",
           reporte: ""
@@ -62,6 +59,7 @@ export default function Registro(props) {
       Alert.alert("Por favor, completa todos los campos");
     }
   }
+  
   const goPerfilOtros = () => {
     navigation.navigate("PerfilOtros");
   };
