@@ -394,4 +394,11 @@ const styles = StyleSheet.create({
     color: 'gray',
     alignItems: 'center'
   },
+  textCardDate: {
+    fontSize: 17,
+    color: 'grey',
+    marginTop: 5,
+    marginHorizontal: 12,
+    alignSelf: "center"
+  },
 });
