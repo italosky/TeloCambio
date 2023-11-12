@@ -62,6 +62,10 @@ export default function MisPublicados() {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
+
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
   
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
@@ -106,6 +110,9 @@ export default function MisPublicados() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 
