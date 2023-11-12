@@ -33,10 +33,28 @@ export default function MisPublicados() {
 
   const handleDeleteItem = async (itemId) => {
     try {
-      await deleteDoc(doc(db, "Publicaciones", itemId));
+      await Promise.all([eliminarOfertasAsociadas(itemId), deleteDoc(doc(db, "Publicaciones", itemId))]);
       setDataSource((prevData) => prevData.filter(item => item.uid !== itemId));
     } catch (error) {
       console.error("Error al eliminar el artículo:", error);
+    }
+  };
+
+  const eliminarOfertasAsociadas = async (itemId) => {
+    try {
+      const ofertasRef = query(collection(db, "Ofertas"), where("ArticuloGaleria", "==", itemId));
+      const ofertasSnap = await getDocs(ofertasRef);
+  
+      console.log("Ofertas a eliminar:", ofertasSnap.docs.map(doc => doc.id));
+  
+      for (const ofertaDoc of ofertasSnap.docs) {
+        const ofertaId = ofertaDoc.id;
+        console.log("Eliminando oferta:", ofertaId);
+        await deleteDoc(doc(db, "Ofertas", ofertaId));
+      }
+    } catch (error) {
+      console.error("Error al eliminar ofertas asociadas:", error);
+      throw error; // Propaga el error para que pueda ser capturado en la función que lo llama.
     }
   };
 
