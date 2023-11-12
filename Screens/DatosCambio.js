@@ -29,6 +29,15 @@ export default function DatosCambio({ route }) {
   };
 
   useEffect(() => {
+    if (modo === "telocambio") {
+      Alert.alert("¡Felicidades!", "Has efectuado un intercambio con éxito", [
+        { text: "OK" },
+      ]);
+    } else {
+      Alert.alert("¡Felicidades!", "Has reclamado un artículo con éxito", [
+        { text: "OK" },
+      ]);
+    }
     if (!userId) {
       console.error("UserId es undefined");
       return;
@@ -81,6 +90,7 @@ export default function DatosCambio({ route }) {
   const openGmailWithSubject = () => {
     if (userData && userData.email) {
       const email = userData.email;
+      const foto = userData.imagenen;
       const nombreArticulo = item.nombreArticulo;
       const nombrePersona = userData.nombre_apellido;
       const subject = `Solicitud Articulo ${nombreArticulo}`;
@@ -102,15 +112,7 @@ export default function DatosCambio({ route }) {
 
   return (
     <View style={styles.container}>
-      {modo === 'telocambio' ? (
-        <Text style={styles.felicitationText}>Felicidades Telocambista, has efectuado un intercambio con éxito</Text>
-      ) : (
-        <Text style={styles.felicitationText}>Felicidades Telocambista, has reclamado un artículo con éxito</Text>
-      )}
-      <Image
-        style={styles.tinyLogo}
-        source={require("../assets/FotoPerfil.com.png")}
-      />
+      <Image style={styles.tinyLogo} source={{ uri: userData.imagenen[0] }} />
       {userData && (
         <>
           <Text style={styles.textonormal}>Nombre del Telocambista</Text>
