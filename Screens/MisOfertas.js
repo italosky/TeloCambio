@@ -35,9 +35,12 @@ export default function MisOfertas() {
     const fetchOfertas = async () => {
       try {
         // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
-        const offersRef = query(collection(db, 'Ofertas'), where('UsuarioGaleria', '==', auth.currentUser.uid));
+        const offersRef = query(
+          collection(db, 'Ofertas'),
+          where('UsuarioGaleria', '==', auth.currentUser.uid),
+          where('Estado', '==', 'pendiente')  // AQUI ESTA LA FUNCION QUE TRAE SOLO LOS QUE ESTAN PENDIENTE
+        );
         const offersSnap = await getDocs(offersRef);
-        
         const fetchedOfertas = [];
         for (let offerDoc of offersSnap.docs) {
           const ofertaData = offerDoc.data();
@@ -139,6 +142,10 @@ export default function MisOfertas() {
     navigation.navigate("MisOfertas");
   };
 
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
+
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
       setDrawerPosition("right");
@@ -180,6 +187,9 @@ export default function MisOfertas() {
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
+        </TouchableOpacity>
       </Drawer.Section>
 
       <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
@@ -191,8 +201,8 @@ export default function MisOfertas() {
     </View>
   );
 
-  const goConcretar = (oferta) => {
-    navigation.navigate('Concretar', { ofertaSeleccionada: oferta });
+  const goConcretar = () => {
+    navigation.navigate('Concretar');
   };
 
   const renderDrawerAndroid = () => (
@@ -390,5 +400,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'gray',
     alignItems: 'center'
+  },
+  textCardDate: {
+    fontSize: 17,
+    color: 'grey',
+    marginTop: 5,
+    marginHorizontal: 12,
+    alignSelf: "center"
   },
 });

@@ -132,6 +132,7 @@ export default function SubirArticulos() {
         imagenURL3: url3,
         uid: userId,
         fecha: serverTimestamp(),
+        estadoPublicacion: "activa",
       });
       setUploading(false);
       Alert.alert(

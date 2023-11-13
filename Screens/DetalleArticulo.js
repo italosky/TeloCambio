@@ -30,6 +30,7 @@ export default function DetalleArticulo() {
   const navigation = useNavigation();
   const route = useRoute();
   const item = route.params?.item;
+  const [modo, setModo] = useState('teloregalo');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [articulos, setArticulos] = useState([]);
   const [articleId, setarticleId] = useState(null);
@@ -102,8 +103,8 @@ export default function DetalleArticulo() {
     }
   };
 
-  const navigateToDatosCambio = () => {
-    navigation.navigate("DatosCambio", { item });
+  const navigateToDatosCambio = (userId, modo) => {
+    navigation.navigate("DatosCambio", { item : {id: userId}, modo: modo });
   };
 
   const toggleModal = (index) => {
@@ -140,6 +141,10 @@ export default function DetalleArticulo() {
       estadoArticulo: item.estadoArticulo,
       comuna: item.comuna,
     });
+  };
+
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
   };
 
   const drawer = useRef(null);
@@ -185,6 +190,9 @@ export default function DetalleArticulo() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 
@@ -481,9 +489,11 @@ const styles = StyleSheet.create({
   },
   tittle: {
     fontSize: 20,
+
     fontWeight: "900",
     textAlign: "center",
     margin: 15,
+
   },
   containerText:{
     width: "45%",

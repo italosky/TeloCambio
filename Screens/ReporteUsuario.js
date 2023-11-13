@@ -48,8 +48,10 @@ export default function Registro(props) {
       comuna
     ) {
       try {
+
         const reportesUsuariosRef = collection(db, 'Reportes');
         const newReporteRef = await addDoc(reportesUsuariosRef, {
+
           causa_reporte: data.causa_reporte,
           reporte: data.reporte,
           nombreArticulo,
@@ -57,7 +59,16 @@ export default function Registro(props) {
           estadoArticulo,
           comuna,
           timestamp: serverTimestamp(),
+
           // Agrega cualquier otro campo que desees almacenar en el reporte
+
+          userid: userId,
+        });
+        Alert.alert('¡Reporte enviado!', 'Un administrador revisará su solicitud');
+        setData({
+          causa_reporte: "",
+          reporte: ""
+
         });
   
         Alert.alert(
@@ -73,7 +84,10 @@ export default function Registro(props) {
     } else {
       Alert.alert('Por favor, completa todos los campos');
     }
+
   };
+
+
   
   const goPerfilOtros = () => {
     navigation.navigate("PerfilOtros");

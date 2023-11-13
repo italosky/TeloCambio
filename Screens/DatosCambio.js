@@ -15,12 +15,41 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 export default function DatosCambio({ route }) {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
-  const item = route.params.item;
-  const userId = item.id.match(/-(.*)/)[1];
+  const item = route.params?.item;
+  const modo = route.params?.modo;
+
+  if (!item || !item.id || !modo) {
+    console.error("Parámetros necesarios no proporcionados. Recibido:", {
+      item,
+      modo,
+    });
+    return (
+      <View>
+        <Text>Información no disponible</Text>
+      </View>
+    );
+  }
+  const userId = item.id;
 
   const backGaleria = () => {
     navigation.navigate("Galeria2");
   };
+
+  useEffect(() => {
+    if (modo === "telocambio") {
+      Alert.alert("¡Felicidades!", "Has efectuado un intercambio con éxito", [
+        { text: "OK" },
+      ]);
+    } else {
+      Alert.alert("¡Felicidades!", "Has reclamado un artículo con éxito", [
+        { text: "OK" },
+      ]);
+    }
+    if (!userId) {
+      console.error("UserId es undefined");
+      return;
+    }
+  }, [userId]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,6 +74,7 @@ export default function DatosCambio({ route }) {
     };
     fetchUserData();
   }, [userId]);
+
   const openWhatsApp = () => {
     if (userData && userData.telefono) {
       const phoneNumber = userData.telefono;
@@ -67,6 +97,7 @@ export default function DatosCambio({ route }) {
   const openGmailWithSubject = () => {
     if (userData && userData.email) {
       const email = userData.email;
+      const foto = userData.imagenen;
       const nombreArticulo = item.nombreArticulo;
       const nombrePersona = userData.nombre_apellido;
       const subject = `Solicitud Articulo ${nombreArticulo}`;
@@ -88,12 +119,10 @@ export default function DatosCambio({ route }) {
 
   return (
     <View style={styles.container}>
-      <Image
-        style={styles.tinyLogo}
-        source={require("../assets/FotoPerfil.com.png")}
-      />
+      <Image style={styles.tinyLogo} source={{ uri: userData.imagenen[0] }} />
       {userData && (
         <>
+          <Text style={styles.textonormal}>Nombre del Telocambista</Text>
           <View style={styles.textContainer}>
             <Text style={styles.text}>{userData.nombre_apellido}</Text>
           </View>
@@ -119,8 +148,9 @@ export default function DatosCambio({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
+    paddingTop: 50,
   },
   tinyLogo: {
     width: 150,
@@ -156,5 +186,18 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 18,
     fontWeight: "500",
+  },
+  felicitationText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 5,
+    marginBottom: 50,
+  },
+  textonormal: {
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 10,
   },
 });
