@@ -20,22 +20,33 @@ export default function ListaReportesAdmin() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [numColumns, setNumColumns] = useState(2);
+  const formatDateFromDatabase = (date) => {
+    if (!date) return '';  // Verifica si date está definido
+    return getCurrentDateFormatted(date);
+  };
+  
+  const getCurrentDateFormatted = (date) => {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return new Date(date).toLocaleDateString(undefined, options);
+  };
 
   const fetchPosts = async () => {
     try {
       setLoading(true);
       const allItemsArray = [];
-      const articulosPublicadosRef = collection(db, "Publicaciones");
+      const articulosPublicadosRef = collection(db, "Reportes");
       const usersSnapshot = await getDocs(articulosPublicadosRef);
       usersSnapshot.forEach((postDoc) => {
         const postData = postDoc.data();
         allItemsArray.push({
           id: postDoc.id,
-          imagenURL: postData.imagenURL,
+          imagenes: postData.imagenes,
           nombreArticulo: postData.nombreArticulo,
-          tipo: postData.tipo,
-          estadoArticulo: postData.estadoArticulo,
+          fecha: postData.timestamp.toDate(),
+          estado: postData.estadoArticulo,
           comuna: postData.comuna,
+          causaReporte: postData.causa_reporte,
+          detalleReporte: postData.reporte,
         });
       });
       setDataSource(allItemsArray);
@@ -66,20 +77,27 @@ export default function ListaReportesAdmin() {
     });
   }, [navigation]);
 
-  const goMiPerfil = () => {
-    navigation.navigate("MiPerfil");
-  };
+
 
   const renderItem = ({item}) => {
-  
+    const navigateToPublicacionReportada = () => {
+      navigation.navigate("PublicacionReportada", {
+        nombreArticulo: item.nombreArticulo,
+        images: item.imagenes,
+        estadoArticulo: item.estado,
+        comuna: item.comuna,
+        causaReporte: item.causaReporte,
+        detalleReporte: item.detalleReporte,
+        fechaReporte: formatDateFromDatabase(item.fecha),
+      });
+    };
     return (
-      <Card style={styles.containerCard} onPress={goMiPerfil}> 
+      <Card style={styles.containerCard} onPress={navigateToPublicacionReportada}>
         <Card.Title
         style={styles.containerCardContent} 
         title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
-        subtitle={<Text style={styles.textCardDate} >Publicado el {item.fecha}</Text>}
-        left={(props) => <Image source={item.imagenList} style={styles.imagen}/>}
-        right={(props) => <Image source={require("../assets/Eliminar.png")} style={styles.iconList}/>}
+        subtitle={<Text style={styles.textCardDate}>Reportado el {formatDateFromDatabase(item.fecha)}</Text>}
+        left={(props) => <Image source={{ uri: item.imagenes[0] }} style={styles.imagenList} />}
         />
       </Card>
   
