@@ -203,7 +203,7 @@ export default function MisPublicados() {
   
   const renderItem = ({item}) => {
     return (
-      <Card style={styles.containerCard} onPress={goMiPerfil}> 
+      <Card style={styles.containerCard}> 
         <Card.Title
         style={styles.containerCardContent} 
         title={<Text style={styles.textCard} >{item.nombreArticulo}</Text>} 
