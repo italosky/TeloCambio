@@ -148,6 +148,10 @@ export default function MisOfertas() {
     navigation.navigate("MisOfertas");
   };
 
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
+
   const changeDrawerPosition = () => {
     if (drawerPosition === "left") {
       setDrawerPosition("right");
@@ -188,6 +192,9 @@ export default function MisOfertas() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 

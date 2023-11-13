@@ -44,6 +44,9 @@ export default function MiPerfil() {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -109,6 +112,9 @@ export default function MiPerfil() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 
