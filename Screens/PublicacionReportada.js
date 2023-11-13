@@ -1,110 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  Alert,
-} from "react-native";
-import { Card } from "react-native-paper";
+import React, { useRef, useEffect, useState } from "react";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
-import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { Drawer } from "react-native-paper";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  limit,
-  serverTimestamp,
-} from "firebase/firestore";
-import { db, auth } from "../firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function DetalleArticulo() {
+export default function PublicacionReportada() {
   const navigation = useNavigation();
-  const route = useRoute();
-  const item = route.params?.item;
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [articulos, setArticulos] = useState([]);
-  const [articleId, setarticleId] = useState(null);
-  const [selectedCard, setSelectedCard] = useState(null);
   const [indiceImagenAmpliada, setIndiceImagenAmpliada] = useState(0);
-  const [userData, setUserData] = useState(null);
-  const userID = auth.currentUser ? auth.currentUser.uid : null; // UID DEL USUARIO LOGEADO ACTUALMENTE
-  const userId = item.id.match(/-(.*)/)[1];
-  const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
-  const [userRole, setUserRole] = useState(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      console.log("Fetching user data for userId:", userId);
-      if (!userId) return;
-      try {
-        const usuariosCollection = collection(db, "Usuarios");
-        const usuariosQuery = query(
-          usuariosCollection,
-          where("uid", "==", userId)
-        );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-        if (!usuariosSnapshot.empty) {
-          const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
-          setUserData(userDataFromSnapshot);
-        } else {
-          console.log("No se encuentra el uid");
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchUserData();
-  }, [userId]);
-
-  useEffect(() => {
-    if (userData && userData.role) {
-      setUserRole(userData.role);
-    }
-  }, [userData]);
-
-  const createOfferCollection = async (articleId) => {
-    try {
-      const offersRef = collection(db, "Ofertas");
-      const q = query(
-        offersRef,
-        where("ArticuloOferta", "==", articleId),
-        where("ArticuloGaleria", "==", item.id),
-        limit(1)
-      );
-      const existingOfferSnap = await getDocs(q);
-      if (!existingOfferSnap.empty) {
-        console.log(
-          "Ya realizaste una oferta por este articulo."
-        );
-        return;
-      }
-      const offerDoc = {
-        UsuarioOferta: userID,
-        ArticuloOferta: articleId,
-        ArticuloGaleria: item.id,
-        UsuarioGaleria: userId,
-        Estado: "pendiente",
-        fecha: serverTimestamp(),
-      };
-      await addDoc(offersRef, offerDoc);
-      console.log("Documento de oferta añadido con éxito");
-    } catch (error) {
-      console.error("Error al añadir el documento:", error);
-    }
-  };
-
-  const navigateToDatosCambio = () => {
-    navigation.navigate("DatosCambio", { item });
-  };
+  const route = useRoute();
+  const { params } = route;
+  const { nombreArticulo, images, estadoArticulo, comuna, causaReporte, detalleReporte, fechaReporte } = params;
 
   const ReporteUsuario = () => {
     navigation.navigate("ReporteUsuario");
@@ -115,374 +21,116 @@ export default function DetalleArticulo() {
     setMostrarModal(!mostrarModal);
   };
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => null,
-      gestureEnabled: false,
-    });
-  }, [navigation]);
-
-  const drawer = useRef(null);
-  const [drawerPosition, setDrawerPosition] = useState("left");
-
-  const changeDrawerPosition = () => {
-    if (drawerPosition === "left") {
-      setDrawerPosition("right");
-    } else {
-      setDrawerPosition("left");
-    }
-  };
-
-  const cerrarSesion = async () => {
-    try {
-      await auth.signOut();
-      await AsyncStorage.removeItem("isLoggedIn");
-      navigation.navigate("Ingreso");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
-  };
-
-  const navigationView = () => (
-    <View style={[styles.containerDrawer, styles.navigationContainer]}>
-      <View>
-        <Image
-          source={require("../assets/LogoTeLoCambio.png")}
-          style={styles.logo}
-        />
+  return (
+    <View style={styles.container}>
+      <View style={styles.containerSwiper}>
+        <Swiper
+          showsButtons={true}
+          loop={false}
+          autoplay={false}
+          onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
+          dotStyle={styles.dot}
+          activeDot={<View style={styles.activeDot}/>}
+          nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
+          prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
+        >
+          {images.map((item, index) => (
+            <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
+              <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="contain" />
+            </TouchableOpacity>
+          ))}
+        </Swiper>
       </View>
-      <View style={styles.separatorLine} />
-
-      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
-        <Image
-          source={require("../assets/Salir.png")}
-          style={styles.logoutImage}
-        />
-      </TouchableOpacity>
+      <View style={styles.textContainer}>
+        <Text style={styles.tittle}>{nombreArticulo}</Text>
+        <Text style={styles.text2}>Estado: {estadoArticulo}</Text>
+        <Text style={styles.text2}>Comuna: {comuna}</Text>
+        <Text style={styles.text2}>Causa del Reporte: {causaReporte}</Text>
+        <Text style={styles.text2}>Detalle del Reporte: {detalleReporte}</Text>
+        <Text style={styles.text2}>Fecha del Reporte: {fechaReporte}</Text>
+      </View>
+      <Modal visible={mostrarModal} transparent={true}>
+        <View style={styles.modalContainer}>
+          <Image
+            source={{ uri: images[indiceImagenAmpliada] }}
+            style={styles.imageModal}
+            resizeMode="contain"
+          />
+          <TouchableOpacity
+            style={styles.cerrarButton}
+            onPress={() => toggleModal(indiceImagenAmpliada)}
+          >
+            <Text style={styles.cerrarButtonText}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      <View style={styles.containerBoton}>
+        <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+          <Text style={styles.textoBoton}>Eliminar Publicación</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.boton2} onPress={ReporteUsuario}>
+          <Text style={styles.textoBoton}>Eliminar Reporte</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-
-  const confirmarReclamo = () => {
-    Alert.alert(
-      "Confirmación",
-      "¿Estás seguro de que deseas reclamar este artículo?",
-      [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        { text: "Sí", onPress: navigateToDatosCambio },
-      ],
-      { cancelable: false }
-    );
-  };
-
-  useEffect(() => {
-    const fetchPublicaciones = async () => {
-      try {
-        const publicacionesCollection = collection(db, "Publicaciones");
-        const publicacionesQuery = query(
-          publicacionesCollection,
-          where("uid", "==", userID)
-        );
-        const publicacionesSnapshot = await getDocs(publicacionesQuery);
-        const publicacionesData = publicacionesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log("Publicaciones:", publicacionesData);
-        setArticulos(publicacionesData);
-      } catch (error) {
-        console.error("Error al obtener las publicaciones:", error);
-      }
-    };
-    fetchPublicaciones();
-  }, [userID]);
-
-  const [modalArticulo, setModalArticulo] = useState(false);
-
-  const closeModal = () => {
-    setModalArticulo(false);
-  };
-
-  const openModal = () => {
-    setModalArticulo(true);
-  };
-
-  const ArticuloModal = (nombreArticulo, id) => {
-    Alert.alert(
-      "Atención",
-      `¿Deseas intercambiar por ${nombreArticulo}?`,
-      [
-        {
-          text: "No",
-          onPress: () => {
-            setSelectedCard(null);
-            setarticleId(null);
-          },
-          style: "cancel",
-        },
-        {
-          text: "Sí",
-          onPress: async () => {
-            closeModal();
-            await createOfferCollection(id);
-            Alert.alert(
-              "Felicidades Telocambista",
-              "Tu oferta de intercambio ha sido ingresada con exito",
-              [
-                {
-                  text: "OK",
-                  onPress: () => navigation.navigate("Galeria2"),
-                },
-              ]
-            );
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  useEffect(() => {
-    console.log(
-      "Después de establecer el estado - ID seleccionado:",
-      selectedCard
-    );
-    console.log(
-      "Después de establecer el estado - ID de artículo ofrecido:",
-      articleId
-    );
-  }, [selectedCard, articleId]);
-
-  const [columns, setColumns] = useState(1);
-
-  const renderDrawerAndroid = () => (
-    <DrawerLayout
-      ref={drawer}
-      drawerWidth={200}
-      drawerPosition={drawerPosition}
-      renderNavigationView={navigationView}
-    >
-      <View style={styles.container}>
-        <View style={styles.userInfoContainer}>
-          <View style={styles.containerSwiper}>
-            <Text style={styles.tittle}>{item.nombreArticulo}</Text>
-            <Swiper
-              showsButtons={true}
-              loop={false}
-              autoplay={false}
-              onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
-              dotStyle={styles.dot}
-              activeDot={<View style={styles.activeDot} />}
-              nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
-              prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
-            >
-              {images.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => toggleModal(index)}
-                >
-                  <Image
-                    source={{ uri: item }}
-                    style={styles.imageCarrusel}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              ))}
-            </Swiper>
-            <Text style={styles.text2}>Estado: {item.estadoArticulo}</Text>
-            <Text style={styles.text2}>Comuna: {item.comuna}</Text>
-          </View>
-          {userData && (
-            <View style={styles.userProfile}>
-              <Image
-                source={{ uri: userData.imagenen[0] }}
-                style={styles.imageUser}
-              />
-              <Text style={styles.text2}>{userData.nombre_apellido}</Text>
-              {item.tipo === "Intercambiar artículo" && (
-                <TouchableOpacity
-                  style={[styles.teLoCambioButton]}
-                  onPress={openModal}
-                >
-                  <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-                </TouchableOpacity>
-              )}
-              {item.tipo === "Regalar artículo" && (
-                <TouchableOpacity
-                  style={[styles.teLoRegaloButton]}
-                  onPress={confirmarReclamo}
-                >
-                  <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-        <View>
-          {userRole === "admin" && (
-            <View style={styles.containerBoton}>
-              <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-                <Text style={styles.textoBoton}>Eliminar Publicación</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {userRole === "usuario" && (
-            <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-              <Text style={styles.textoBoton}>Reportar Usuario</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <Modal visible={mostrarModal} transparent={true}>
-          <View style={styles.modalContainer}>
-            <Image
-              source={{ uri: images[indiceImagenAmpliada] }}
-              style={styles.imageModal}
-              resizeMode="contain"
-            />
-            <TouchableOpacity
-              style={styles.cerrarButton}
-              onPress={() => toggleModal(indiceImagenAmpliada)}
-            >
-              <Text style={styles.cerrarButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalArticulo}
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Disponible para Intercambio</Text>
-
-              <FlatList
-                style={styles.containerFlastList}
-                numColumns={columns}
-                data={articulos}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <Card
-                    key={item.id}
-                    style={[
-                      styles.containerCard,
-                      selectedCard === item.id ? { borderWidth: 2 } : {},
-                    ]}
-                    onPress={() => {
-                      console.log(
-                        "Tarjeta seleccionada:",
-                        item.nombreArticulo,
-                        item.id
-                      );
-                      ArticuloModal(item.nombreArticulo, item.id);
-                    }}
-                  >
-                    <View style={styles.containerImagen}>
-                      <Card.Cover
-                        source={{ uri: item.imagenURL }}
-                        style={styles.imagen}
-                      />
-                      <View style={styles.textContainer}>
-                        <Text style={styles.titleCard}>
-                          {item.nombreArticulo}
-                        </Text>
-                        <Text style={styles.titleEstado}>
-                          {item.estadoArticulo}
-                        </Text>
-                      </View>
-                    </View>
-                  </Card>
-                )}
-              />
-            </View>
-            <TouchableOpacity style={styles.cerrarButton} onPress={closeModal}>
-              <Text style={styles.cerrarButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </View>
-    </DrawerLayout>
-  );
-
-  return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 90,
+    paddingTop: 0,
     alignItems: "center",
   },
   containerSwiper: {
     flex: 1,
-    height: "100%",
-    marginRight: 20,
+    height: "50%",
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#ffffff",
   },
   buttonSwiper: {
     color: "#ffffff",
-    fontSize: 42,
+    fontSize: 62,
     opacity: 70,
+    paddingHorizontal: 45,
   },
   imageCarrusel: {
-    width: "100%",
-    height: 170,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
+    width: Dimensions.get("window").width,
+    height: 300,
+    borderRadius: 0,
   },
-  userInfoContainer: {
-    flexDirection: "row",
-    width: 364,
-    height: 240,
-    fontSize: 70,
-    marginTop: 30,
-    paddingHorizontal: 5,
-    backgroundColor: "#ffffff",
+  textContainer: {
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
+
   tittle: {
     fontSize: 20,
-    fontWeight: "700",
-    marginVertical: 20,
+    fontWeight: "900",
     textAlign: "center",
+    marginVertical: 10,
   },
-  containerText: {
-    width: "45%",
-    marginRight: 175,
-  },
-  text: {
+  text2: {
     fontSize: 18,
     fontWeight: "500",
-    paddingTop: 10,
-  },
-  userProfile: {
-    alignItems: "center",
-    marginTop: 60,
-    backgroundColor: "#ffffff",
-  },
-  nombreUser: {
-    fontSize: 19,
-    fontWeight: "500",
-    marginTop: 18,
-    marginBottom: 15,
-  },
-  imageUser: {
-    width: 115,
-    height: 115,
-    borderRadius: 58,
+    marginVertical: 5,
   },
   containerBoton: {
     alignItems: "center",
-    marginTop: 100,
+    marginBottom: 40,
   },
   boton: {
     backgroundColor: "#cc0000",
+    borderRadius: 25,
+    paddingVertical: 10,
+    width: 170,
+    marginTop: 10,
+  },
+  boton2: {
+    backgroundColor: "#8AAD34",
     borderRadius: 25,
     paddingVertical: 10,
     width: 170,
@@ -500,12 +148,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "gray",
     alignItems: "center",
-    marginBottom: 0.1,
   },
   activeDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 15,
+    height: 15,
+    borderRadius: 10,
     marginHorizontal: 5,
     backgroundColor: "#ffffff",
   },
@@ -513,9 +160,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   imageModal: {
-    width: 350,
+    width: Dimensions.get("window").width - 40,
     height: 350,
   },
   cerrarButton: {
@@ -527,120 +175,5 @@ const styles = StyleSheet.create({
     backgroundColor: "gray",
     padding: 10,
     borderRadius: 5,
-  },
-  containerDrawer: {
-    flex: 1,
-    padding: 5,
-  },
-  navigationContainer: {
-    backgroundColor: "#ecf0f1",
-  },
-  drawerItem: {
-    backgroundColor: "#8AAD34",
-    marginBottom: 10,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  drawerText: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: "#ffffff",
-    padding: 10,
-  },
-  separatorLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#7A7A7A",
-    margin: 15,
-  },
-  logo: {
-    width: 255,
-    height: 55,
-  },
-  logoutButton: {
-    alignItems: "center",
-    marginTop: 20,
-  },
-  logoutImage: {
-    width: 80,
-    height: 80,
-  },
-  teLoCambioButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 45,
-    borderRadius: 5,
-    marginTop: 5,
-    backgroundColor: "#63A355",
-  },
-  teLoCambioButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  teLoRegaloButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 45,
-    borderRadius: 5,
-    marginTop: 5,
-    backgroundColor: "#efb810",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "flex-start",
-    height: 360,
-    width: 300,
-    borderColor: "#63A355",
-    borderWidth: 2.0,
-  },
-  modalText: {
-    fontSize: 20,
-    fontWeight: "500",
-    marginBottom: 20,
-    marginBottom: 5,
-    paddingStart: 12,
-  },
-  containerFlastList: {
-    marginBottom: 1,
-  },
-  containerCard: {
-    width: 263,
-    height: 110,
-    borderRadius: 11,
-    backgroundColor: "#fff",
-    marginHorizontal: 5,
-    marginTop: 5,
-    alignItems: "flex-start",
-    borderWidth: 0.3,
-  },
-
-  containerImagen: {
-    marginTop: 6,
-    alignItems: "center",
-    marginHorizontal: 5,
-    flexDirection: "row",
-  },
-  imagen: {
-    width: 100,
-    height: 95,
-    borderRadius: 7,
-  },
-  titleCard: {
-    fontSize: 17,
-    textAlign: "auto",
-    flexDirection: "row",
-  },
-  titleEstado: {
-    marginTop: 5,
-  },
-  textContainer: {
-    flexDirection: "column",
-    marginLeft: 10,
   },
 });
