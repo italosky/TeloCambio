@@ -24,7 +24,7 @@ export default function Concretar() {
     navigation.setOptions({
       gestureEnabled: false,
     });
-  }, [navigation]);
+  }, [navigation]); 
 
   useEffect(() => {
     const fetchOfertas = async () => {
