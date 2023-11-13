@@ -17,66 +17,77 @@ export default function DatosCambio({ route }) {
   const [userData, setUserData] = useState(null);
   const item = route.params?.item;
   const modo = route.params?.modo;
+  const routeParams = route.params;
+  const usuarioId = routeParams?.userId;
 
-  if (!item || !item.id || !modo) {
+  if (!item || !modo) {
     console.error("Parámetros necesarios no proporcionados. Recibido:", { item, modo });
     return <View><Text>Información no disponible</Text></View>;
   }
-  const userId = item.id;
   
   const backGaleria = () => {
     navigation.navigate("Galeria2");
   };
 
+  // --------------  ESTE ES EL USEEFFECT DE LOS ALERT PARA TELOCAMBIO Y TELOREGALO ---------------
   useEffect(() => {
     if (modo === "telocambio") {
       Alert.alert("¡Felicidades!", "Has efectuado un intercambio con éxito", [
         { text: "OK" },
       ]);
-    } else {
+    } else if (modo === "teloregalo") {
       Alert.alert("¡Felicidades!", "Has reclamado un artículo con éxito", [
-        { text: "OK" },
+        { text: "OK" }
       ]);
     }
-    if (!userId) {
-      console.error("UserId es undefined");
-      return;
-    }
-  }, [userId]);
-
+  }, [modo]);
+  
+  // --------------  ESTE ES EL USEEFFECT QUE HACE EL BACKEND DE TELOCAMBIO Y TELOREGALO ---------------
   useEffect(() => {
     const fetchUserData = async () => {
-      console.log("Fetching user data for userId:", userId);
-      if (!userId) return;
+      let idParaBuscar;
+      if (modo === "telocambio") {
+        idParaBuscar = item.UsuarioOfertaUid;
+      } else if (modo === "teloregalo") {
+        idParaBuscar = item.id;
+      }
+      if (!idParaBuscar) {
+        console.error("No se proporcionó un ID para buscar");
+        return;
+      }
       try {
         const usuariosCollection = collection(db, "Usuarios");
-        const usuariosQuery = query(
-          usuariosCollection,
-          where("uid", "==", userId)
-        );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-        if (!usuariosSnapshot.empty) {
-          const userDataFromSnapshot = usuariosSnapshot.docs[0].data();
-          setUserData(userDataFromSnapshot);
+        const q = query(usuariosCollection, where("uid", "==", idParaBuscar));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+          setUserData(userData);
         } else {
-          console.log("No se encuentra el uid");
+          console.error("Usuario no encontrado con el ID:", idParaBuscar);
         }
       } catch (error) {
-        console.error(error);
+        console.error("Error al obtener datos del usuario:", error);
       }
     };
+  
     fetchUserData();
-  }, [userId]);
-
+  }, [item, modo, route.params]);
+  
+  
   const openWhatsApp = () => {
     if (userData && userData.telefono) {
       const phoneNumber = userData.telefono;
       const nombrePersona = userData.nombre_apellido;
-      const nombreArticulo = item.nombreArticulo;
-      const message = `Hola ${nombrePersona}, deseo reclamar tu artículo publicado en la aplicación TeloCambio🌱 *${nombreArticulo}*. Me gustaría que conversáramos para coordinar la entrega.`;
-      const whatsappURL = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
-        message
-      )}`;
+      let message;
+      if (modo === "teloregalo") {
+        const nombreArticulo = item.nombreArticulo;
+        message = `Hola ${nombrePersona}, quisiera obtener tu artículo '${nombreArticulo}' publicado en la aplicación TeloCambio🌱. Me gustaría que conversáramos para coordinar la entrega.`;
+      } else if (modo === "telocambio") {
+        const nombreArticuloOferta = item.nombreArticuloOferta || item.nombreArticulo;
+        const nombreArticuloGaleria = item.nombreArticuloGaleria;
+        message = `Hola ${nombrePersona}, he aceptado tu oferta de tu articulo '${nombreArticuloOferta}' por mi artículo '${nombreArticuloGaleria}' en la aplicación TeloCambio🌱. Me gustaría que conversáramos para coordinar los detalles del intercambio.`;
+      }
+      const whatsappURL = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
       Linking.openURL(whatsappURL)
         .then(() => {
           console.log("Abriendo WhatsApp con mensaje personalizado...");
@@ -86,20 +97,25 @@ export default function DatosCambio({ route }) {
         });
     }
   };
-
+  
   const openGmailWithSubject = () => {
     if (userData && userData.email) {
       const email = userData.email;
-      const foto = userData.imagenen;
-      const nombreArticulo = item.nombreArticulo;
       const nombrePersona = userData.nombre_apellido;
-      const subject = `Solicitud Articulo ${nombreArticulo}`;
-      const message = `Hola ${nombrePersona}, deseo reclamar tu artículo publicado en la aplicación TeloCambio🌱 ${nombreArticulo}. Me gustaría que conversáramos para coordinar la entrega.`;
-
-      const gmailURL = `mailto:${email}?subject=${encodeURIComponent(
-        subject
-      )}&body=${encodeURIComponent(message)}`;
-
+      let nombreArticulo;
+      let subject;
+      let message;
+      if (modo === "teloregalo") {
+        nombreArticulo = item.nombreArticulo;
+        subject = `Solicitud Articulo ${nombreArticulo}`;
+        message = `Hola ${nombrePersona}, quisiera obtener tu articulo ${nombreArticulo} publicado en la aplicación TeloCambio🌱. Me gustaría que conversáramos para coordinar la entrega.`;
+      } else if (modo === "telocambio") {
+        nombreArticuloOferta = item.nombreArticuloOferta || item.nombreArticulo;
+        nombreArticuloGaleria = item.nombreArticuloGaleria; 
+        subject = `Intercambio: ${nombreArticuloGaleria} por ${nombreArticuloOferta}`;
+        message = `Hola ${nombrePersona}, he aceptado tu oferta de tu articulo '${nombreArticuloOferta}' por mi artículo '${nombreArticuloGaleria}' en la aplicación TeloCambio🌱. Me gustaría que conversáramos para coordinar los detalles del intercambio.`;
+      }
+      const gmailURL = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
       Linking.openURL(gmailURL)
         .then(() => {
           console.log("Abriendo Gmail con asunto y mensaje predeterminados...");
@@ -112,9 +128,9 @@ export default function DatosCambio({ route }) {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.tinyLogo} source={{ uri: userData.imagenen[0] }} />
       {userData && (
         <>
+          <Image style={styles.tinyLogo} source={{ uri: userData.imagenen[0] }} />
           <Text style={styles.textonormal}>Nombre del Telocambista</Text>
           <View style={styles.textContainer}>
             <Text style={styles.text}>{userData.nombre_apellido}</Text>

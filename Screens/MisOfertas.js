@@ -53,28 +53,34 @@ export default function MisOfertas() {
           ]);
           // AQUI YA CON LOS UID OBTENIDOS DE Publicaciones LLAMA A LA DATA DE LA OFERTA
           // ESTOS SON LOS DATOS QUE VA A MOSTRAR EN EL FRONT, SE OBTUVIERON COMPARANDO LOS UID DE Ofertas Y Publicaciones
-          fetchedOfertas.push({
-            id: offerDoc.id,
-            fecha: ofertaData.fecha,
-            ArticuloGaleria: {
-              imagenURL: publicacionGaleriaSnap.data().imagenURL,
-              nombreArticulo: publicacionGaleriaSnap.data().nombreArticulo
-            },
-            ArticuloOferta: {
-              imagenURL: publicacionOfertaSnap.data().imagenURL,
-              nombreArticulo: publicacionOfertaSnap.data().nombreArticulo
-            }
-          });
-        }    
-        setOfertas(fetchedOfertas);
-        setIsLoading(false); 
-      } catch (error) {
-          console.error("Error al obtener ofertas:", error);
-          setIsLoading(false);
-      }
-    };
-    fetchOfertas();
-  }, []);
+          if (publicacionGaleriaSnap.exists() && publicacionOfertaSnap.exists()) {
+            const galeriaData = publicacionGaleriaSnap.data();
+            const ofertaData = publicacionOfertaSnap.data();
+            // AQUI VERIFICA EL ESTADO DE LAS PUBLICACIONES, SI ESTAN INACTIVAS NO SE MUESTRAN LAS OFERTAS
+            if (galeriaData.estadoPublicacion === 'activa' && ofertaData.estadoPublicacion === 'activa') {
+              fetchedOfertas.push({
+                id: offerDoc.id,
+                fecha: ofertaData.fecha,
+                ArticuloGaleria: {
+                  imagenURL: galeriaData.imagenURL,
+                  nombreArticulo: galeriaData.nombreArticulo
+                },
+                ArticuloOferta: {
+                  imagenURL: ofertaData.imagenURL,
+                  nombreArticulo: ofertaData.nombreArticulo
+                }
+            });
+          }
+        }
+      }    
+      setOfertas(fetchedOfertas);
+    } catch (error) {
+      console.error("Error al obtener ofertas:", error);
+    }
+    setIsLoading(false); 
+  };
+  fetchOfertas();
+  },[]);
 
 
   const EliminarOferta = async (oferta) => {
@@ -116,7 +122,7 @@ export default function MisOfertas() {
   );
 
   const formatDateFromDatabase = (timestamp) => {
-    if (!timestamp) return '';  // or return a default value or error message
+    if (!timestamp) return '';
     const date = timestamp.toDate();
     return getCurrentDateFormatted(date);
   } 

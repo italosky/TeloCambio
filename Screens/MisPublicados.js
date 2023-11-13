@@ -126,7 +126,11 @@ export default function MisPublicados() {
   const fetchPosts = async () => {
     setLoading(true);
     const allItemsArray = [];
-    const articulosPublicadosRef = await getDocs(query(collection(db, "Publicaciones"), where("uid", "==", userId)));
+    const articulosPublicadosRef = await getDocs(query(
+      collection(db, "Publicaciones"), 
+      where("uid", "==", userId),
+      where("estadoPublicacion", "==", "activa")
+    ));
     articulosPublicadosRef.forEach((postDoc) => {
       const postData = postDoc.data();
       allItemsArray.push({
