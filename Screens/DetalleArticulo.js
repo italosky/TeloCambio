@@ -106,10 +106,6 @@ export default function DetalleArticulo() {
     navigation.navigate("DatosCambio", { item });
   };
 
-  const ReporteUsuario = () => {
-    navigation.navigate("ReporteUsuario");
-  };
-
   const toggleModal = (index) => {
     setIndiceImagenAmpliada(index);
     setMostrarModal(!mostrarModal);
@@ -138,7 +134,12 @@ export default function DetalleArticulo() {
     navigation.navigate("MisOfertas");
   };
   const goReporteUsuario = () => {
-    navigation.navigate("ReporteUsuario");
+    navigation.navigate("ReporteUsuario", {
+      nombreArticulo: item.nombreArticulo,
+      imagenes: images,
+      estadoArticulo: item.estadoArticulo,
+      comuna: item.comuna,
+    });
   };
 
   const drawer = useRef(null);
@@ -360,14 +361,9 @@ export default function DetalleArticulo() {
         
 
         <View style={styles.containerBoton}>
-          {userRole === "admin" && (
-              <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-                <Text style={styles.textoBoton}>Eliminar Publicación</Text>
-              </TouchableOpacity>
-          )}
           {userRole === "usuario" && (
-            <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
-              <Text style={styles.textoBoton}>Reportar Usuario</Text>
+            <TouchableOpacity style={styles.boton} onPress={goReporteUsuario}>
+              <Text style={styles.textoBoton}>Reportar Publicacion</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -485,8 +481,9 @@ const styles = StyleSheet.create({
   },
   tittle: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "900",
     textAlign: "center",
+    margin: 15,
   },
   containerText:{
     width: "45%",

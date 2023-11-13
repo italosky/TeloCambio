@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import { db } from '../firebaseConfig';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -36,29 +36,44 @@ export default function Registro(props) {
   }, []);
 
   const navigation = useNavigation();
+  const route = useRoute();
+  const { nombreArticulo, imagenes, estadoArticulo, comuna } = route.params;
   const handleRegister = async () => {
-    if (data.causa_reporte && data.reporte) {
+    if (
+      data.causa_reporte &&
+      data.reporte &&
+      nombreArticulo &&
+      imagenes &&
+      estadoArticulo &&
+      comuna
+    ) {
       try {
-        const reportesRef = collection(db, 'Reportes');
-        const newReporteRef = await addDoc(reportesRef, {
+        const reportesUsuariosRef = collection(db, 'Reportes');
+        const newReporteRef = await addDoc(reportesUsuariosRef, {
           causa_reporte: data.causa_reporte,
           reporte: data.reporte,
+          nombreArticulo,
+          imagenes,
+          estadoArticulo,
+          comuna,
           timestamp: serverTimestamp(),
-          userid: userId,
+          // Agrega cualquier otro campo que desees almacenar en el reporte
         });
-        Alert.alert('¡Reporte enviado!', 'Un administrador revisará su solicitud');
-        setData({
-          causa_reporte: "",
-          reporte: ""
-        });
+  
+        Alert.alert(
+          '¡Reporte enviado!',
+          'Un administrador revisará su solicitud'
+        );
+  
+        // Puedes hacer algo más después de enviar el reporte si es necesario
       } catch (error) {
         console.error(error);
-        Alert.alert("Error enviando el reporte.");
+        Alert.alert('Error enviando el reporte.');
       }
     } else {
-      Alert.alert("Por favor, completa todos los campos");
+      Alert.alert('Por favor, completa todos los campos');
     }
-  }
+  };
   
   const goPerfilOtros = () => {
     navigation.navigate("PerfilOtros");
@@ -96,7 +111,7 @@ export default function Registro(props) {
         </View>
         <View style={styles.padreBoton}>
           <TouchableOpacity style={styles.cajaBotonReportar} onPress={handleRegister}>
-            <Text style={styles.textoBoton}>Reportar</Text>
+            <Text style={styles.textoBoton}>Confirmar Reporte</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cajaBotonCancelar} onPress={goPerfilOtros}>
             <Text style={styles.textoBoton}>Cancelar</Text>
@@ -139,10 +154,9 @@ const styles = StyleSheet.create({
   },
   cajaTexto: {
     backgroundColor: "#cccccc50",
-    borderRadius: 30,
-    marginVertical: 10,  
+    borderRadius: 30,  
     width:300,
-    height: 180,
+    height: 60,
   },
   padreBoton: {
     alignItems: "center",
@@ -150,16 +164,16 @@ const styles = StyleSheet.create({
   cajaBotonCancelar: {
     backgroundColor: "#8AAD34",
     borderRadius: 30,
-    paddingVertical: 20,
-    marginTop: 20,
+    paddingVertical: 12,
+    marginTop: 10,
     width:200,
   },
   cajaBotonReportar: {
     backgroundColor: "#cc0000",
     borderRadius: 30,
-    paddingVertical: 20,
-    marginTop: 20,
-    width:250,
+    paddingVertical: 12,
+    marginTop: 10,
+    width:200,
   },
   textoBoton: {
     textAlign: "center",
