@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { collection, getDocs, doc, getDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { db, auth } from "../firebaseConfig";
 import { FlatList } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisPublicados() {
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +64,10 @@ export default function MisPublicados() {
   };
   const goDatosCambio = () => {
     navigation.navigate("DatosCambio", { item });
+  };
+
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
   };
 
   const drawer = useRef(null);
@@ -164,6 +169,9 @@ export default function MisPublicados() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 

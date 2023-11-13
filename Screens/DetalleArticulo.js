@@ -142,6 +142,10 @@ export default function DetalleArticulo() {
     navigation.navigate("ReporteUsuario");
   };
 
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios");
+  };
+
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
 
@@ -185,6 +189,9 @@ export default function DetalleArticulo() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
+          <Text style={styles.drawerText}>Mis Intercambios</Text>
         </TouchableOpacity>
       </Drawer.Section>
 
@@ -488,6 +495,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     textAlign: "center",
+    marginVertical: 20,
   },
   containerText:{
     width: "45%",
