@@ -349,6 +349,7 @@ const styles = StyleSheet.create({
   },
   textCardLeft: {
     fontSize: 16,
+    width: 150,
     fontWeight: '500',
     textAlign: 'center',
     marginHorizontal: 3

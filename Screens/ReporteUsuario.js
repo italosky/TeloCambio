@@ -12,15 +12,15 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
-import { db } from '../firebaseConfig';
+import { db } from "../firebaseConfig";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { addDoc, collection, doc, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
 
 export default function Registro(props) {
   const [userId, setUserId] = useState(null);
-  const [data, setData] = useState({ 
-    causa_reporte: "", 
-    reporte: "" 
+  const [data, setData] = useState({
+    causa_reporte: "",
+    reporte: "",
   });
 
   useEffect(() => {
@@ -29,12 +29,17 @@ export default function Registro(props) {
       if (user) {
         setUserId(user.uid);
       } else {
-        console.log("El usuario no esta autenticado, porfavor dirijase a login"); 
+        console.log(
+          "El usuario no esta autenticado, porfavor dirijase a login"
+        );
       }
     });
     return () => unsubscribe();
   }, []);
 
+  const goGaleria2 = () => {
+    navigation.navigate("Galeria2");
+  };
   const navigation = useNavigation();
   const route = useRoute();
   const { nombreArticulo, imagenes, estadoArticulo, comuna } = route.params;
@@ -48,10 +53,8 @@ export default function Registro(props) {
       comuna
     ) {
       try {
-
-        const reportesUsuariosRef = collection(db, 'Reportes');
+        const reportesUsuariosRef = collection(db, "Reportes");
         const newReporteRef = await addDoc(reportesUsuariosRef, {
-
           causa_reporte: data.causa_reporte,
           reporte: data.reporte,
           nombreArticulo,
@@ -64,33 +67,29 @@ export default function Registro(props) {
 
           userid: userId,
         });
-        Alert.alert('¡Reporte enviado!', 'Un administrador revisará su solicitud');
+        Alert.alert(
+          "¡Reporte enviado",
+          "Un administrador revisará su solicitud",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Galeria2"),
+            },
+          ]
+        );
         setData({
           causa_reporte: "",
-          reporte: ""
-
+          reporte: "",
         });
-  
-        Alert.alert(
-          '¡Reporte enviado!',
-          'Un administrador revisará su solicitud'
-        );
-  
+
         // Puedes hacer algo más después de enviar el reporte si es necesario
       } catch (error) {
         console.error(error);
-        Alert.alert('Error enviando el reporte.');
+        Alert.alert("Error enviando el reporte.");
       }
     } else {
-      Alert.alert('Por favor, completa todos los campos');
+      Alert.alert("Por favor, completa todos los campos");
     }
-
-  };
-
-
-  
-  const goPerfilOtros = () => {
-    navigation.navigate("PerfilOtros");
   };
 
   return (
@@ -100,40 +99,51 @@ export default function Registro(props) {
     >
       <View style={styles.padre}>
         <View style={styles.tarjeta}>
-        <View style={styles.cajaPicker}>
-          <Picker
-            selectedValue={data.causa_reporte}
-            onValueChange={(itemValue) => setData({ ...data, causa_reporte: itemValue })}
-          >
-            <Picker.Item label="Causa del reporte"       value="" />
-            <Picker.Item label="No responde al intercambio"     value="No responde al intercambio" />
-            <Picker.Item label="Las fotos son falsas o robadas"  value="Las fotos son falsas o robadas" />
-            <Picker.Item label="Estafa"      value="Estafa" />
-            <Picker.Item label="Otros"      value="Otros" />
-          </Picker>
-        </View>
-        <View style={styles.cajaTexto}>
-          <TextInput
-            placeholder="Escriba aquí si desea añadir mas detalles"
-            style={{ paddingHorizontal: 15 }}
-            onChangeText={(text) => setData({ ...data, reporte: text })}
-            value={data.reporte}
-            multiline={true}
-            numberOfLines={5}
-            maxLength={140}
-          />
-        </View>
-        <View style={styles.padreBoton}>
-          <TouchableOpacity style={styles.cajaBotonReportar} onPress={handleRegister}>
-            <Text style={styles.textoBoton}>Confirmar Reporte</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cajaBotonCancelar} onPress={goPerfilOtros}>
-            <Text style={styles.textoBoton}>Cancelar</Text>
-          </TouchableOpacity>
+          <View style={styles.cajaPicker}>
+            <Picker
+              selectedValue={data.causa_reporte}
+              onValueChange={(itemValue) =>
+                setData({ ...data, causa_reporte: itemValue })
+              }
+            >
+              <Picker.Item label="Causa del reporte" value="" />
+              <Picker.Item
+                label="No responde al intercambio"
+                value="No responde al intercambio"
+              />
+              <Picker.Item
+                label="Las fotos son falsas o robadas"
+                value="Las fotos son falsas o robadas"
+              />
+              <Picker.Item label="Estafa" value="Estafa" />
+              <Picker.Item label="Otros" value="Otros" />
+            </Picker>
+          </View>
+          <View style={styles.cajaTexto}>
+            <TextInput
+              placeholder="Escriba aquí si desea añadir mas detalles"
+              style={{ paddingHorizontal: 15 }}
+              onChangeText={(text) => setData({ ...data, reporte: text })}
+              value={data.reporte}
+              multiline={true}
+              numberOfLines={5}
+              maxLength={140}
+            />
+          </View>
+          <View style={styles.padreBoton}>
+            <TouchableOpacity
+              style={styles.cajaBotonReportar}
+              onPress={handleRegister}
+            >
+              <Text style={styles.textoBoton}>Confirmar Reporte</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cajaBotonCancelar}>
+              <Text style={styles.textoBoton}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -164,12 +174,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#cccccc50",
     borderRadius: 30,
     marginVertical: 10,
-      
   },
   cajaTexto: {
     backgroundColor: "#cccccc50",
-    borderRadius: 30,  
-    width:300,
+    borderRadius: 30,
+    width: 300,
     height: 60,
   },
   padreBoton: {
@@ -180,14 +189,14 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingVertical: 12,
     marginTop: 10,
-    width:200,
+    width: 200,
   },
   cajaBotonReportar: {
     backgroundColor: "#cc0000",
     borderRadius: 30,
     paddingVertical: 12,
     marginTop: 10,
-    width:200,
+    width: 200,
   },
   textoBoton: {
     textAlign: "center",
