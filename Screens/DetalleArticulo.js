@@ -551,8 +551,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
     textAlign: "center",
-    margin: 15,
-
+    marginVertical: 20,
   },
   containerText:{
     width: "45%",
