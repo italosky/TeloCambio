@@ -10,20 +10,21 @@ import {
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
-import { collection, getDocs, doc, getDoc, query, where, updateDoc  } from 'firebase/firestore';
-import { Drawer, Card } from "react-native-paper";
+import { collection, getDocs, doc, getDoc, query, where, updateDoc } from 'firebase/firestore';
+import { Drawer } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
 
 export default function Concretar() {
   const [ofertas, setOfertas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modo, setModo] = useState('telocambio'); // o 'teloregalo' según corresponda
+  const [idsPublicaciones, setIdsPublicaciones] = useState([]);
   const navigation = useNavigation();
   React.useLayoutEffect(() => {
     navigation.setOptions({
       gestureEnabled: false,
     });
-  }, [navigation]);
+  }, [navigation]); 
 
   useEffect(() => {
     const fetchOfertas = async () => {
@@ -36,8 +37,11 @@ export default function Concretar() {
         );
         const offersSnap = await getDocs(offersRef);
         const fetchedOfertas = [];
+        const idsTemporales = [];
         for (let offerDoc of offersSnap.docs) {
           const ofertaData = offerDoc.data();
+          idsTemporales.push(ofertaData.ArticuloGaleria);
+          idsTemporales.push(ofertaData.ArticuloOferta);
           const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
           const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
           const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
@@ -52,7 +56,11 @@ export default function Concretar() {
           ]);
           const userGaleriaData = !userGaleriaSnapshot.empty ? userGaleriaSnapshot.docs[0].data() : null;
           const userOfertaData = !userOfertaSnapshot.empty ? userOfertaSnapshot.docs[0].data() : null;
+          const nombreArticuloGaleria = publicacionGaleriaSnap.data()?.nombreArticulo;
+          const nombreArticuloOferta = publicacionOfertaSnap.data()?.nombreArticulo;
           fetchedOfertas.push({
+            nombreArticuloGaleria,
+            nombreArticuloOferta,
             id: offerDoc.id,
             fecha: ofertaData.fecha,
             ArticuloGaleria: publicacionGaleriaSnap.data(),
@@ -69,6 +77,7 @@ export default function Concretar() {
           });
           
         }
+        setIdsPublicaciones(idsTemporales);
         setOfertas(fetchedOfertas);
       } catch (error) {
         console.error("Error al obtener ofertas:", error);
@@ -78,6 +87,7 @@ export default function Concretar() {
     fetchOfertas();
   }, []);
 
+  // ---------------  AQUI CAMBIA EL ESTADO DE LA OFERTA A COMPLETADA ----------------
   const actualizarEstadoOferta = async (ofertaId) => {
     const ofertaRef = doc(db, 'Ofertas', ofertaId);
     try {
@@ -102,26 +112,53 @@ export default function Concretar() {
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
+
   const goToDatosCambio = (ofertaEspecifica, modo) => {
     if (ofertaEspecifica?.UsuarioOferta?.uid) {
-      navigation.navigate('DatosCambio', { item: { id: ofertaEspecifica.UsuarioOferta.uid }, modo: modo });
+      const itemParaPasar = {
+        ArticuloGaleria: ofertaEspecifica.ArticuloGaleria,
+        ArticuloOferta: ofertaEspecifica.ArticuloOferta,
+        UsuarioOfertaUid: ofertaEspecifica.UsuarioOferta.uid,
+        nombreArticuloGaleria: ofertaEspecifica.nombreArticuloGaleria,
+        nombreArticuloOferta: ofertaEspecifica.nombreArticuloOferta
+      };
+      navigation.navigate('DatosCambio', { item: itemParaPasar, modo: modo });
     } else {
       console.error('Datos de oferta específica o ID de UsuarioOferta no disponibles', ofertaEspecifica);
     }
   };
-
+  
   const manejarAceptarOferta = async (ofertaEspecifica) => {
     if (modo === 'telocambio' && ofertaEspecifica) {
       await actualizarEstadoOferta(ofertaEspecifica.id);
+      if (idsPublicaciones.length >= 2) {
+        const idPublicacion1 = idsPublicaciones[0];
+        const idPublicacion2 = idsPublicaciones[1];
+        await actualizarEstadoPublicaciones(idPublicacion1, idPublicacion2);
+      } else {
+        console.error('No hay suficientes IDs de publicación disponibles');
+      }
       goToDatosCambio(ofertaEspecifica, 'telocambio');
     } else {
       console.error('Oferta específica no definida o modo no es telocambio');
     }
   };
   
+  // --------------- AQUI CAMBIA EL ESTADO DE ACTIVA A INACTIVA LAS PUBLICACIONES, POR ENDE NO SE VEN EN NINGUN LADO ---------------
+  const actualizarEstadoPublicaciones = async () => {
+    try {
+      const updates = idsPublicaciones.map(id => 
+        updateDoc(doc(db, 'Publicaciones', id), { estadoPublicacion: 'inactiva' })
+      );
+      await Promise.all(updates);
+      console.log('Estados de publicaciones actualizados a inactiva');
+    } catch (error) {
+      console.error('Error al actualizar las publicaciones: ', error);
+    }
+  };
+
   const drawer = useRef(null);
   const [drawerPosition] = useState("left");
-
   const navigationView = () => (
     <View style={[styles.containerDrawer, styles.navigationContainer]}>
       <View>

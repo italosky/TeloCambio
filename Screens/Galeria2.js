@@ -35,7 +35,7 @@ export default function Galeria2() {
       const user = auth.currentUser;
       usersSnapshot.forEach((postDoc) => {
         const postData = postDoc.data();
-        if (user && postData.uid !== user.uid) {
+        if (postData.estadoPublicacion === 'activa') {
           allItemsArray.push({
             id: postDoc.id,
             imagenURL: postData.imagenURL,
