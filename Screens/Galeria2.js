@@ -114,7 +114,7 @@ export default function Galeria2() {
   };
 
   const goMiPerfil = () => {
-    navigation.navigate("Mi Perfil");
+    navigation.navigate("MiPerfil");
 
   };
   const MisIntercambios = () => {

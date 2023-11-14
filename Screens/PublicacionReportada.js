@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Swiper from "react-native-swiper";
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from "../firebaseConfig";
 
 export default function PublicacionReportada() {
   const navigation = useNavigation();
@@ -10,16 +12,78 @@ export default function PublicacionReportada() {
 
   const route = useRoute();
   const { params } = route;
-  const { nombreArticulo, images, estadoArticulo, comuna, causaReporte, detalleReporte, fechaReporte } = params;
-
-  const ReporteUsuario = () => {
-    navigation.navigate("ReporteUsuario");
-  };
+  const { nombreArticulo, imagenes, estadoArticulo, comuna, causaReporte, detalleReporte, fechaReporte } = params;
 
   const toggleModal = (index) => {
     setIndiceImagenAmpliada(index);
     setMostrarModal(!mostrarModal);
   };
+
+  const eliminarReporte = () => {
+    const item = params
+    Alert.alert(
+      "Confirmación",
+      "¿Estás seguro de eliminar el reporte?",
+      [
+        {
+          text: "No",
+          onPress: () => console.log("Eliminación cancelada"),
+          style: "cancel"
+        },
+        {
+          text: "Sí", 
+          onPress: async () => {
+            try {
+              console.log("Dentro de eliminarReporte:", item.id);
+              const reporteRef = doc(db, 'Reportes', item.id);
+              await deleteDoc(reporteRef);
+              Alert.alert(
+                "¡Éxito!",
+                "El reporte ha sido eliminado.",
+              );
+              navigation.navigate("ListaReportesAdmin")
+            } catch (error) {
+              console.error("Error al eliminar el reporte:", error);
+            }
+          }
+        }
+      ],
+      { cancelable: false }
+  );
+  }
+
+  const eliminarPublicacion = () => {
+    const item = params
+    Alert.alert(
+      "Confirmación",
+      "¿Estás seguro de eliminar la publicacion?",
+      [
+        {
+          text: "No",
+          onPress: () => console.log("Eliminación cancelada"),
+          style: "cancel"
+        },
+        {
+          text: "Sí", 
+          onPress: async () => {
+            try {
+              console.log("Dentro de eliminarPublicacion:", item);
+              const PublicacionRef = doc(db, 'Publicaciones', item.publicacionId);
+              await deleteDoc(PublicacionRef);
+              Alert.alert(
+                "¡Éxito!",
+                "La publicación ha sido eliminada.",
+              );
+              navigation.navigate("ListaReportesAdmin")
+            } catch (error) {
+              console.error("Error al eliminar la publicación:", error);
+            }
+          }
+        }
+      ],
+      { cancelable: false }
+  );
+  }
 
   return (
     <View style={styles.container}>
@@ -34,7 +98,7 @@ export default function PublicacionReportada() {
           nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
           prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
         >
-          {images.map((item, index) => (
+          {imagenes.map((item, index) => (
             <TouchableOpacity key={index} onPress={() => toggleModal(index)}>
               <Image source={{ uri: item }} style={styles.imageCarrusel} resizeMode="contain" />
             </TouchableOpacity>
@@ -52,7 +116,7 @@ export default function PublicacionReportada() {
       <Modal visible={mostrarModal} transparent={true}>
         <View style={styles.modalContainer}>
           <Image
-            source={{ uri: images[indiceImagenAmpliada] }}
+            source={{ uri: imagenes[indiceImagenAmpliada] }}
             style={styles.imageModal}
             resizeMode="contain"
           />
@@ -65,10 +129,10 @@ export default function PublicacionReportada() {
         </View>
       </Modal>
       <View style={styles.containerBoton}>
-        <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+        <TouchableOpacity style={styles.boton} onPress={eliminarPublicacion}>
           <Text style={styles.textoBoton}>Eliminar Publicación</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.boton2} onPress={ReporteUsuario}>
+        <TouchableOpacity style={styles.boton2} onPress={eliminarReporte}>
           <Text style={styles.textoBoton}>Eliminar Reporte</Text>
         </TouchableOpacity>
       </View>

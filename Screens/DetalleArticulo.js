@@ -207,6 +207,7 @@ export default function DetalleArticulo() {
       imagenes: images,
       estadoArticulo: item.estadoArticulo,
       comuna: item.comuna,
+      id: item.id
     });
   };
 
