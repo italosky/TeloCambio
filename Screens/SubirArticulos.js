@@ -26,6 +26,7 @@ export default function SubirArticulos() {
   const navigation = useNavigation();
   const [selectedImages, setSelectedImages] = useState([]);
   const [itemName, setItemName] = useState("");
+  const [itemNameError, setItemNameError] = useState("");
   const [itemCondition, setItemCondition] = useState("");
   const [itemTrade, setItemTrade] = useState("");
   const [itemRegion, setItemRegion] = useState([]);
@@ -174,6 +175,16 @@ export default function SubirArticulos() {
     }
   }, [selectedRegionUrl]);
 
+  const handleItemNameChange = (text) => {
+    // Limitar la longitud del itemName a 30 caracteres
+    if (text.length <= 17) {
+      setItemName(text);
+      setItemNameError("");
+    } else {
+      setItemNameError("El nombre del artículo no puede tener más de 20 caracteres");
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.container}>
@@ -208,7 +219,7 @@ export default function SubirArticulos() {
             maxLength={30}
             placeholder="Nombre del Artículo (Ej. Bicicleta)"
             style={styles.textInput}
-            onChangeText={setItemName}
+            onChangeText={handleItemNameChange}
             value={itemName}
           />
         </View>
