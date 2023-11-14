@@ -301,15 +301,14 @@ export default function DetalleArticulo() {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter((publicacion) => publicacion.estadoPublicacion !== "inactiva"); // Filtrar publicaciones inactivas
-  
+          .filter((publicacion) => publicacion.estadoPublicacion !== "inactiva");
         console.log("Publicaciones para intercambiar:", publicacionesData);
         setArticulos(publicacionesData);
       } catch (error) {
         console.error("Error al obtener las publicaciones:", error);
       }
     };
-    fetchPublicaciones();
+    fetchPublicaciones(); 
   }, [userID]);
   
 
