@@ -82,13 +82,9 @@ export default function ListaReportesAdmin() {
   const renderItem = ({item}) => {
     const navigateToPublicacionReportada = () => {
       navigation.navigate("PublicacionReportada", {
-        nombreArticulo: item.nombreArticulo,
-        images: item.imagenes,
-        estadoArticulo: item.estado,
-        comuna: item.comuna,
-        causaReporte: item.causaReporte,
-        detalleReporte: item.detalleReporte,
+        ...item,
         fechaReporte: formatDateFromDatabase(item.fecha),
+        
       });
     };
     return (
