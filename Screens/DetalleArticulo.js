@@ -296,18 +296,22 @@ export default function DetalleArticulo() {
           where("uid", "==", userID)
         );
         const publicacionesSnapshot = await getDocs(publicacionesQuery);
-        const publicacionesData = publicacionesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })); 
+        const publicacionesData = publicacionesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((publicacion) => publicacion.estadoPublicacion !== "inactiva"); // Filtrar publicaciones inactivas
+  
         console.log("Publicaciones para intercambiar:", publicacionesData);
         setArticulos(publicacionesData);
       } catch (error) {
         console.error("Error al obtener las publicaciones:", error);
       }
     };
-    fetchPublicaciones(); 
+    fetchPublicaciones();
   }, [userID]);
+  
 
   const [modalArticulo, setModalArticulo] = useState(false);
 
