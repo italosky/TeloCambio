@@ -43,6 +43,7 @@ export default function Registro(props) {
   const navigation = useNavigation();
   const route = useRoute();
   const { nombreArticulo, imagenes, estadoArticulo, comuna } = route.params;
+
   const handleRegister = async () => {
     if (
       data.causa_reporte &&
@@ -62,7 +63,7 @@ export default function Registro(props) {
           estadoArticulo,
           comuna,
           timestamp: serverTimestamp(),
-
+          publicacionId: route.params.id,
           // Agrega cualquier otro campo que desees almacenar en el reporte
 
           userid: userId,

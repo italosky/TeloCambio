@@ -47,6 +47,7 @@ export default function ListaReportesAdmin() {
           comuna: postData.comuna,
           causaReporte: postData.causa_reporte,
           detalleReporte: postData.reporte,
+          publicacionId:postData.publicacionId 
         });
       });
       setDataSource(allItemsArray);

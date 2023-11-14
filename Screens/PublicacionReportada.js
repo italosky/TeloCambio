@@ -14,11 +14,6 @@ export default function PublicacionReportada() {
   const { params } = route;
   const { nombreArticulo, imagenes, estadoArticulo, comuna, causaReporte, detalleReporte, fechaReporte } = params;
 
-  const ReporteUsuario = () => {
-    navigation.navigate("ReporteUsuario");
-  };
-
-
   const toggleModal = (index) => {
     setIndiceImagenAmpliada(index);
     setMostrarModal(!mostrarModal);
@@ -49,6 +44,39 @@ export default function PublicacionReportada() {
               navigation.navigate("ListaReportesAdmin")
             } catch (error) {
               console.error("Error al eliminar el reporte:", error);
+            }
+          }
+        }
+      ],
+      { cancelable: false }
+  );
+  }
+
+  const eliminarPublicacion = () => {
+    const item = params
+    Alert.alert(
+      "Confirmación",
+      "¿Estás seguro de eliminar la publicacion?",
+      [
+        {
+          text: "No",
+          onPress: () => console.log("Eliminación cancelada"),
+          style: "cancel"
+        },
+        {
+          text: "Sí", 
+          onPress: async () => {
+            try {
+              console.log("Dentro de eliminarPublicacion:", item);
+              const PublicacionRef = doc(db, 'Publicaciones', item.publicacionId);
+              await deleteDoc(PublicacionRef);
+              Alert.alert(
+                "¡Éxito!",
+                "La publicación ha sido eliminada.",
+              );
+              navigation.navigate("ListaReportesAdmin")
+            } catch (error) {
+              console.error("Error al eliminar la publicación:", error);
             }
           }
         }
@@ -101,7 +129,7 @@ export default function PublicacionReportada() {
         </View>
       </Modal>
       <View style={styles.containerBoton}>
-        <TouchableOpacity style={styles.boton} onPress={ReporteUsuario}>
+        <TouchableOpacity style={styles.boton} onPress={eliminarPublicacion}>
           <Text style={styles.textoBoton}>Eliminar Publicación</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.boton2} onPress={eliminarReporte}>
