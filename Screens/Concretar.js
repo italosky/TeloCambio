@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
@@ -14,11 +15,12 @@ import { collection, getDocs, doc, getDoc, query, where, updateDoc } from 'fireb
 import { Drawer } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
 
-export default function Concretar() {
+export default function Concretar({ route }) {
   const [ofertas, setOfertas] = useState([]);
+  const ofertaId = route.params?.ofertaId;
+  const [ofertaEspecifica, setOfertaEspecifica] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modo, setModo] = useState('telocambio'); // o 'teloregalo' según corresponda
-  const [idsPublicaciones, setIdsPublicaciones] = useState([]);
   const navigation = useNavigation();
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -56,11 +58,10 @@ export default function Concretar() {
           ]);
           const userGaleriaData = !userGaleriaSnapshot.empty ? userGaleriaSnapshot.docs[0].data() : null;
           const userOfertaData = !userOfertaSnapshot.empty ? userOfertaSnapshot.docs[0].data() : null;
-          const nombreArticuloGaleria = publicacionGaleriaSnap.data()?.nombreArticulo;
-          const nombreArticuloOferta = publicacionOfertaSnap.data()?.nombreArticulo;
           fetchedOfertas.push({
-            nombreArticuloGaleria,
-            nombreArticuloOferta,
+            nombreArticuloGaleria: publicacionGaleriaSnap.data()?.nombreArticulo,
+            nombreArticuloOferta: publicacionOfertaSnap.data()?.nombreArticulo,
+            idsPublicaciones: [ofertaData.ArticuloGaleria, ofertaData.ArticuloOferta],
             id: offerDoc.id,
             fecha: ofertaData.fecha,
             ArticuloGaleria: publicacionGaleriaSnap.data(),
@@ -75,17 +76,22 @@ export default function Concretar() {
               nombre_apellido: userOfertaData ? userOfertaData.nombre_apellido : null,
             },
           });
-          
         }
-        setIdsPublicaciones(idsTemporales);
         setOfertas(fetchedOfertas);
+        if (ofertaId) {
+          const ofertaEspecifica = fetchedOfertas.find(o => o.id === ofertaId);
+          if (ofertaEspecifica) {
+            setOfertaEspecifica(ofertaEspecifica);
+          }
+        }
       } catch (error) {
         console.error("Error al obtener ofertas:", error);
       }
       setIsLoading(false);
     };
     fetchOfertas();
-  }, []);
+  }, [ofertaId]);
+
 
   // ---------------  AQUI CAMBIA EL ESTADO DE LA OFERTA A COMPLETADA ----------------
   const actualizarEstadoOferta = async (ofertaId) => {
@@ -131,10 +137,9 @@ export default function Concretar() {
   const manejarAceptarOferta = async (ofertaEspecifica) => {
     if (modo === 'telocambio' && ofertaEspecifica) {
       await actualizarEstadoOferta(ofertaEspecifica.id);
-      if (idsPublicaciones.length >= 2) {
-        const idPublicacion1 = idsPublicaciones[0];
-        const idPublicacion2 = idsPublicaciones[1];
-        await actualizarEstadoPublicaciones(idPublicacion1, idPublicacion2);
+      const idsPublicacion = ofertaEspecifica.idsPublicaciones;
+      if (idsPublicacion && idsPublicacion.length >= 2) {
+        await actualizarEstadoPublicaciones(idsPublicacion[0], idsPublicacion[1]);
       } else {
         console.error('No hay suficientes IDs de publicación disponibles');
       }
@@ -145,9 +150,9 @@ export default function Concretar() {
   };
   
   // --------------- AQUI CAMBIA EL ESTADO DE ACTIVA A INACTIVA LAS PUBLICACIONES, POR ENDE NO SE VEN EN NINGUN LADO ---------------
-  const actualizarEstadoPublicaciones = async () => {
+  const actualizarEstadoPublicaciones = async (idPublicacion1, idPublicacion2) => {
     try {
-      const updates = idsPublicaciones.map(id => 
+      const updates = [idPublicacion1, idPublicacion2].map(id => 
         updateDoc(doc(db, 'Publicaciones', id), { estadoPublicacion: 'inactiva' })
       );
       await Promise.all(updates);
@@ -196,64 +201,66 @@ export default function Concretar() {
         <Text style={{ ...styles.bigText, ...styles.boldTextTittle }}>
           Objetos de Intercambio
         </Text>
-        {ofertas.map((oferta, index) => (
-          <View key={index} style={styles.itemContainer}>
+        {ofertaEspecifica ? (
+          <View style={styles.itemContainer}>
             <Text style={styles.boldTextTittle}>Mi artículo</Text>
             <View style={styles.item}>
-              {oferta.ArticuloGaleria.imagenURL && (
-                <Image source={{ uri: oferta.ArticuloGaleria.imagenURL }} style={styles.imagen} />
+              {ofertaEspecifica.ArticuloGaleria.imagenURL && (
+                <Image source={{ uri: ofertaEspecifica.ArticuloGaleria.imagenURL }} style={styles.imagen} />
               )}
               <View style={styles.detallesContainer}>
                 <Text style={styles.text}>
-                  {oferta.ArticuloGaleria.nombreArticulo}
+                  {ofertaEspecifica.ArticuloGaleria.nombreArticulo}
                 </Text>
                 <Text style={styles.text}>
-                  {oferta.ArticuloGaleria.estadoArticulo}
+                  {ofertaEspecifica.ArticuloGaleria.estadoArticulo}
                 </Text>
                 <Text style={styles.text}>
-                  {oferta.ArticuloGaleria.tipo}
+                  {ofertaEspecifica.ArticuloGaleria.tipo}
                 </Text>
               </View>
-              {oferta.UsuarioGaleria.imagenen && (
-                <Image source={{ uri: oferta.UsuarioGaleria.imagenen }} style={styles.fotoPerfil} />
+              {ofertaEspecifica.UsuarioGaleria.imagenen && (
+                <Image source={{ uri: ofertaEspecifica.UsuarioGaleria.imagenen }} style={styles.fotoPerfil} />
               )}
             </View>
             <Text style={styles.boldTextTittle}>
-              Artículo de {oferta.UsuarioOferta.nombre_apellido || 'Usuario desconocido'}
+              Artículo de {ofertaEspecifica.UsuarioOferta.nombre_apellido || 'Usuario desconocido'}
             </Text>
             <View style={styles.item}>
-              {oferta.ArticuloOferta.imagenURL && (
-                <Image source={{ uri: oferta.ArticuloOferta.imagenURL }} style={styles.imagen} />
+              {ofertaEspecifica.ArticuloOferta.imagenURL && (
+                <Image source={{ uri: ofertaEspecifica.ArticuloOferta.imagenURL }} style={styles.imagen} />
               )}
               <View style={styles.detallesContainer}>
                 <Text style={styles.text}>
-                  {oferta.ArticuloOferta.nombreArticulo}
+                  {ofertaEspecifica.ArticuloOferta.nombreArticulo}
                 </Text>
                 <Text style={styles.text}>
-                  {oferta.ArticuloOferta.estadoArticulo}
+                  {ofertaEspecifica.ArticuloOferta.estadoArticulo}
                 </Text>
                 <Text style={styles.text}>
-                  {oferta.ArticuloOferta.tipo}
+                  {ofertaEspecifica.ArticuloOferta.tipo}
                 </Text>
               </View>
-              {oferta.UsuarioOferta.imagenen && (
-                <Image source={{ uri: oferta.UsuarioOferta.imagenen }} style={styles.fotoPerfil} />
+              {ofertaEspecifica.UsuarioOferta.imagenen && (
+                <Image source={{ uri: ofertaEspecifica.UsuarioOferta.imagenen }} style={styles.fotoPerfil} />
               )}
             </View>
             <TouchableOpacity
               style={styles.buttonAceptar}
-              onPress={() => manejarAceptarOferta(oferta)}
+              onPress={() => manejarAceptarOferta(ofertaEspecifica)}
             >
               <Text style={styles.buttonText}>Aceptar Oferta</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.buttonRechazar}
-              onPress={() => manejarAceptarOferta(oferta)}
-              >
+              onPress={() => manejarRechazarOferta(ofertaEspecifica)}
+            >
               <Text style={styles.buttonText}>Rechazar Oferta</Text>
             </TouchableOpacity>
           </View>
-        ))}
+        ) : (
+          <ActivityIndicator size="large" color="#0000ff" />
+        )}
       </View>
     </DrawerLayout>
   );
