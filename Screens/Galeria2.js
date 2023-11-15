@@ -35,7 +35,7 @@ export default function Galeria2() {
       const user = auth.currentUser;
       usersSnapshot.forEach((postDoc) => {
         const postData = postDoc.data();
-        if (postData.estadoPublicacion === 'activa') {
+        if (postData.estadoPublicacion === 'activa' && postData.uid !== user.uid) {
           allItemsArray.push({
             id: postDoc.id,
             imagenURL: postData.imagenURL,
@@ -54,7 +54,7 @@ export default function Galeria2() {
     } finally {
       setLoading(false);
     }
-  };
+  };    
 
   useEffect(() => {
     //ESTE USEEFFECT HACE QUE LA GALERIA SE REFRESQUE PARA VER EL ARTICULO RECIEN SUBIDO
