@@ -72,9 +72,9 @@ export default function PublicacionReportada() {
               await deleteDoc(PublicacionRef);
               Alert.alert(
                 "¡Éxito!",
-                "La publicación ha sido eliminada.",
+                "La publicación ha sido eliminada, no olvides cerrar el reporte",
               );
-              navigation.navigate("ListaReportesAdmin")
+              
             } catch (error) {
               console.error("Error al eliminar la publicación:", error);
             }
@@ -133,7 +133,7 @@ export default function PublicacionReportada() {
           <Text style={styles.textoBoton}>Eliminar Publicación</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.boton2} onPress={eliminarReporte}>
-          <Text style={styles.textoBoton}>Eliminar Reporte</Text>
+          <Text style={styles.textoBoton}>Cerrar Reporte</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   boton2: {
-    backgroundColor: "#8AAD34",
+    backgroundColor: "#F55C5C",
     borderRadius: 25,
     paddingVertical: 10,
     width: 170,
