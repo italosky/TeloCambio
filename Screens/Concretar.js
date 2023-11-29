@@ -259,7 +259,7 @@ export default function Concretar({ route }) {
             </TouchableOpacity>
           </View>
         ) : (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#63A355" />
         )}
       </View>
     </DrawerLayout>
