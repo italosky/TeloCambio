@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
@@ -19,6 +20,7 @@ import { db } from "../firebaseConfig";
 export default function Galeria2() {
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const [isExtended, setIsExtended] = useState(true);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
@@ -138,7 +140,10 @@ export default function Galeria2() {
     >
       <View style={styles.container}>
         {loading ? (
-          <Text>Cargando...</Text>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#63A355" />
+            <Text>{loadingMessage}</Text>
+          </View>
         ) : (
           <FlatList
             data={dataSource}
@@ -335,5 +340,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

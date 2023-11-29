@@ -8,6 +8,7 @@ import {
   Modal,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Card } from "react-native-paper";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -44,7 +45,9 @@ export default function DetalleArticulo() {
   const userId = item.id.match(/-(.*)/)[1];
   const images = [item.imagenURL, item.imagenURL2, item.imagenURL3];
   const [userRole, setUserRole] = useState(null);
- 
+  const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -65,6 +68,12 @@ export default function DetalleArticulo() {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        const loadingTimer = setTimeout(() => {
+          setLoading(false);
+        }, 2000);
+
+        return () => clearTimeout(loadingTimer);
       }
     };
     fetchUserData();
@@ -75,6 +84,30 @@ export default function DetalleArticulo() {
       setUserRole(userData.role);
     }
   }, [userData]);
+
+  useEffect(() => {
+    const fetchPublicaciones = async () => {
+      try {
+        const publicacionesCollection = collection(db, "Publicaciones");
+        const publicacionesQuery = query(
+          publicacionesCollection,
+          where("uid", "==", userID)
+        );
+        const publicacionesSnapshot = await getDocs(publicacionesQuery);
+        const publicacionesData = publicacionesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((publicacion) => publicacion.estadoPublicacion !== "inactiva");
+        console.log("Publicaciones para intercambiar:", publicacionesData);
+        setArticulos(publicacionesData);
+      } catch (error) {
+        console.error("Error al obtener las publicaciones:", error);
+      }
+    };
+    fetchPublicaciones(); 
+  }, [userID]);
 
   const createOfferCollection = async (articleId) => {
     try {
@@ -287,30 +320,6 @@ export default function DetalleArticulo() {
       { cancelable: false }
     );
   };  
-
-  useEffect(() => {
-    const fetchPublicaciones = async () => {
-      try {
-        const publicacionesCollection = collection(db, "Publicaciones");
-        const publicacionesQuery = query(
-          publicacionesCollection,
-          where("uid", "==", userID)
-        );
-        const publicacionesSnapshot = await getDocs(publicacionesQuery);
-        const publicacionesData = publicacionesSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter((publicacion) => publicacion.estadoPublicacion !== "inactiva");
-        console.log("Publicaciones para intercambiar:", publicacionesData);
-        setArticulos(publicacionesData);
-      } catch (error) {
-        console.error("Error al obtener las publicaciones:", error);
-      }
-    };
-    fetchPublicaciones(); 
-  }, [userID]);
   
 
   const [modalArticulo, setModalArticulo] = useState(false);
@@ -367,148 +376,158 @@ export default function DetalleArticulo() {
       drawerPosition={drawerPosition}
       renderNavigationView={navigationView}
     >
-      <View style={styles.container}>
-        <View style={styles.userInfoContainer}>
-          <View style={styles.containerSwiper}>
-            <Text style={styles.tittle}>{item.nombreArticulo}</Text>
-            <Swiper
-              showsButtons={true}
-              loop={false}
-              autoplay={false}
-              onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
-              dotStyle={styles.dot}
-              activeDot={<View style={styles.activeDot} />}
-              nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
-              prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
-            >
-              {images.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => toggleModal(index)}
-                >
-                  <Image
-                    source={{ uri: item }}
-                    style={styles.imageCarrusel}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              ))}
-            </Swiper>
-          </View>
-
-          {userData && (
-            <View style={styles.userProfile}>
-              <Image
-                source={{ uri: userData.imagenen[0] }}
-                style={styles.imageUser}
-              />
-              <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
-              {item.tipo === "Intercambiar artículo" && (
-                <TouchableOpacity
-                  style={[styles.teLoCambioButton]}
-                  onPress={openModal}
-                >
-                  <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-                </TouchableOpacity>
-              )}
-              {item.tipo === "Regalar artículo" && (
-                <TouchableOpacity
-                  style={[styles.teLoRegaloButton]}
-                  onPress={() => confirmarReclamo(item)}
-                >
-                  <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#63A355" />
+          <Text>{loadingMessage}</Text>
         </View>
-        <View style={styles.containerText}>
-          <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
-          <Text style={styles.text}>Comuna: {item.comuna}</Text>
-        </View>
-        
-
-        <View style={styles.containerBoton}>
-          {userRole === "usuario" && (
-            <TouchableOpacity style={styles.boton} onPress={goReporteUsuario}>
-              <Text style={styles.textoBoton}>Reportar Publicacion</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <Modal visible={mostrarModal} transparent={true}>
-          <View style={styles.modalContainer}>
-            <Image
-              source={{ uri: images[indiceImagenAmpliada] }}
-              style={styles.imageModal}
-              resizeMode="contain"
-            />
-            <TouchableOpacity
-              style={styles.cerrarButton}
-              onPress={() => toggleModal(indiceImagenAmpliada)}
-            >
-              <Text style={styles.cerrarButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalArticulo}
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalText}>Disponible para Intercambio</Text>
-
-              <FlatList
-                style={styles.containerFlastList}
-                numColumns={columns}
-                data={articulos}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <Card
-                    key={item.id}
-                    style={[
-                      styles.containerCard,
-                      selectedCard === item.id ? { borderWidth: 2 } : {},
-                    ]}
-                    onPress={() => {
-                      console.log(
-                        "Tarjeta seleccionada:",
-                        item.nombreArticulo,
-                        item.id
-                      );
-                      ArticuloModal(item.nombreArticulo, item.id);
-                    }}
-                  >
-                    <View style={styles.containerImagen}>
-                      <Card.Cover
-                        source={{ uri: item.imagenURL }}
-                        style={styles.imagen}
+        ) : (
+          <View style={styles.container}>
+            <View style={styles.userInfoContainer}>
+              <View style={styles.containerSwiper}>
+                <Text style={styles.tittle}>{item.nombreArticulo}</Text>
+                <Swiper
+                  showsButtons={true}
+                  loop={false}
+                  autoplay={false}
+                  onIndexChanged={(index) => setIndiceImagenAmpliada(index)}
+                  dotStyle={styles.dot}
+                  activeDot={<View style={styles.activeDot} />}
+                  nextButton={<Text style={styles.buttonSwiper}>❯</Text>}
+                  prevButton={<Text style={styles.buttonSwiper}>❮</Text>}
+                >
+                  {images.map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => toggleModal(index)}
+                    >
+                      <Image
+                        source={{ uri: item }}
+                        style={styles.imageCarrusel}
+                        resizeMode="cover"
                       />
-                      <View style={styles.textContainer}>
-                        <Text style={styles.titleCard}>
-                          {item.nombreArticulo}
-                        </Text>
-                        <Text style={styles.titleEstado}>
-                          {item.estadoArticulo}
-                        </Text>
-                      </View>
-                    </View>
-                  </Card>
-                )}
-              />
+                    </TouchableOpacity>
+                  ))}
+                </Swiper>
+              </View>
+
+              {userData && (
+                <View style={styles.userProfile}>
+                  <Image
+                    source={{ uri: userData.imagenen[0] }}
+                    style={styles.imageUser}
+                  />
+                  <Text style={styles.nombreUser}>{userData.nombre_apellido}</Text>
+                  {item.tipo === "Intercambiar artículo" && (
+                    <TouchableOpacity
+                      style={[styles.teLoCambioButton]}
+                      onPress={openModal}
+                    >
+                      <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
+                    </TouchableOpacity>
+                  )}
+                  {item.tipo === "Regalar artículo" && (
+                    <TouchableOpacity
+                      style={[styles.teLoRegaloButton]}
+                      onPress={() => confirmarReclamo(item)}
+                    >
+                      <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
             </View>
-            <TouchableOpacity style={styles.cerrarButton} onPress={closeModal}>
-              <Text style={styles.cerrarButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </View>
+            <View style={styles.containerText}>
+              <Text style={styles.text}>Estado: {item.estadoArticulo}</Text>
+              <Text style={styles.text}>Comuna: {item.comuna}</Text>
+            </View>
+            
+
+            <View style={styles.containerBoton}>
+              {userRole === "usuario" && (
+                <TouchableOpacity style={styles.boton} onPress={goReporteUsuario}>
+                  <Text style={styles.textoBoton}>Reportar Publicacion</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <Modal visible={mostrarModal} transparent={true}>
+              <View style={styles.modalContainer}>
+                <Image
+                  source={{ uri: images[indiceImagenAmpliada] }}
+                  style={styles.imageModal}
+                  resizeMode="contain"
+                />
+                <TouchableOpacity
+                  style={styles.cerrarButton}
+                  onPress={() => toggleModal(indiceImagenAmpliada)}
+                >
+                  <Text style={styles.cerrarButtonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalArticulo}
+              onRequestClose={closeModal}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalText}>Disponible para Intercambio</Text>
+
+                  <FlatList
+                    style={styles.containerFlastList}
+                    numColumns={columns}
+                    data={articulos}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                      <Card
+                        key={item.id}
+                        style={[
+                          styles.containerCard,
+                          selectedCard === item.id ? { borderWidth: 2 } : {},
+                        ]}
+                        onPress={() => {
+                          console.log(
+                            "Tarjeta seleccionada:",
+                            item.nombreArticulo,
+                            item.id
+                          );
+                          ArticuloModal(item.nombreArticulo, item.id);
+                        }}
+                      >
+                        <View style={styles.containerImagen}>
+                          <Card.Cover
+                            source={{ uri: item.imagenURL }}
+                            style={styles.imagen}
+                          />
+                          <View style={styles.textContainer}>
+                            <Text style={styles.titleCard}>
+                              {item.nombreArticulo}
+                            </Text>
+                            <Text style={styles.titleEstado}>
+                              {item.estadoArticulo}
+                            </Text>
+                          </View>
+                        </View>
+                      </Card>
+                    )}
+                  />
+                </View>
+                <TouchableOpacity style={styles.cerrarButton} onPress={closeModal}>
+                  <Text style={styles.cerrarButtonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
+          </View> 
+        )}
+      
     </DrawerLayout>
   );
+
+  
 
   return Platform.OS === "ios" ? renderDrawerAndroid() : renderDrawerAndroid();
 }
@@ -743,5 +762,10 @@ const styles = StyleSheet.create({
   textContainer: {
     flexDirection: "column",
     marginLeft: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
