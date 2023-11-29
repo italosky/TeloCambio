@@ -29,6 +29,7 @@ export default function MisPublicados() {
   const navigation = useNavigation();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const [refreshing, setRefreshing] = useState(false);
 
   const handleDeleteItem = async (itemId) => {
@@ -149,28 +150,42 @@ export default function MisPublicados() {
   }, []);
 
   const fetchPosts = async () => {
-    setLoading(true);
-    const allItemsArray = [];
-    const articulosPublicadosRef = await getDocs(query(
-      collection(db, "Publicaciones"), 
-      where("uid", "==", userId),
-      where("estadoPublicacion", "==", "activa")
-    ));
-    articulosPublicadosRef.forEach((postDoc) => {
-      const postData = postDoc.data();
-      allItemsArray.push({
-        uid: postDoc.id,
-        imagenURL: postData.imagenURL,
-        nombreArticulo: postData.nombreArticulo,
-        tipo: postData.tipo,
-        estadoArticulo: postData.estadoArticulo,
-        comuna: postData.comuna,
-        fecha: postData.fecha
+    try {
+      setLoading(true);
+      const allItemsArray = [];
+      const articulosPublicadosRef = await getDocs(
+        query(
+          collection(db, "Publicaciones"),
+          where("uid", "==", userId),
+          where("estadoPublicacion", "==", "activa")
+        )
+      );
+  
+      articulosPublicadosRef.forEach((postDoc) => {
+        const postData = postDoc.data();
+        allItemsArray.push({
+          uid: postDoc.id,
+          imagenURL: postData.imagenURL,
+          nombreArticulo: postData.nombreArticulo,
+          tipo: postData.tipo,
+          estadoArticulo: postData.estadoArticulo,
+          comuna: postData.comuna,
+          fecha: postData.fecha,
+        });
       });
-    });
-    setDataSource(allItemsArray);
-    setLoading(false);
+  
+      const loadingTimer = setTimeout(() => {
+        setDataSource(allItemsArray);
+        setLoading(false);
+      }, 600);
+  
+      return () => clearTimeout(loadingTimer);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
   };
+  
   
   const EmptyListComponent = () => (
     <View style={styles.emptyContainer}>
@@ -235,9 +250,10 @@ export default function MisPublicados() {
     >
       <View style={{ flex: 1 }}>
         {loading ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>        
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#63A355" />
+            <Text>{loadingMessage}</Text>
+          </View>      
         ) : (
           <FlatList
             data={dataSource}
@@ -361,5 +377,10 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: 'grey'
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

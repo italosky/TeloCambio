@@ -18,12 +18,12 @@ import { FlatList } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MisPublicados() {
-  const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState("");
   const [ofertas, setOfertas] = useState([]);
   const navigation = useNavigation();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const [refreshing, setRefreshing] = useState(false);
 
   const handleDeleteItem = async (itemId) => {
@@ -117,10 +117,15 @@ export default function MisPublicados() {
           });
         }    
         setOfertas(fetchedOfertas);
-        setIsLoading(false); 
+        setLoading(false); 
       } catch (error) {
-          console.error("Error al obtener ofertas:", error);
-          setIsLoading(false);
+        console.error("Error al obtener ofertas:", error);
+      } finally {
+        const loadingTimer = setTimeout(() => {
+          setLoading(false);
+        }, 600);
+  
+        return () => clearTimeout(loadingTimer);
       }
     };
     fetchOfertas();
@@ -269,9 +274,10 @@ export default function MisPublicados() {
       renderNavigationView={navigationView}
     >
       <View style={{ flex: 1 }}>
-          {isLoading ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#0000ff" />
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#63A355" />
+              <Text>{loadingMessage}</Text>
             </View>
           ) : (
             <FlatList
@@ -445,5 +451,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginHorizontal: 12,
     alignSelf: "center"
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

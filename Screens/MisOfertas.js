@@ -20,7 +20,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function MisOfertas() {
   const navigation = useNavigation();
   const [ofertas, setOfertas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");;
 
@@ -76,8 +77,13 @@ export default function MisOfertas() {
       setOfertas(fetchedOfertas);
     } catch (error) {
       console.error("Error al obtener ofertas:", error);
+    } finally {
+      const loadingTimer = setTimeout(() => {
+        setLoading(false);
+      }, 600);
+
+      return () => clearTimeout(loadingTimer);
     }
-    setIsLoading(false); 
   };
   fetchOfertas();
   },[]);
@@ -215,9 +221,10 @@ export default function MisOfertas() {
       renderNavigationView={navigationView}
     >
       <View style={{ flex: 1 }}>
-          {isLoading ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#0000ff" />
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#63A355" />
+              <Text>{loadingMessage}</Text>
             </View>
           ) : (
             <FlatList
@@ -410,5 +417,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginHorizontal: 12,
     alignSelf: "center"
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
