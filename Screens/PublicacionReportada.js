@@ -12,7 +12,7 @@ export default function PublicacionReportada() {
 
   const route = useRoute();
   const { params } = route;
-  const { nombreArticulo, imagenes, estadoArticulo, comuna, causaReporte, detalleReporte, fechaReporte } = params;
+  const { nombreArticulo, imagenes, estado, comuna, causaReporte, detalleReporte, fechaReporte } = params;
 
   const toggleModal = (index) => {
     setIndiceImagenAmpliada(index);
@@ -107,7 +107,7 @@ export default function PublicacionReportada() {
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.tittle}>{nombreArticulo}</Text>
-        <Text style={styles.text2}>Estado: {estadoArticulo}</Text>
+        <Text style={styles.text2}>Estado: {estado}</Text>
         <Text style={styles.text2}>Comuna: {comuna}</Text>
         <Text style={styles.text2}>Causa del Reporte: {causaReporte}</Text>
         <Text style={styles.text2}>Detalle del Reporte: {detalleReporte}</Text>
@@ -159,16 +159,18 @@ const styles = StyleSheet.create({
     fontSize: 62,
     opacity: 70,
     paddingHorizontal: 45,
+    top: 15
   },
   imageCarrusel: {
     width: Dimensions.get("window").width,
     height: 300,
-    borderRadius: 0,
+    marginTop: 40
   },
   textContainer: {
     alignItems: "flex-start",
+    marginTop: 20,
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    height: "35%"
   },
 
   tittle: {
@@ -184,7 +186,7 @@ const styles = StyleSheet.create({
   },
   containerBoton: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 50,
   },
   boton: {
     backgroundColor: "#cc0000",
@@ -207,15 +209,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   dot: {
-    width: 8.5,
-    height: 8.5,
+    width: 9,
+    height: 9,
     borderRadius: 5,
     backgroundColor: "gray",
     alignItems: "center",
   },
   activeDot: {
-    width: 15,
-    height: 15,
+    width: 13,
+    height: 13,
     borderRadius: 10,
     marginHorizontal: 5,
     backgroundColor: "#ffffff",

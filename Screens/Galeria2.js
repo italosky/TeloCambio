@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
 import { Drawer, AnimatedFAB } from "react-native-paper";
 import { auth } from "../firebaseConfig";
@@ -27,6 +27,9 @@ export default function Galeria2() {
   const [numColumns, setNumColumns] = useState(2);
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
+  const route = useRoute();
+  const numOfertasRecibidas = route.params?.numOfertasRecibidas || 0;
+
 
   const fetchPosts = async () => {
     try {
@@ -64,8 +67,9 @@ export default function Galeria2() {
       fetchPosts();
     });
     fetchPosts();
+
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, route.params]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -194,6 +198,11 @@ export default function Galeria2() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+          {numOfertasRecibidas > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{numOfertasRecibidas}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
           <Text style={styles.drawerText}>Mis Intercambios</Text>
@@ -238,6 +247,21 @@ export default function Galeria2() {
 }
 
 const styles = StyleSheet.create({
+  badgeContainer: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
   container: {
     flex: 1,
   },

@@ -24,6 +24,8 @@ export default function MisOfertas() {
   const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");;
+  const [numOfertasRecibidas, setNumOfertasRecibidas] = useState(0);
+
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -74,6 +76,7 @@ export default function MisOfertas() {
           }
         }
       }    
+      setNumOfertasRecibidas(fetchedOfertas.length);
       setOfertas(fetchedOfertas);
     } catch (error) {
       console.error("Error al obtener ofertas:", error);
@@ -143,7 +146,7 @@ export default function MisOfertas() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.navigate("Galeria2", { numOfertasRecibidas: numOfertasRecibidas });
   };
 
   const goMisPublicados = () => {
