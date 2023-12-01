@@ -146,7 +146,7 @@ export default function MisOfertas() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2", { numOfertasRecibidas: numOfertasRecibidas });
+    navigation.navigate("Galeria2");
   };
 
   const goMisPublicados = () => {
@@ -201,6 +201,11 @@ export default function MisOfertas() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+          {numOfertasRecibidas > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{numOfertasRecibidas}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
           <Text style={styles.drawerText}>Mis Intercambios</Text>
@@ -425,5 +430,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  badgeContainer: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
 });
