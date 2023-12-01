@@ -117,7 +117,7 @@ export default function MisPublicados() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
 
   const goMisPublicados = () => {

@@ -109,6 +109,7 @@ export default function MisOfertas() {
                 console.log("Dentro de eliminarOferta, ofertaId:", oferta.id);
                 const offerRef = doc(db, 'Ofertas', oferta.id);
                 await deleteDoc(offerRef);
+                setNumOfertasRecibidas((prevNum) => Math.max(0, prevNum - 1));
                 setOfertas(prevOfertas => prevOfertas.filter(item => item.id !== oferta.id));
                 Alert.alert(
                   "¡Éxito!",
@@ -146,7 +147,7 @@ export default function MisOfertas() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
 
   const goMisPublicados = () => {

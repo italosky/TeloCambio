@@ -32,7 +32,7 @@ export default function MiPerfil() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
 
   const goMisPublicados = () => {
