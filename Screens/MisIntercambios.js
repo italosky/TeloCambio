@@ -67,9 +67,6 @@ export default function MisPublicados() {
   const goConcretarInfo = () => {
     navigation.navigate("ConcretarInfo");
   };
-  const goDatosCambio = () => {
-    navigation.navigate("DatosCambio", { item });
-  };
 
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
@@ -342,7 +339,7 @@ export default function MisPublicados() {
               data={ofertas}
               keyExtractor={item => item.id}
               renderItem={({ item, index }) => (
-                <Card style={styles.containerCard}>
+                <Card style={styles.containerCard} onPress={goConcretarInfo}>
                   <Text style={styles.textCardDate}>Intercambio completado el {formatDateFromDatabase(item.fecha)}</Text>
                   <Card.Title
                     style={styles.containerCardContent}
