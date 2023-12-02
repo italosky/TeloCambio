@@ -9,10 +9,8 @@ import {
   ScrollView,
   ActivityIndicator
 } from "react-native";
-import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { collection, getDocs, doc, getDoc, query, where, updateDoc } from 'firebase/firestore';
-import { Drawer } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
 
 export default function Concretar({ route }) {
@@ -106,19 +104,6 @@ export default function Concretar({ route }) {
     }
   };
 
-  const goMiPerfil = () => {
-    navigation.navigate("MiPerfil");
-  };
-  const goGaleria = () => {
-    navigation.navigate("Galeria2");
-  };
-  const goMisPublicados = () => {
-    navigation.navigate("MisPublicados");
-  };
-  const goMisOfertas = () => {
-    navigation.navigate("MisOfertas");
-  };
-
   const goToDatosCambio = (ofertaEspecifica, modo) => {
     if (ofertaEspecifica?.UsuarioOferta?.uid) {
       const itemParaPasar = {
@@ -162,41 +147,7 @@ export default function Concretar({ route }) {
     }
   };
 
-  const drawer = useRef(null);
-  const [drawerPosition] = useState("left");
-  const navigationView = () => (
-    <View style={[styles.containerDrawer, styles.navigationContainer]}>
-      <View>
-        <Image
-          source={require("../assets/LogoTeLoCambio.png")}
-          style={styles.logo}
-        />
-      </View>
-      <View style={styles.separatorLine} />
-      <Drawer.Section>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMiPerfil}>
-          <Text style={styles.drawerText}>Mi Perfil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goGaleria}>
-          <Text style={styles.drawerText}>Galeria de Artículos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMisPublicados}>
-          <Text style={styles.drawerText}>Mis Publicados</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
-          <Text style={styles.drawerText}>Mis Ofertas</Text>
-        </TouchableOpacity>
-      </Drawer.Section>
-    </View>
-  );
-
   return (
-    <DrawerLayout
-      ref={drawer}
-      drawerWidth={300}
-      drawerPosition={drawerPosition}
-      renderNavigationView={navigationView}
-    >
       <View style={styles.container}>
         <Text style={{ ...styles.bigText, ...styles.boldTextTittle }}>
           Objetos de Intercambio
@@ -259,10 +210,9 @@ export default function Concretar({ route }) {
             </TouchableOpacity>
           </View>
         ) : (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#63A355" />
         )}
       </View>
-    </DrawerLayout>
   );
 }
 

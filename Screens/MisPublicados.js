@@ -13,14 +13,7 @@ import { Card, Drawer } from 'react-native-paper';
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native-gesture-handler";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  deleteDoc,
-  doc
-} from "firebase/firestore";
+import { collection, getDocs, query, where, deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -29,7 +22,61 @@ export default function MisPublicados() {
   const navigation = useNavigation();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const [refreshing, setRefreshing] = useState(false);
+  const [ofertas, setOfertas] = useState([]);
+  const [numOfertasRecibidas, setNumOfertasRecibidas] = useState(0);
+
+  useEffect(() => {
+    const fetchOfertas = async () => {
+      try {
+        // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
+        const offersRef = query(
+          collection(db, 'Ofertas'),
+          where('UsuarioGaleria', '==', auth.currentUser.uid),
+          where('Estado', '==', 'pendiente')  // AQUI ESTA LA FUNCION QUE TRAE SOLO LOS QUE ESTAN PENDIENTE
+        );
+        const offersSnap = await getDocs(offersRef);
+        const fetchedOfertas = [];
+        for (let offerDoc of offersSnap.docs) {
+          const ofertaData = offerDoc.data();
+          // AQUI LLAMA A LA COLECCION Publicaciones Y OBTIENE LOS ARTICULOS SEGUN LOS UID DE OFERTAS
+          const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
+          const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
+          const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
+            getDoc(publicacionGaleriaRef),
+            getDoc(publicacionOfertaRef)
+          ]);
+          // AQUI YA CON LOS UID OBTENIDOS DE Publicaciones LLAMA A LA DATA DE LA OFERTA
+          // ESTOS SON LOS DATOS QUE VA A MOSTRAR EN EL FRONT, SE OBTUVIERON COMPARANDO LOS UID DE Ofertas Y Publicaciones
+          if (publicacionGaleriaSnap.exists() && publicacionOfertaSnap.exists()) {
+            const galeriaData = publicacionGaleriaSnap.data();
+            const ofertaData = publicacionOfertaSnap.data();
+            // AQUI VERIFICA EL ESTADO DE LAS PUBLICACIONES, SI ESTAN INACTIVAS NO SE MUESTRAN LAS OFERTAS
+            if (galeriaData.estadoPublicacion === 'activa' && ofertaData.estadoPublicacion === 'activa') {
+              fetchedOfertas.push({
+                id: offerDoc.id,
+                fecha: ofertaData.fecha,
+                ArticuloGaleria: {
+                  imagenURL: galeriaData.imagenURL,
+                  nombreArticulo: galeriaData.nombreArticulo
+                },
+                ArticuloOferta: {
+                  imagenURL: ofertaData.imagenURL,
+                  nombreArticulo: ofertaData.nombreArticulo
+                }
+            });
+          }
+        }
+      }
+      setNumOfertasRecibidas(fetchedOfertas.length);    
+      setOfertas(fetchedOfertas);
+    } catch (error) {
+      console.error("Error al obtener ofertas:", error);
+    }
+  };
+  fetchOfertas();
+  },[]);
 
   const handleDeleteItem = async (itemId) => {
     try {
@@ -70,7 +117,7 @@ export default function MisPublicados() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
 
   const goMisPublicados = () => {
@@ -128,6 +175,11 @@ export default function MisPublicados() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+          {numOfertasRecibidas > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{numOfertasRecibidas}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
           <Text style={styles.drawerText}>Mis Intercambios</Text>
@@ -149,28 +201,42 @@ export default function MisPublicados() {
   }, []);
 
   const fetchPosts = async () => {
-    setLoading(true);
-    const allItemsArray = [];
-    const articulosPublicadosRef = await getDocs(query(
-      collection(db, "Publicaciones"), 
-      where("uid", "==", userId),
-      where("estadoPublicacion", "==", "activa")
-    ));
-    articulosPublicadosRef.forEach((postDoc) => {
-      const postData = postDoc.data();
-      allItemsArray.push({
-        uid: postDoc.id,
-        imagenURL: postData.imagenURL,
-        nombreArticulo: postData.nombreArticulo,
-        tipo: postData.tipo,
-        estadoArticulo: postData.estadoArticulo,
-        comuna: postData.comuna,
-        fecha: postData.fecha
+    try {
+      setLoading(true);
+      const allItemsArray = [];
+      const articulosPublicadosRef = await getDocs(
+        query(
+          collection(db, "Publicaciones"),
+          where("uid", "==", userId),
+          where("estadoPublicacion", "==", "activa")
+        )
+      );
+  
+      articulosPublicadosRef.forEach((postDoc) => {
+        const postData = postDoc.data();
+        allItemsArray.push({
+          uid: postDoc.id,
+          imagenURL: postData.imagenURL,
+          nombreArticulo: postData.nombreArticulo,
+          tipo: postData.tipo,
+          estadoArticulo: postData.estadoArticulo,
+          comuna: postData.comuna,
+          fecha: postData.fecha,
+        });
       });
-    });
-    setDataSource(allItemsArray);
-    setLoading(false);
+  
+      const loadingTimer = setTimeout(() => {
+        setDataSource(allItemsArray);
+        setLoading(false);
+      }, 600);
+  
+      return () => clearTimeout(loadingTimer);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
   };
+  
   
   const EmptyListComponent = () => (
     <View style={styles.emptyContainer}>
@@ -235,9 +301,10 @@ export default function MisPublicados() {
     >
       <View style={{ flex: 1 }}>
         {loading ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>        
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#63A355" />
+            <Text>{loadingMessage}</Text>
+          </View>      
         ) : (
           <FlatList
             data={dataSource}
@@ -361,5 +428,25 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: 'grey'
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeContainer: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
 });

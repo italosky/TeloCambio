@@ -20,9 +20,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function MisOfertas() {
   const navigation = useNavigation();
   const [ofertas, setOfertas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");;
+  const [numOfertasRecibidas, setNumOfertasRecibidas] = useState(0);
+
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -73,11 +76,17 @@ export default function MisOfertas() {
           }
         }
       }    
+      setNumOfertasRecibidas(fetchedOfertas.length);
       setOfertas(fetchedOfertas);
     } catch (error) {
       console.error("Error al obtener ofertas:", error);
+    } finally {
+      const loadingTimer = setTimeout(() => {
+        setLoading(false);
+      }, 600);
+
+      return () => clearTimeout(loadingTimer);
     }
-    setIsLoading(false); 
   };
   fetchOfertas();
   },[]);
@@ -100,6 +109,7 @@ export default function MisOfertas() {
                 console.log("Dentro de eliminarOferta, ofertaId:", oferta.id);
                 const offerRef = doc(db, 'Ofertas', oferta.id);
                 await deleteDoc(offerRef);
+                setNumOfertasRecibidas((prevNum) => Math.max(0, prevNum - 1));
                 setOfertas(prevOfertas => prevOfertas.filter(item => item.id !== oferta.id));
                 Alert.alert(
                   "¡Éxito!",
@@ -137,7 +147,7 @@ export default function MisOfertas() {
   };
 
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
 
   const goMisPublicados = () => {
@@ -192,6 +202,11 @@ export default function MisOfertas() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+          {numOfertasRecibidas > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{numOfertasRecibidas}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
           <Text style={styles.drawerText}>Mis Intercambios</Text>
@@ -215,9 +230,10 @@ export default function MisOfertas() {
       renderNavigationView={navigationView}
     >
       <View style={{ flex: 1 }}>
-          {isLoading ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#0000ff" />
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#63A355" />
+              <Text>{loadingMessage}</Text>
             </View>
           ) : (
             <FlatList
@@ -410,5 +426,25 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginHorizontal: 12,
     alignSelf: "center"
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeContainer: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
 });

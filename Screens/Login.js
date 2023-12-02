@@ -57,7 +57,7 @@ export default function Login(props) {
       if (!userQuerySnapshot.empty) {
         const userData = userQuerySnapshot.docs[0].data();
         if (userData.role === "admin") {
-          navigation.navigate("ListaReportesAdmin");
+          navigation.navigate("Galeria2");
         } else {
           navigation.navigate("Galeria2");
         }
