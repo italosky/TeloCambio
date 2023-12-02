@@ -146,6 +146,36 @@ export default function Concretar({ route }) {
       console.error('Error al actualizar las publicaciones: ', error);
     }
   };
+  // ----------------- RECHAZAR UNA OFERTA -------------------------------------------------------------
+
+  const manejarRechazarOferta = async (ofertaEspecifica) => {
+    Alert.alert(
+      "Confirmación",
+      "¿Estás seguro de rechazar el intercambio?",
+      [
+        {
+          text: "No",
+          onPress: () => console.log("Rechazo cancelado"),
+          style: "cancel"
+        },
+        {
+          text: "Sí", 
+          onPress: async () => {
+            try {
+              console.log("Dentro de manejarRechazarOferta, ofertaId:", ofertaEspecifica.id);
+              const ofertaRef = doc(db, 'Ofertas', ofertaEspecifica.id);
+              await deleteDoc(ofertaRef);
+              setOfertas(prevOfertas => prevOfertas.filter(item => item.id !== ofertaEspecifica.id));
+              Alert.alert("¡Éxito!", "El intercambio ha sido rechazado.");
+            } catch (error) {
+              console.error("Error al rechazar el intercambio:", error);
+            }
+          }
+        }
+      ],
+      { cancelable: false }
+    );
+  };
 
   return (
       <View style={styles.container}>

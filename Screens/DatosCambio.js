@@ -31,16 +31,19 @@ export default function DatosCambio({ route }) {
 
   // --------------  ESTE ES EL USEEFFECT DE LOS ALERT PARA TELOCAMBIO Y TELOREGALO ---------------
   useEffect(() => {
-    if (modo === "telocambio") {
-      Alert.alert("¡Felicidades!", "Has efectuado un intercambio con éxito", [
-        { text: "OK" },
-      ]);
-    } else if (modo === "teloregalo") {
-      Alert.alert("¡Felicidades!", "Has reclamado un artículo con éxito", [
-        { text: "OK" }
-      ]);
+    if ((modo === "telocambio" || modo === "teloregalo") && !routeParams?.fromConcretarInfo) {
+      if (modo === "telocambio") {
+        Alert.alert("¡Felicidades!", "Has efectuado un intercambio con éxito", [
+          { text: "OK" },
+        ]);
+      } else if (modo === "teloregalo") {
+        Alert.alert("¡Felicidades!", "Has reclamado un artículo con éxito", [
+          { text: "OK" }
+        ]);
+      }
     }
-  }, [modo]);
+  }, [modo, routeParams]);
+  
   
   // --------------  ESTE ES EL USEEFFECT QUE HACE EL BACKEND DE TELOCAMBIO Y TELOREGALO ---------------
   useEffect(() => {
