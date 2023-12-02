@@ -11,13 +11,15 @@ import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 import { db, auth } from "../firebaseConfig";
-import { getDocs, collection, query, where } from "firebase/firestore";
+import { getDocs, collection, query, where, doc, getDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function MiPerfil() {
   const [userData, setUserData] = useState(null);
   const userId = auth.currentUser ? auth.currentUser.uid : null;
   const navigation = useNavigation();
+  const [ofertas, setOfertas] = useState([]);
+  const [numOfertasRecibidas, setNumOfertasRecibidas] = useState(0);
   
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -25,28 +27,76 @@ export default function MiPerfil() {
     });
   }, [navigation]);
 
-  const goPublicaciones = () => {
-    navigation.navigate("MisPublicados");
-  };
-  const goOfertas = () => {
-    navigation.navigate("MisOfertas");
-  };
-
   const goMiPerfil = () => {
     navigation.navigate("MiPerfil");
   };
+
   const goGaleria2 = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
+
   const goMisPublicados = () => {
     navigation.navigate("MisPublicados");
   };
+
   const goMisOfertas = () => {
     navigation.navigate("MisOfertas");
   };
+
   const MisIntercambios = () => {
     navigation.navigate("MisIntercambios");
   };
+
+  useEffect(() => {
+    const fetchOfertas = async () => {
+      try {
+        // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
+        const offersRef = query(
+          collection(db, 'Ofertas'),
+          where('UsuarioGaleria', '==', auth.currentUser.uid),
+          where('Estado', '==', 'pendiente')  // AQUI ESTA LA FUNCION QUE TRAE SOLO LOS QUE ESTAN PENDIENTE
+        );
+        const offersSnap = await getDocs(offersRef);
+        const fetchedOfertas = [];
+        for (let offerDoc of offersSnap.docs) {
+          const ofertaData = offerDoc.data();
+          // AQUI LLAMA A LA COLECCION Publicaciones Y OBTIENE LOS ARTICULOS SEGUN LOS UID DE OFERTAS
+          const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
+          const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
+          const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
+            getDoc(publicacionGaleriaRef),
+            getDoc(publicacionOfertaRef)
+          ]);
+          // AQUI YA CON LOS UID OBTENIDOS DE Publicaciones LLAMA A LA DATA DE LA OFERTA
+          // ESTOS SON LOS DATOS QUE VA A MOSTRAR EN EL FRONT, SE OBTUVIERON COMPARANDO LOS UID DE Ofertas Y Publicaciones
+          if (publicacionGaleriaSnap.exists() && publicacionOfertaSnap.exists()) {
+            const galeriaData = publicacionGaleriaSnap.data();
+            const ofertaData = publicacionOfertaSnap.data();
+            // AQUI VERIFICA EL ESTADO DE LAS PUBLICACIONES, SI ESTAN INACTIVAS NO SE MUESTRAN LAS OFERTAS
+            if (galeriaData.estadoPublicacion === 'activa' && ofertaData.estadoPublicacion === 'activa') {
+              fetchedOfertas.push({
+                id: offerDoc.id,
+                fecha: ofertaData.fecha,
+                ArticuloGaleria: {
+                  imagenURL: galeriaData.imagenURL,
+                  nombreArticulo: galeriaData.nombreArticulo
+                },
+                ArticuloOferta: {
+                  imagenURL: ofertaData.imagenURL,
+                  nombreArticulo: ofertaData.nombreArticulo
+                }
+            });
+          }
+        }
+      }
+      setNumOfertasRecibidas(fetchedOfertas.length);    
+      setOfertas(fetchedOfertas);
+    } catch (error) {
+      console.error("Error al obtener ofertas:", error);
+    }
+  };
+  fetchOfertas();
+  },[]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -112,6 +162,11 @@ export default function MiPerfil() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+          {numOfertasRecibidas > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{numOfertasRecibidas}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
           <Text style={styles.drawerText}>Mis Intercambios</Text>
@@ -240,5 +295,20 @@ const styles = StyleSheet.create({
   logoutImage: {
     width: 80,
     height: 80,
+  },
+  badgeContainer: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
 });

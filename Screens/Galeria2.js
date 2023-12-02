@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
@@ -13,18 +14,21 @@ import { FlatList } from "react-native-gesture-handler";
 import { Drawer, AnimatedFAB } from "react-native-paper";
 import { auth } from "../firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query , where, doc, getDoc} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 export default function Galeria2() {
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Cargando...");
   const [isExtended, setIsExtended] = useState(true);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [numColumns, setNumColumns] = useState(2);
   const drawer = useRef(null);
   const [drawerPosition, setDrawerPosition] = useState("left");
+  const [ofertas, setOfertas] = useState([]);
+  const [numOfertasRecibidas, setNumOfertasRecibidas] = useState(0);
 
   const fetchPosts = async () => {
     try {
@@ -62,8 +66,60 @@ export default function Galeria2() {
       fetchPosts();
     });
     fetchPosts();
+
     return unsubscribe;
   }, [navigation]);
+
+  useEffect(() => {
+    const fetchOfertas = async () => {
+      try {
+        // AQUI HACE QUE MUESTRE SOLO LAS OFERTAS DEL USUARIO QUE ESTA LOGEADO
+        const offersRef = query(
+          collection(db, 'Ofertas'),
+          where('UsuarioGaleria', '==', auth.currentUser.uid),
+          where('Estado', '==', 'pendiente')  // AQUI ESTA LA FUNCION QUE TRAE SOLO LOS QUE ESTAN PENDIENTE
+        );
+        const offersSnap = await getDocs(offersRef);
+        const fetchedOfertas = [];
+        for (let offerDoc of offersSnap.docs) {
+          const ofertaData = offerDoc.data();
+          // AQUI LLAMA A LA COLECCION Publicaciones Y OBTIENE LOS ARTICULOS SEGUN LOS UID DE OFERTAS
+          const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
+          const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
+          const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
+            getDoc(publicacionGaleriaRef),
+            getDoc(publicacionOfertaRef)
+          ]);
+          // AQUI YA CON LOS UID OBTENIDOS DE Publicaciones LLAMA A LA DATA DE LA OFERTA
+          // ESTOS SON LOS DATOS QUE VA A MOSTRAR EN EL FRONT, SE OBTUVIERON COMPARANDO LOS UID DE Ofertas Y Publicaciones
+          if (publicacionGaleriaSnap.exists() && publicacionOfertaSnap.exists()) {
+            const galeriaData = publicacionGaleriaSnap.data();
+            const ofertaData = publicacionOfertaSnap.data();
+            // AQUI VERIFICA EL ESTADO DE LAS PUBLICACIONES, SI ESTAN INACTIVAS NO SE MUESTRAN LAS OFERTAS
+            if (galeriaData.estadoPublicacion === 'activa' && ofertaData.estadoPublicacion === 'activa') {
+              fetchedOfertas.push({
+                id: offerDoc.id,
+                fecha: ofertaData.fecha,
+                ArticuloGaleria: {
+                  imagenURL: galeriaData.imagenURL,
+                  nombreArticulo: galeriaData.nombreArticulo
+                },
+                ArticuloOferta: {
+                  imagenURL: ofertaData.imagenURL,
+                  nombreArticulo: ofertaData.nombreArticulo
+                }
+            });
+          }
+        }
+      }
+      setNumOfertasRecibidas(fetchedOfertas.length);    
+      setOfertas(fetchedOfertas);
+    } catch (error) {
+      console.error("Error al obtener ofertas:", error);
+    }
+  };
+  fetchOfertas();
+  },[]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -93,8 +149,9 @@ export default function Galeria2() {
     }
   };
 
-  const goPublicacionReportada = () => {
-    navigation.navigate("PublicacionReportada");
+
+  const goMiPerfil = () => {
+    navigation.navigate("MiPerfil");
   };
 
   const goGaleria2 = () => {
@@ -109,16 +166,12 @@ export default function Galeria2() {
     navigation.navigate("MisOfertas");
   };
 
+  const MisIntercambios = () => {
+    navigation.navigate("MisIntercambios",);
+  };
+
   const goSubirArticulos = () => {
     navigation.navigate("SubirArticulos");
-  };
-
-  const goMiPerfil = () => {
-    navigation.navigate("MiPerfil");
-
-  };
-  const MisIntercambios = () => {
-    navigation.navigate("MisIntercambios");
   };
 
   const changeDrawerPosition = () => {
@@ -138,7 +191,10 @@ export default function Galeria2() {
     >
       <View style={styles.container}>
         {loading ? (
-          <Text>Cargando...</Text>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#63A355" />
+            <Text>{loadingMessage}</Text>
+          </View>
         ) : (
           <FlatList
             data={dataSource}
@@ -189,6 +245,11 @@ export default function Galeria2() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={goMisOfertas}>
           <Text style={styles.drawerText}>Mis Ofertas</Text>
+          {numOfertasRecibidas > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{numOfertasRecibidas}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.drawerItem} onPress={MisIntercambios}>
           <Text style={styles.drawerText}>Mis Intercambios</Text>
@@ -207,7 +268,7 @@ export default function Galeria2() {
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("DetalleArticulo", { item })}
+        onPress={() => navigation.navigate("DetalleArticulo", { item, numOfertasRecibidas: numOfertasRecibidas })}
       >
         <Image style={styles.imageThumbnail} source={{ uri: item.imagenURL }} />
         <View style={styles.itemOverlay}>
@@ -215,14 +276,14 @@ export default function Galeria2() {
           <Text style={styles.itemInfo}>{item.estadoArticulo || ""}</Text>
           <Text style={styles.itemInfo}>{item.comuna || ""}</Text>
           {item.tipo === "Intercambiar artículo" && (
-            <TouchableOpacity style={[styles.teLoCambioButton]}>
+            <View style={[styles.teLoCambioButton]}>
               <Text style={styles.teLoCambioButtonText}>TELOCAMBIO</Text>
-            </TouchableOpacity>
+            </View>
           )}
           {item.tipo === "Regalar artículo" && (
-            <TouchableOpacity style={[styles.teLoRegaloButton]}>
+            <View style={[styles.teLoRegaloButton]}>
               <Text style={styles.teLoRegaloButtonText}>TELOREGALO</Text>
-            </TouchableOpacity>
+            </View>
           )}
         </View>
       </TouchableOpacity>
@@ -233,6 +294,21 @@ export default function Galeria2() {
 }
 
 const styles = StyleSheet.create({
+  badgeContainer: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    backgroundColor: "red",
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
   container: {
     flex: 1,
   },
@@ -335,5 +411,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

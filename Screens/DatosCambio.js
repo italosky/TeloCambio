@@ -26,7 +26,7 @@ export default function DatosCambio({ route }) {
   }
   
   const backGaleria = () => {
-    navigation.navigate("Galeria2");
+    navigation.replace("Galeria2");
   };
 
   // --------------  ESTE ES EL USEEFFECT DE LOS ALERT PARA TELOCAMBIO Y TELOREGALO ---------------
