@@ -13,8 +13,10 @@ import DrawerLayout from "react-native-gesture-handler/DrawerLayout";
 import { useNavigation } from "@react-navigation/native";
 import { Drawer } from "react-native-paper";
 
-export default function Registro() {
+export default function Concretarinfo() {
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [intercambios, setIntercambios] = useState([]);
   React.useLayoutEffect(() => {
     navigation.setOptions({
       gestureEnabled: false,
@@ -50,6 +52,52 @@ export default function Registro() {
       { cancelable: false }
     );
   };
+
+  useEffect(() => {
+    const fetchIntercambios = async () => {
+      setIsLoading(true);
+      try {
+        const offersRef = query(
+          collection(db, 'Ofertas'),
+          where('UsuarioGaleria', '==', auth.currentUser.uid),
+          where('Estado', '==', 'completado')
+        );
+        const offersSnap = await getDocs(offersRef);
+        const fetchedIntercambios = [];
+        for (let offerDoc of offersSnap.docs) {
+          const ofertaData = offerDoc.data();
+          const publicacionGaleriaRef = doc(db, 'Publicaciones', ofertaData.ArticuloGaleria);
+          const publicacionOfertaRef = doc(db, 'Publicaciones', ofertaData.ArticuloOferta);
+          const [publicacionGaleriaSnap, publicacionOfertaSnap] = await Promise.all([
+            getDoc(publicacionGaleriaRef),
+            getDoc(publicacionOfertaRef)
+          ]);
+          const userGaleriaQuery = query(collection(db, 'Usuarios'), where('uid', '==', ofertaData.UsuarioGaleria));
+          const userOfertaQuery = query(collection(db, 'Usuarios'), where('uid', '==', ofertaData.UsuarioOferta));
+          const [userGaleriaSnapshot, userOfertaSnapshot] = await Promise.all([
+            getDocs(userGaleriaQuery),
+            getDocs(userOfertaQuery),
+          ]);
+          const userGaleriaData = !userGaleriaSnapshot.empty ? userGaleriaSnapshot.docs[0].data() : null;
+          const userOfertaData = !userOfertaSnapshot.empty ? userOfertaSnapshot.docs[0].data() : null;
+          fetchedIntercambios.push({
+            id: offerDoc.id,
+            ArticuloGaleria: publicacionGaleriaSnap.data(),
+            ArticuloOferta: publicacionOfertaSnap.data(),
+            UsuarioGaleria: userGaleriaData,
+            UsuarioOferta: userOfertaData,
+          });
+        }
+        setIntercambios(fetchedIntercambios);
+      } catch (error) {
+        console.error("Error al obtener intercambios:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchIntercambios();
+  }, []);
+  
 
   const drawer = useRef(null);
   const [drawerPosition] = useState("left");
@@ -106,49 +154,45 @@ export default function Registro() {
         <Text style={{ ...styles.bigText, ...styles.boldTextTittle }}>
           Objetos de Intercambio
         </Text>
-        <View style={styles.itemContainer}>
-          <Text style={styles.boldTextTittle}>Mis articulos</Text>
-          <View style={styles.item}>
-            <Image source={objeto1.imagen} style={styles.imagen} />
-            <View style={styles.detallesContainer}>
-              <Text style={styles.text}>
-                <Text style={styles.boldText}></Text> {objeto1.nombre}
+  
+        {isLoading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          intercambios.map((intercambio) => (
+            <View key={intercambio.id} style={styles.itemContainer}>
+              <Text style={styles.boldTextTittle}>Mis artículos</Text>
+              <View style={styles.item}>
+                <Image source={{ uri: intercambio.ArticuloGaleria.imagenURL }} style={styles.imagen} />
+                <View style={styles.detallesContainer}>
+                  <Text style={styles.text}>Nombre: {intercambio.ArticuloGaleria.nombreArticulo}</Text>
+                  <Text style={styles.text}>Estado: Nuevo/Usado (indicar estado)</Text>
+                  <Text style={styles.text}>Tipo: Intercambio/Gratis (indicar tipo)</Text>
+                </View>
+                <Image source={{ uri: 'URL de la foto de perfil del usuario galería' }} style={styles.fotoPerfil} />
+              </View>
+              <Text style={styles.boldTextTittle}>
+                Artículo de "{intercambio.UsuarioGaleria.nombre_apellido}"
               </Text>
-              <Text style={styles.text}>
-                <Text style={styles.boldText}></Text> {objeto1.Estado}
-              </Text>
-              <Text style={styles.text}>
-                <Text style={styles.boldText}></Text> {objeto1.Tipo}
-              </Text>
+              <View style={styles.item}>
+                <Image source={{ uri: intercambio.ArticuloOferta.imagenURL }} style={styles.imagen} />
+                <View style={styles.detallesContainer}>
+                  <Text style={styles.text}>Nombre: {intercambio.ArticuloOferta.nombreArticulo}</Text>
+                  <Text style={styles.text}>Estado: Nuevo/Usado (indicar estado)</Text>
+                  <Text style={styles.text}>Tipo: Intercambio/Gratis (indicar tipo)</Text>
+                </View>
+                <Image source={{ uri: 'URL de la foto de perfil del usuario oferta' }} style={styles.fotoPerfil} />
+              </View>
             </View>
-            <Image source={objeto1.fotoPerfil} style={styles.fotoPerfil} />
-          </View>
-          <Text style={styles.boldTextTittle}>
-            Articulo de "Nombre del Estupido"
-          </Text>
-          <View style={styles.item}>
-            <Image source={objeto2.imagen} style={styles.imagen} />
-            <View style={styles.detallesContainer}>
-              <Text style={styles.text}>
-                <Text style={styles.boldText}></Text> {objeto2.nombre}
-              </Text>
-              <Text style={styles.text}>
-                <Text style={styles.boldText}></Text> {objeto2.Estado}
-              </Text>
-              <Text style={styles.text}>
-                <Text style={styles.boldText}></Text> {objeto2.Tipo}
-              </Text>
-            </View>
-            <Image source={objeto2.fotoPerfil} style={styles.fotoPerfil} />
-          </View>
-        </View>
-
+          ))
+        )}
+  
         <TouchableOpacity style={styles.buttonRechazar} onPress={alerta}>
           <Text style={styles.buttonText}>Ver Información</Text>
         </TouchableOpacity>
       </View>
     </DrawerLayout>
   );
+  
 }
 
 const styles = StyleSheet.create({
